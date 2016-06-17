@@ -164,8 +164,9 @@ class character {
 	}
 
 	public static void main(String[] args) {
-		character c = new character("Jim", "Human", "Barbarian", 3);
-		c.multiClass("Rogue", 5);
+		character c = new character("Jim", "Human", "Barbarian", 1);
+		c.multiClass("Bard", 2);
+		c.multiClass("Fighter", 2);
 		c.assignRolls(c.rollStats());
 		c.getClassFeatures();
 		c.printCharacter();
@@ -280,7 +281,93 @@ class characterClass {
 			special.get(19).add("Mighty Rage");
 			special.get(19).add("Rage 6/day");
 		}
-		else if(clas.equals("Rogue")) {
+		else if (clas.equals("Bard")) {
+			hitDie = 6;
+			baseAttackBonus = 0.75f;
+			goodFort = false;
+			goodRef = true;
+			goodWill = true;
+			String[] classSkills = {"Appraise", "Balance", "Bluff", "Climb", "Concentration", "Craft", "Decipher Script", "Diplomacy", "Disguise", "Escape Artist", "Gather Information", "Hide", "Jump", "Knowledge(Arcana)", "Knowledge(Architecture & Engineering)", "Knowledge(Dungeoneering)", "Knowledge(Geography)", "Knowledge(History)", "Knowledge(Local)", "Knowledge(Nature)", "Knowledge(Nobility & Royalty)", "Knowledge(Religion)", "Knowledge(The Planes)", "Listen", "Move Silently", "Perform", "Profession", "Sense Motive", "Sleight of Hand", "Speak Language", "Spellcraft", "Swim", "Tumble", "Use Magic Device"};
+			skillPointsPerLevel = 6;
+			special.get(0).add("Bardic Music");
+			special.get(0).add("Bardic Knowledge");
+			special.get(0).add("Countersong");
+			special.get(0).add("Fascinate");
+			special.get(0).add("Inspire Courage +1");
+			special.get(2).add("Inspire Competence");
+			special.get(5).add("Suggestion");
+			special.get(7).add("Inspire Courage +2");
+			special.get(8).add("Inspire Greatness");
+			special.get(11).add("Song of Freedom");
+			special.get(13).add("Inspire Courage +3");
+			special.get(14).add("Inspire Heroics");
+			special.get(17).add("Mass Suggestion");
+			special.get(19).add("Inspire Courage +4");
+			// HAVE TO DO SPELLS
+		}
+		else if (clas.equals("Cleric")) {
+			hitDie = 8;
+			baseAttackBonus = 0.75f;
+			goodFort = true;
+			goodRef = false;
+			goodWill = true;
+			String[] classSkills = {"Concentration", "Craft", "Diplomacy", "Heal", "Knowledge(Arcana)", "Knowledge(History)", "Knowledge(Religion)", "Knowledge(The Planes)", "Profession", "Spellcraft"};
+			skillPointsPerLevel = 2;
+			special.get(0).add("Turn or Rebuke Undead");
+		}
+		else if (clas.equals("Druid")) {
+			hitDie = 8;
+			baseAttackBonus = 0.75f;
+			goodFort = true;
+			goodRef = false;
+			goodWill = true;
+			String[] classSkills = {"Concentration", "Craft", "Diplomacy", "Handle Animal", "Heal", "Knowledge(Nature)", "Listen", "Profession", "Ride", "Spellcraft", "Spot", "Survival", "Swim"};
+			skillPointsPerLevel = 4;
+			special.get(0).add("Animal Companion");
+			special.get(0).add("Nature Sense");
+			special.get(0).add("Wild Empathy");
+			special.get(1).add("Woodland Stride");
+			special.get(2).add("Trackless Step");
+			special.get(3).add("Resist Nature's Lure");
+			special.get(4).add("Wild Shape 1/day");
+			special.get(5).add("Wild Shape 2/day");
+			special.get(6).add("Wild Shape 3/day");
+			special.get(7).add("Wild Shape(Large)");
+			special.get(8).add("Venom Immunity");
+			special.get(9).add("Wild Shape 4/day");
+			special.get(10).add("Wild Shape(Tiny)");
+			special.get(11).add("Wild Shape(Plant)");
+			special.get(12).add("A Thousand Faces");
+			special.get(13).add("Wild Shape 5/day");
+			special.get(14).add("Timeless Body");
+			special.get(14).add("Wild Shape(Huge)");
+			special.get(15).add("Wild Shape(Elemental 1/day");
+			special.get(17).add("Wild Shape 6/day");
+			special.get(17).add("Wild Shape(Elemental 2/day");
+			special.get(19).add("Wild Shape(Elemental 3/day");
+			special.get(19).add("Wild Shape(Huge Elemental");
+		}
+		else if (clas.equals("Fighter")) {
+			hitDie = 10;
+			baseAttackBonus = 1.0f;
+			goodFort = true;
+			goodRef = false;
+			goodWill = false;
+			String[] classSkills = {"Climb", "Craft", "Handle Animal", "Intimidate", "Jump", "Ride", "Swim"};
+			skillPointsPerLevel = 2;
+			special.get(0).add("Bonus Feat");
+			special.get(1).add("Bonus Feat");
+			special.get(3).add("Bonus Feat");
+			special.get(5).add("Bonus Feat");
+			special.get(7).add("Bonus Feat");
+			special.get(9).add("Bonus Feat");
+			special.get(11).add("Bonus Feat");
+			special.get(13).add("Bonus Feat");
+			special.get(15).add("Bonus Feat");
+			special.get(17).add("Bonus Feat");
+			special.get(19).add("Bonus Feat");
+		}
+		else if (clas.equals("Rogue")) {
 			hitDie = 6;
 			baseAttackBonus = 0.75f;
 			goodFort = false;
