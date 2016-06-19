@@ -148,18 +148,14 @@ class character {
 		System.out.println("Name: " + name);
 		System.out.println("Race: " + race);
 		System.out.println(classes);
-		String strengthStr = String.format("Str %1$d (%2$d)", strength, strMod);
-		String dexterityStr = String.format("Dex %1$d (%2$d)", dexterity, dexMod);
-		String consitutionStr = String.format("Con %1$d (%2$d)", consitution, conMod);
-		String intelligenceStr = String.format("Int %1$d (%2$d)", intelligence, intMod);
-		String wisdomStr = String.format("Wis %1$d (%2$d)", wisdom, wisMod);
-		String charismaStr = String.format("Cha %1$d (%2$d)", charisma, chaMod);
-		System.out.println(strengthStr);
-		System.out.println(dexterityStr);
-		System.out.println(consitutionStr);
-		System.out.println(intelligenceStr);
-		System.out.println(wisdomStr);
-		System.out.println(charismaStr);
+
+		System.out.format("Str %d (%d)\n", strength, strMod);
+		System.out.format("Dex %d (%d)\n", dexterity, dexMod);
+		System.out.format("Con %d (%d)\n", consitution, conMod);
+		System.out.format("Int %d (%d)\n", intelligence, intMod);
+		System.out.format("Wis %d (%d)\n", wisdom, wisMod);
+		System.out.format("Cha %d (%d)\n", charisma, chaMod);
+
 		System.out.println(specialList);
 	}
 
@@ -173,13 +169,6 @@ class character {
 
 	}
 }
-
-
-
-
-
-
-
 
 
 
@@ -355,17 +344,122 @@ class characterClass {
 			goodWill = false;
 			String[] classSkills = {"Climb", "Craft", "Handle Animal", "Intimidate", "Jump", "Ride", "Swim"};
 			skillPointsPerLevel = 2;
-			special.get(0).add("Bonus Feat");
-			special.get(1).add("Bonus Feat");
-			special.get(3).add("Bonus Feat");
-			special.get(5).add("Bonus Feat");
-			special.get(7).add("Bonus Feat");
-			special.get(9).add("Bonus Feat");
-			special.get(11).add("Bonus Feat");
-			special.get(13).add("Bonus Feat");
-			special.get(15).add("Bonus Feat");
-			special.get(17).add("Bonus Feat");
-			special.get(19).add("Bonus Feat");
+			special.get(0).add("Bonus Fighter Feat");
+			special.get(1).add("Bonus Fighter Feat");
+			special.get(3).add("Bonus Fighter Feat");
+			special.get(5).add("Bonus Fighter Feat");
+			special.get(7).add("Bonus Fighter Feat");
+			special.get(9).add("Bonus Fighter Feat");
+			special.get(11).add("Bonus Fighter Feat");
+			special.get(13).add("Bonus Fighter Feat");
+			special.get(15).add("Bonus Fighter Feat");
+			special.get(17).add("Bonus Fighter Feat");
+			special.get(19).add("Bonus Fighter Feat");
+		}
+		else if (clas.equals("Monk")) {
+			hitDie = 8;
+			baseAttackBonus = 0.75f;
+			goodFort = true;
+			goodRef = true;
+			goodWill = true;
+			String[] classSkills = {"Balance", "Climb", "Concentration", "Craft", "Diplomacy", "Escape Artist", "Hide", "Jump", "Knowledge(Arcana)", "Knowledge(Religion)", "Listen", "Move Silently", "Perform", "Profession", "Sense Motive", "Spot", "Swim", "Tumble"};
+			skillPointsPerLevel = 4;
+			special.get(0).add("Monk AC Bonus");
+			special.get(0).add("Flurry of Blows");
+			special.get(0).add("Monk Unarmed Strike");
+			// I could get hte character's size here and then create a list of unarmed damages
+			// I'm going to take this opportunity to go work on setting up races some
+			String[2] featChoices = {"Improved Grapple", "Stunning Fist"};
+			special.get(0).add(getRandom(featChoices));
+			featChoices = {"Combat Reflexes", "Deflect Arrows"};
+			special.get(1).add(getRandom(featChoices));
+			special.get(1).add("Evasion");
+			special.get(2).add("Still Mind");
+			special.get(2).add("Unarmored Speed Bonus 10ft");
+			special.get(3).add("Ki Strike(Magic)");
+			special.get(3).add("Slow Fall 20ft");
+			special.get(3).add("Unarmed Damage 1d8")
+			special.get(4).add("Purity of Body");
+			featChoices = {"Improved Disarm", "Improved Trip"};
+			special.get(5).add(getRandom(featChoices));
+			special.get(5).add("Slow Fall 30ft");
+			special.get(6).add("Wholeness of Body");
+			special.get(7).add("Slow Fall 40ft");
+			special.get(7).add("Unarmed Damage 1d10");
+			special.get(8).add("Improved Evasion");
+			special.get(9).add("Ki Strike(Lawful)");
+			special.get(9).add("Slow Fall 50ft");
+			special.get(10).add("Diamond Body");
+			special.get(10).add("Greater Flurry");
+			special.get(11).add("Abundant Step");
+			special.get(11).add("Slow Fall 60ft");
+			special.get(11).add("Unarmed Damage 2d6");
+			special.get(12).add("Diamond Soul");
+			special.get(13).add("Slow Fall 70ft");
+			special.get(14).add("Quivering Palm");
+			special.get(15).add("Ki Strike(Adamantine)");
+			special.get(15).add("Slow Fall 80ft");
+			special.get(15).add("Unarmed Damage 2d8");
+			special.get(16).add("Timeless Body");
+			special.get(16).add("Tongue of the Sun and Moon");
+			special.get(17).add("Slow Fall 90ft");
+			special.get(18).add("Empty Body");
+			special.get(19).add("Perfect Self");
+			special.get(19).add("Slow Fall Any Distance");
+			special.get(19).add("Unarmed Damage 2d10");
+		}
+		else if (clas.equals("Paladin")) {
+			hitDie = 10;
+			baseAttackBonus = 1.0f;
+			goodFort = true;
+			goodRef = false;
+			goodWill = false;
+			String[] classSkills = {"Concentration", "Craft", "Diplomacy", "Handle Animal", "Heal", "Knowledge(Nobility & Royalty)", "Knowledge(Religion)", "Profession", "Ride", "Sense Motive"};
+			skillPointsPerLevel = 2;
+			special.get(0).add("Aura of Good");
+			special.get(0).add("Detect Evil");
+			special.get(0).add("Smite Evil 1/day");
+			special.get(1).add("Divine Grace");
+			special.get(1).add("Lay on Hands");
+			special.get(2).add("Aura of Courage");
+			special.get(2).add("Divine Health");
+			special.get(3).add("Turn Undead");
+			special.get(4).add("Smite Evil 2/day");
+			special.get(4).add("Special Mount");
+			special.get(5).add("Remove Disease 1/week");
+			special.get(8).add("Remove Disease 2/week");
+			special.get(9).add("Smite Evil 3/day");
+			special.get(11).add("Remove Disease 3/week");
+			special.get(14).add("Remove Disease 4/week");
+			special.get(14).add("Smite Evil 4/day");
+			special.get(17).add("Remove Disease 5/week");
+			special.get(19).add("Smite Evil 5/day");
+		}
+		else if (clas.equals("Ranger")) {
+			hitDie = 8;
+			baseAttackBonus = 1.0f;
+			goodFort = true;
+			goodRef = true;
+			goodWill = false;
+			String[] classSkills = {"Climb", "Concentration", "Craft", "Handle Animal", "Heal", "Hide", "Jump", "Knowledge(Dungeoneering)", "Knowledge(Geography)", "Knowledge(Nature)", "Listen", "Move Silently", "Profession", "Ride", "Search", "Spot", "Survival", "Swim", "Use Rope"};
+			skillPointsPerLevel = 6;
+			special.get(0).add("1st Favored Enemy");
+			special.get(0).add("Track");
+			special.get(0).add("Wild Empathy");
+			special.get(1).add("Combat Style");
+			special.get(2).add("Endurance");
+			special.get(3).add("Animal Companion");
+			special.get(4).add("2nd Favored Enemy");
+			special.get(5).add("Improved Combat Style");
+			special.get(6).add("Woodland Stride");
+			special.get(7).add("Swift Tracker");
+			special.get(8).add("Evasion");
+			special.get(9).add("3rd Favored Enemy");
+			special.get(10).add("Combat Style Mastery");
+			special.get(12).add("Camouflage");
+			special.get(14).add("4th Favored Enemy");
+			special.get(16).add("Hide in Plain Sight");
+			special.get(19).add("5th Favored Enemy");
 		}
 		else if (clas.equals("Rogue")) {
 			hitDie = 6;
@@ -400,6 +494,36 @@ class characterClass {
 			special.get(18).add("Sneak Attack +10d6");
 			special.get(18).add("Special Ability"); // AND THIS
 		}
+		else if (clas.equals("Sorcerer")) {
+			hitDie = 4;
+			baseAttackBonus = 0.5f;
+			goodFort = false;
+			goodRef = false;
+			goodWill = true;
+			String[] classSkills = {"Bluff", "Concentration", "Craft", "Knowledge(Arcana)", "Profession", "Spellcraft"};
+			skillPointsPerLevel = 2;
+			special.get(0).add("Summon Familiar");
+		}
+		else if (clas.equals("Wizard")) {
+			hitDie = 4;
+			baseAttackBonus = 0.5f;
+			goodFort = false;
+			goodRef = false;
+			goodWill = true;
+			String[] classSkills = {"Concentration", "Craft", "Decipher Script", "Knowledge(Arcana)", "Knowledge(Architecture & Engineering)", "Knowledge(Dungeoneering)", "Knowledge(Geography)", "Knowledge(History)", "Knowledge(Local)", "Knowledge(Nature)", "Knowledge(Nobility & Royalty)", "Knowledge(Religion)", "Knowledge(The Planes)", "Profession", "Spellcraft"};
+			skillPointsPerLevel = 2;
+			special.get(0).add("Summon Familiar");
+			special.get(0).add("Scribe Scroll");
+			special.get(4).add("Bonus Wizard Feat");
+			special.get(9).add("Bonus Wizard Feat");
+			special.get(14).add("Bonus Wizard Feat");
+			special.get(19).add("Bonus Wizard Feat");
+		}
+	}
+
+	public static String getRandom(String[] array) {
+		int r = new Random().nextInt(array.length);
+		return array[r];
 	}
 
 	public void printClass() {
