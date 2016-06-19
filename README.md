@@ -5,5 +5,4 @@ Allows for more intricate building of characters.
 Has functionality for multiclassing. 
 
 Current classes supported:
-Barbarian
-Rogue
+Barbarian, Bard, Cleric, Druid, Fighter, Monk, Ranger, Rogue, Sorcerer, Wizard
