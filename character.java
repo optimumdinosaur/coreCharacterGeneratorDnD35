@@ -67,9 +67,16 @@ class character {
 		specialList = new ArrayList<String>();
 	}
 
+
+
+	// Function to add an additional class and levels to the character. 
 	private void multiClass(String newClass, int newClassLevel) {
 		classes.put(newClass, newClassLevel);
 	}
+
+
+
+
 
 	/* Function to initially get all class features of the character
 	   Will look at the character's classes hashmap in order to find out 
@@ -173,19 +180,100 @@ class character {
 
 
 
+class race {
+
+	String raceName;
+	int[6] abiScoreAdjustments;
+	int movement;
+	int size;
+	ArrayList<String> special;
+	HashMap<String, Integer> skillAdjust;
+	ArrayList<String> autoLanguages;
+	ArrayList<String> bonusLanguages;
+
+	race(String name) {
+		raceName = name;
+		abiScoreAdjustments = [0, 0, 0, 0, 0, 0];
+		movement = 30;
+		size = 0;
+		special = new ArrayList<String>();
+		skillAdjust = new HashMap<String, Integer>();
+		autoLanguages = new ArrayList<String>();
+		bonusLanguages = new ArrayList<String>();
+		setSpecial(raceName);
+	}
+
+	private void setSpecial(String name) {
+		if (name.equals("Dwarf")) {
+			abiScoreAdjustments[2] = 2;
+			abiScoreAdjustments[5] = -2;
+			movement = 20;
+			special.addAll(Arrays.asList("Dwarven Movement", "Darkvisin 60ft", "Stonecunning", "Dwarven Weapon Familiarity", "Stability", "Dwarven Poison Resistance", "Dwarven Spell Resistance", "Dwarven Orc & Goblinoid Tactics", "Dwarven Giant-Fighting Tactics"));
+			autoLanguages.addAll(Arrays.asList("Common", "Dwarven"));
+			bonusLanguages.addAll(Arrays.asList("Giant", "Gnome", "Goblin", "Orc", "Terran", "Undercommon"));
+		}
+		else if (name.equals("Elf")) {
+			abiScoreAdjustments[1] = 2;
+			abiScoreAdjustments[2] = -2;
+			special.addAll(Arrays.asList("Immunity to Sleep", "Low-Light Vision", "Elven Weapon Proficiencies"))
+			skillAdjust.put("Listen", 2);
+			skillAdjust.put("Search", 2);
+			skillAdjust.put("Spot", 2);
+			autoLanguages.addAll(Arrays.asList("Common", "Elven"));
+			bonusLanguages.addAll(Arrays.asList("Draconic", "Gnoll", "Gnome", "Goblin", "Orc", "Sylvan"));		
+		}
+		else if (name.equals("Gnome")) {
+			abiScoreAdjustments[0] = -2;
+			abiScoreAdjustments[2] = 2;
+			size = -1;
+			movement = 20;
+			special.addAll(Arrays.asList("Low-Light Vision", "Gnomish Weapon Familiarity", "Gnomish Illusion Mastery", "Gnomish Kobold & Goblin Tactics", "Gnomish Giant-Fighting Tactics", "Gnomish Spell-Like Abilities"));
+			skillAdjust.put("Listen", 2);
+			skillAdjust.put("Craft(Alchemy)", 2);
+			autoLanguages.addAll(Arrays.asList("Common", "Gnome"));
+			bonusLanguages.addAll(Arrays.asList("Draconic", "Dwarven", "Elven", "Giant", "Goblin", "Orc"));
+		}
+		else if (name.equals("Half-Elf")) {
+			special.addAll(Arrays.asList("Immunity to Sleep", "Enchantment Resistance", "Low-Light Vision", "Elven Blood"));
+			skillAdjust.put("Listen", 1);
+			skillAdjust.put("Search", 1);
+			skillAdjust.put("Spot", 1);
+			skillAdjust.put("Diplomacy", 2);
+			skillAdjust.put("Gather Information");
+			autoLanguages.addAll(Array.asList("Common", "Elven"));
+			bonusLanguages.addAll(Array.asList("Abyssal", "Aquan", "Auran", "Celestial", "Draconic", "Dwarven", "Giant", "Gnome", "Goblin", "Gnoll", "Halfling", "Ignan", "Infernal", "Orc", "Sylvan", "Terran", "Undercommon"));
+		}
+		else if (name.equals("Half-Orc")) {
+			abiScoreAdjustments[0] = 2;
+			abiScoreAdjustments[3] = -2;
+			abiScoreAdjustments[5] = -2;
+			special.addAll(Arrays.asList("Darkvision 60ft", "Orc Blood"));
+			autoLanguages.addAll(Array.asList("Common", "Orc"));
+			bonusLanguages.addAll(Array.asList("Draconic", "Giant", "Gnoll", "Goblin", "Abyssal"));
+		}
+		else if (name.equals("Halfling")) {
+			abiScoreAdjustments[1] = 2;
+			abiScoreAdjustments[0] = -2;
+			size = -1;
+			movement = 20;
+			skillAdjust.put("Climb", 2);
+			skillAdjust.put("Jump", 2);
+			skillAdjust.put("Listen", 2);
+			skillAdjust.put("Move Silently", 2);
+			special.addAll(Arrays.asList("Halfling Fearlessness", "Halfling Thrown Weapon Mastery", "Halfling Luck"));
+			autoLanguages.addAll(Arrays.asList("Common", "Halfling"));
+			bonusLanguages.addAll(Arrays.asList("Dwarven", "Elven", "Gnome", "Goblin", "Orc"));
+		}
+		else if (name.equals("Human")) {
+			special.addAll(Arrays.asList("Human Bonus Feat", "Human Skill"));
+			autoLanguages.add("Common");
+			bonusLanguages.addAll(Array.asList("Abyssal", "Aquan", "Auran", "Celestial", "Draconic", "Dwarven", "Giant", "Gnome", "Goblin", "Gnoll", "Halfling", "Ignan", "Infernal", "Orc", "Sylvan", "Terran", "Undercommon"));
 
 
+		}
+	}
 
-
-
-
-
-
-
-
-
-
-
+}
 
 
 
@@ -236,7 +324,7 @@ class characterClass {
 	Function to set up the characterClass object's ArrayList of 
 	special features. 
 	Also sets up the chassis of the class */
-	public void setSpecial(String clas) {
+	private void setSpecial(String clas) {
 		if (clas.equals("Barbarian")) {
 			hitDie = 12;
 			baseAttackBonus = 1.0f;
