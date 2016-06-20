@@ -79,26 +79,38 @@ class character {
 
 
 	/* Function to initially get all class features of the character
-	   Will look at the character's classes hashmap in order to find out 
-	   what classes and how many levels of each of stuff to append to
-	   the character's specialList
-	   To add new class features to an existing character use the levelUp() method  */
-	   private void getClassFeatures() {
-	   	System.out.println("Getting class features...");
-	   	Set classSet = classes.keySet(); // a set containing all the classes the character has levels in
-	   	Iterator classIterator = classSet.iterator();
-	   	while (classIterator.hasNext()) { // loop through all the character's classes
-	   		String clas = (String)classIterator.next(); // string containing the name of the class
-	   		characterClass newClass = new characterClass(clas); // characterClass object of the new class; set it up here so we only set up the ones that we need
-	   		classFeatures.put(clas, newClass);
-	   		Integer level = classes.get(clas); // the number of the levels the character has in this clas
-	   		ArrayList<ArrayList<String>> classSpecial = classFeatures.get(clas).special;
-	   		for(int i=0; i < level; i++) {
-	   			ArrayList<String> newFeatures = classFeatures.get(clas).special.get(i);
-	   			specialList.addAll(newFeatures);
-	   		}
-	   	}
-	   }
+   Will look at the character's classes hashmap in order to find out 
+   what classes and how many levels of each of stuff to append to
+   the character's specialList
+   To add new class features to an existing character use the levelUp() method  */
+   private void getClassFeatures() {
+   	System.out.println("Getting class features...");
+   	Set classSet = classes.keySet(); // a set containing all the classes the character has levels in
+   	Iterator classIterator = classSet.iterator();
+   	while (classIterator.hasNext()) { // loop through all the character's classes
+   		String clas = (String)classIterator.next(); // string containing the name of the class
+   		characterClass newClass = new characterClass(clas); // characterClass object of the new class; set it up here so we only set up the ones that we need
+   		classFeatures.put(clas, newClass);
+   		Integer level = classes.get(clas); // the number of the levels the character has in this clas
+   		ArrayList<ArrayList<String>> classSpecial = classFeatures.get(clas).special;
+   		for(int i=0; i < level; i++) {
+   			ArrayList<String> newFeatures = classFeatures.get(clas).special.get(i);
+   			specialList.addAll(newFeatures);
+   		}
+   		// still to be done: bab, saves, skills, hp
+   	}
+   }
+
+   private void getRacialTraits() {
+   	System.out.println("Getting racial traits...");
+   	playerRace newRace = new playerRace(race);
+   	specialList.addAll(newRace.special);
+   	// i also need to adjust ability scores
+   	// adjust skills
+   	// and do languages
+   }
+
+
 
 	/* public static int calcMod(int score)
 	   takes an int score as its only parameter and returns the 
@@ -167,11 +179,9 @@ class character {
 	}
 
 	public static void main(String[] args) {
-		character c = new character("Jim", "Human", "Barbarian", 1);
-		c.multiClass("Bard", 2);
-		c.multiClass("Fighter", 2);
-		c.multiClass("Paladin", 3);
+		character c = new character("Jim", "Dwarf", "Wizard", 1);
 		c.assignRolls(c.rollStats());
+		c.getRacialTraits();
 		c.getClassFeatures();
 		c.printCharacter();
 
@@ -180,10 +190,10 @@ class character {
 
 
 
-class race {
+class playerRace {
 
 	String raceName;
-	int[6] abiScoreAdjustments;
+	int[] abiScoreAdjustments;
 	int movement;
 	int size;
 	ArrayList<String> special;
@@ -191,9 +201,9 @@ class race {
 	ArrayList<String> autoLanguages;
 	ArrayList<String> bonusLanguages;
 
-	race(String name) {
+	playerRace(String name) {
 		raceName = name;
-		abiScoreAdjustments = [0, 0, 0, 0, 0, 0];
+		abiScoreAdjustments = new int[] {0, 0, 0, 0, 0, 0};
 		movement = 30;
 		size = 0;
 		special = new ArrayList<String>();
@@ -215,7 +225,7 @@ class race {
 		else if (name.equals("Elf")) {
 			abiScoreAdjustments[1] = 2;
 			abiScoreAdjustments[2] = -2;
-			special.addAll(Arrays.asList("Immunity to Sleep", "Low-Light Vision", "Elven Weapon Proficiencies"))
+			special.addAll(Arrays.asList("Immunity to Sleep", "Low-Light Vision", "Elven Weapon Proficiencies"));
 			skillAdjust.put("Listen", 2);
 			skillAdjust.put("Search", 2);
 			skillAdjust.put("Spot", 2);
@@ -239,17 +249,17 @@ class race {
 			skillAdjust.put("Search", 1);
 			skillAdjust.put("Spot", 1);
 			skillAdjust.put("Diplomacy", 2);
-			skillAdjust.put("Gather Information");
-			autoLanguages.addAll(Array.asList("Common", "Elven"));
-			bonusLanguages.addAll(Array.asList("Abyssal", "Aquan", "Auran", "Celestial", "Draconic", "Dwarven", "Giant", "Gnome", "Goblin", "Gnoll", "Halfling", "Ignan", "Infernal", "Orc", "Sylvan", "Terran", "Undercommon"));
+			skillAdjust.put("Gather Information", 2);
+			autoLanguages.addAll(Arrays.asList("Common", "Elven"));
+			bonusLanguages.addAll(Arrays.asList("Abyssal", "Aquan", "Auran", "Celestial", "Draconic", "Dwarven", "Giant", "Gnome", "Goblin", "Gnoll", "Halfling", "Ignan", "Infernal", "Orc", "Sylvan", "Terran", "Undercommon"));
 		}
 		else if (name.equals("Half-Orc")) {
 			abiScoreAdjustments[0] = 2;
 			abiScoreAdjustments[3] = -2;
 			abiScoreAdjustments[5] = -2;
 			special.addAll(Arrays.asList("Darkvision 60ft", "Orc Blood"));
-			autoLanguages.addAll(Array.asList("Common", "Orc"));
-			bonusLanguages.addAll(Array.asList("Draconic", "Giant", "Gnoll", "Goblin", "Abyssal"));
+			autoLanguages.addAll(Arrays.asList("Common", "Orc"));
+			bonusLanguages.addAll(Arrays.asList("Draconic", "Giant", "Gnoll", "Goblin", "Abyssal"));
 		}
 		else if (name.equals("Halfling")) {
 			abiScoreAdjustments[1] = 2;
@@ -267,7 +277,7 @@ class race {
 		else if (name.equals("Human")) {
 			special.addAll(Arrays.asList("Human Bonus Feat", "Human Skill"));
 			autoLanguages.add("Common");
-			bonusLanguages.addAll(Array.asList("Abyssal", "Aquan", "Auran", "Celestial", "Draconic", "Dwarven", "Giant", "Gnome", "Goblin", "Gnoll", "Halfling", "Ignan", "Infernal", "Orc", "Sylvan", "Terran", "Undercommon"));
+			bonusLanguages.addAll(Arrays.asList("Abyssal", "Aquan", "Auran", "Celestial", "Draconic", "Dwarven", "Giant", "Gnome", "Goblin", "Gnoll", "Halfling", "Ignan", "Infernal", "Orc", "Sylvan", "Terran", "Undercommon"));
 
 
 		}
@@ -460,16 +470,18 @@ class characterClass {
 			// I'm going to take this opportunity to go work on setting up races some
 			String[] featChoices = {"Improved Grapple", "Stunning Fist"};
 			special.get(0).add(getRandom(featChoices));
-			featChoices = {"Combat Reflexes", "Deflect Arrows"};
+			featChoices[0] = "Combat Reflexes";
+			featChoices[1] = "Deflect Arrows";
 			special.get(1).add(getRandom(featChoices));
 			special.get(1).add("Evasion");
 			special.get(2).add("Still Mind");
 			special.get(2).add("Unarmored Speed Bonus 10ft");
 			special.get(3).add("Ki Strike(Magic)");
 			special.get(3).add("Slow Fall 20ft");
-			special.get(3).add("Unarmed Damage 1d8")
+			special.get(3).add("Unarmed Damage 1d8");
 			special.get(4).add("Purity of Body");
-			featChoices = {"Improved Disarm", "Improved Trip"};
+			featChoices[0] = "Improved Disarm";
+			featChoices[1] = "Improved Trip";
 			special.get(5).add(getRandom(featChoices));
 			special.get(5).add("Slow Fall 30ft");
 			special.get(6).add("Wholeness of Body");
