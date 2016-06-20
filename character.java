@@ -163,6 +163,7 @@ class character {
 		character c = new character("Jim", "Human", "Barbarian", 1);
 		c.multiClass("Bard", 2);
 		c.multiClass("Fighter", 2);
+		c.multiClass("Paladin", 3);
 		c.assignRolls(c.rollStats());
 		c.getClassFeatures();
 		c.printCharacter();
@@ -369,7 +370,7 @@ class characterClass {
 			special.get(0).add("Monk Unarmed Strike");
 			// I could get hte character's size here and then create a list of unarmed damages
 			// I'm going to take this opportunity to go work on setting up races some
-			String[2] featChoices = {"Improved Grapple", "Stunning Fist"};
+			String[] featChoices = {"Improved Grapple", "Stunning Fist"};
 			special.get(0).add(getRandom(featChoices));
 			featChoices = {"Combat Reflexes", "Deflect Arrows"};
 			special.get(1).add(getRandom(featChoices));
