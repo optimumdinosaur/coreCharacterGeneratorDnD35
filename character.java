@@ -73,14 +73,14 @@ class character {
 				getClassFeatures(currClass, levels);
 				classes.put(currClass, classes.get(currClass) + levels);
 				nnew = false; // this class is not new
-				break; // out of this while loop, we're done checking classes
+				return; // we're done here
 			}
 		}
-		if (nnew) { // if it is a new class, create it
-			characterClass newClass = new characterClass(cName);
-			getClassFeatures(newClass, levels);
-			classes.put(newClass, levels); // and put it in classes
-			
+		if (nnew) { // if it is a new class
+			characterClass newClass = new characterClass(cName); // create the characterClass
+			classes.put(newClass, 1); // put it into classes at level 1 so getClassFeatures() works properly
+			getClassFeatures(newClass, levels); // will the class's features from level 1 to levels
+			classes.put(newClass, levels); // update classes with the actual level. 
 		}
 
 	}
@@ -90,17 +90,17 @@ class character {
 	   according to the number of given levels in the class*/
    private void getClassFeatures(characterClass clas, int levels) {
 	   	System.out.println("Getting class features...");
-	   	for(int i=classes.get(clas)-1; i < levels; i++) {
+	   	for(int i=classes.get(clas)-1; i < levels + classes.get(clas); i++) {
 	   		ArrayList<String> newFeatures = clas.special.get(i);
 	   		for(int j=0; j < newFeatures.size(); j++) {
 	   			specialList.add(newFeatures.get(j));
 	   		}
 	   		Random r = new Random();
-	   		hitPoints = hitPoints + r.nextInt(clas.hitDie) + conMod;
+	   		hitPoints = hitPoints + r.nextInt(clas.hitDie) + conMod + 1;
 	   		System.out.println("hitPoints increasesd to " + hitPoints);
 	   	}
 
-   		// still to be done: bab, saves, skills, hp
+   		// still to be done: bab, saves, skills
    	}
 
    private void getRacialTraits() {
@@ -198,6 +198,8 @@ class character {
 	public static void main(String[] args) {
 		character c = new character("Jim", "Halfling", "Barbarian");
 		c.levelUp("Barbarian", 4);
+		c.levelUp("Wizard", 1);
+		c.levelUp("Barbarian", 3);
 		
 		c.printCharacter();
 
