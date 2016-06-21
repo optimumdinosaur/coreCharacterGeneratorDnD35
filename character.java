@@ -14,12 +14,10 @@ import java.util.*;
 /* Class to store and manage the characters
 */
 class character {
-
-	private static HashMap<String, characterClass> classFeatures = new HashMap<String, characterClass>();
 	
 	private String name;
-	private String race;
-	private HashMap<String,Integer> classes = new HashMap<String,Integer>();
+	private playerRace race;
+	private HashMap<characterClass,Integer> classes = new HashMap<characterClass,Integer>();
 	private int hitPoints;
 
 	private int strength;
@@ -41,71 +39,90 @@ class character {
 
 	// private HashMap<String, int[]> skills;
 
-	private ArrayList<String> specialList;
+	private Set<String> specialList;
 
 
-	character(String newName, String newRace, String newClass, int newClassLevel) {
+	character(String newName, String newRace, String newClass) {
 		name = newName;
-		race = newRace;
-		classes.put(newClass, newClassLevel);
-		strength = 10;
-		strMod = 0;
-		dexterity = 10;
-		dexMod = 0;
-		consitution = 10;
-		conMod = 0;
-		intelligence = 10;
-		intMod = 0;
-		wisdom = 10;
-		wisMod = 0;
-		charisma = 10;
-		chaMod = 0;
+		playerRace nRace = new playerRace(newRace);
+		race = nRace;
+
+		characterClass clas = new characterClass(newClass);
+		classes.put(clas, 1);
+
+		hitPoints = 0;
+		assignRolls(rollStats());
 		// fortSave = new HashMap<String,int>();
 		// refSave = new HashMap<String,int>();
 		// willSave = new HashMap<String,int>();
 		// skills = new HashMap<String, int[]>();
-		specialList = new ArrayList<String>();
+		specialList = new HashSet<String>();
+		getRacialTraits();
+		getClassFeatures(clas, 1);
+	}
+
+	// Function to add levels to a new or already existing class
+	private void levelUp(String cName, int levels) {
+		// first we check if the given class is already in classes
+		boolean nnew = true; // whether or not the class represented by cName is a new one or not
+		Set<characterClass> cSet = classes.keySet();
+		Iterator<characterClass> cIterator = cSet.iterator();
+		while (cIterator.hasNext()) {
+			characterClass currClass = cIterator.next();
+			if (currClass.className.equals(cName)) { // if we find a match
+				getClassFeatures(currClass, levels);
+				classes.put(currClass, classes.get(currClass) + levels);
+				nnew = false; // this class is not new
+				break; // out of this while loop, we're done checking classes
+			}
+		}
+		if (nnew) { // if it is a new class, create it
+			characterClass newClass = new characterClass(cName);
+			getClassFeatures(newClass, levels);
+			classes.put(newClass, levels); // and put it in classes
+			
+		}
+
 	}
 
 
+	/* Function to add get class features from the given class
+	   according to the number of given levels in the class*/
+   private void getClassFeatures(characterClass clas, int levels) {
+	   	System.out.println("Getting class features...");
+	   	for(int i=classes.get(clas)-1; i < levels; i++) {
+	   		ArrayList<String> newFeatures = clas.special.get(i);
+	   		for(int j=0; j < newFeatures.size(); j++) {
+	   			specialList.add(newFeatures.get(j));
+	   		}
+	   		Random r = new Random();
+	   		hitPoints = hitPoints + r.nextInt(clas.hitDie) + conMod;
+	   		System.out.println("hitPoints increasesd to " + hitPoints);
+	   	}
 
-	// Function to add an additional class and levels to the character. 
-	private void multiClass(String newClass, int newClassLevel) {
-		classes.put(newClass, newClassLevel);
-	}
-
-
-
-
-
-	/* Function to initially get all class features of the character
-   Will look at the character's classes hashmap in order to find out 
-   what classes and how many levels of each of stuff to append to
-   the character's specialList
-   To add new class features to an existing character use the levelUp() method  */
-   private void getClassFeatures() {
-   	System.out.println("Getting class features...");
-   	Set classSet = classes.keySet(); // a set containing all the classes the character has levels in
-   	Iterator classIterator = classSet.iterator();
-   	while (classIterator.hasNext()) { // loop through all the character's classes
-   		String clas = (String)classIterator.next(); // string containing the name of the class
-   		characterClass newClass = new characterClass(clas); // characterClass object of the new class; set it up here so we only set up the ones that we need
-   		classFeatures.put(clas, newClass);
-   		Integer level = classes.get(clas); // the number of the levels the character has in this clas
-   		ArrayList<ArrayList<String>> classSpecial = classFeatures.get(clas).special;
-   		for(int i=0; i < level; i++) {
-   			ArrayList<String> newFeatures = classFeatures.get(clas).special.get(i);
-   			specialList.addAll(newFeatures);
-   		}
    		// still to be done: bab, saves, skills, hp
    	}
-   }
 
    private void getRacialTraits() {
    	System.out.println("Getting racial traits...");
-   	playerRace newRace = new playerRace(race);
-   	specialList.addAll(newRace.special);
+   	for(int i=0; i<race.special.size(); i++) {
+   		specialList.add(race.special.get(i));
+   	}
+
    	// i also need to adjust ability scores
+   	strength += race.abiScoreAdjustments[0];
+   	dexterity += race.abiScoreAdjustments[1];
+   	consitution += race.abiScoreAdjustments[2];
+   	intelligence += race.abiScoreAdjustments[3];
+   	wisdom += race.abiScoreAdjustments[4];
+   	charisma += race.abiScoreAdjustments[5];
+   	strMod = calcMod(strength);
+   	dexMod = calcMod(dexterity);
+   	conMod = calcMod(consitution);
+   	intMod = calcMod(intelligence);
+   	wisMod = calcMod(wisdom);
+   	chaMod = calcMod(charisma);
+   	// i now need to calculate ability score mods
    	// adjust skills
    	// and do languages
    }
@@ -167,7 +184,7 @@ class character {
 		System.out.println("Name: " + name);
 		System.out.println("Race: " + race);
 		System.out.println(classes);
-
+		System.out.println("HP " + hitPoints);
 		System.out.format("Str %d (%d)\n", strength, strMod);
 		System.out.format("Dex %d (%d)\n", dexterity, dexMod);
 		System.out.format("Con %d (%d)\n", consitution, conMod);
@@ -179,10 +196,9 @@ class character {
 	}
 
 	public static void main(String[] args) {
-		character c = new character("Jim", "Dwarf", "Wizard", 1);
-		c.assignRolls(c.rollStats());
-		c.getRacialTraits();
-		c.getClassFeatures();
+		character c = new character("Jim", "Halfling", "Barbarian");
+		c.levelUp("Barbarian", 4);
+		
 		c.printCharacter();
 
 	}
