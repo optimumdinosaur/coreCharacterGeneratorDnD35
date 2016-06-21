@@ -33,9 +33,9 @@ class character {
 	private int charisma;
 	private int chaMod;
 
-	// private HashMap<String,int> fortSave;
-	// private HashMap<String,int> refSave;
-	// private HashMap<String,int> willSave;
+	private HashMap<String,Integer> fortSave;
+	private HashMap<String,Integer> refSave;
+	private HashMap<String,Integer> willSave;
 
 	// private HashMap<String, int[]> skills;
 
@@ -44,21 +44,33 @@ class character {
 
 	character(String newName, String newRace, String newClass) {
 		name = newName;
-		playerRace nRace = new playerRace(newRace);
-		race = nRace;
+		//playerRace nRace = new playerRace(newRace);
+		race = new playerRace(newRace);
 
 		characterClass clas = new characterClass(newClass);
-		classes.put(clas, 1);
+		classes.put(clas, 0);
 
 		hitPoints = 0;
 		assignRolls(rollStats());
-		// fortSave = new HashMap<String,int>();
-		// refSave = new HashMap<String,int>();
-		// willSave = new HashMap<String,int>();
+
+		fortSave = new HashMap<String,Integer>();
+		fortSave.put("Total", 0);
+		fortSave.put("Base", 0);
+		fortSave.put("Misc", 0);
+		refSave = new HashMap<String,Integer>();
+		refSave.put("Total", 0);
+		refSave.put("Base", 0);
+		refSave.put("Misc", 0);
+		willSave = new HashMap<String,Integer>();
+		willSave.put("Total", 0);
+		willSave.put("Base", 0);
+		willSave.put("Misc", 0);
+		
 		// skills = new HashMap<String, int[]>();
 		specialList = new HashSet<String>();
 		getRacialTraits();
 		getClassFeatures(clas, 1);
+		classes.put(clas, 1);
 	}
 
 	// Function to add levels to a new or already existing class
@@ -89,15 +101,39 @@ class character {
 	/* Function to add get class features from the given class
 	   according to the number of given levels in the class*/
    private void getClassFeatures(characterClass clas, int levels) {
-	   	System.out.println("Getting class features...");
-	   	for(int i=classes.get(clas)-1; i < levels + classes.get(clas); i++) {
-	   		ArrayList<String> newFeatures = clas.special.get(i);
+	   	System.out.format("Getting class features for %s...\n", clas.className);
+	   	System.out.println("Current level: " + classes.get(clas));
+	   	System.out.format("Leveling up %1$d times, getting to Level %2$d.\n", levels, classes.get(clas)+levels);
+	   	// for(int i=classes.get(clas)-1; i < levels + classes.get(clas); i++) {
+	   	// this just needs to run levels number of times
+	   	for(int i=0; i < levels; i++) {
+	   		int currentLevel = i + classes.get(clas);
+	   		System.out.format("Going from level %1$d to %2$d...\n", currentLevel, currentLevel + 1);
+	   		ArrayList<String> newFeatures = clas.special.get(currentLevel+1);
 	   		for(int j=0; j < newFeatures.size(); j++) {
 	   			specialList.add(newFeatures.get(j));
 	   		}
 	   		Random r = new Random();
 	   		hitPoints = hitPoints + r.nextInt(clas.hitDie) + conMod + 1;
 	   		System.out.println("hitPoints increasesd to " + hitPoints);
+	   		// the current level being processed is equal to i + 1
+	   		// using that we can calculate saves
+	   		if ((i+1 % 2) == 0) { // if the level is even, when a goodSave progression increments
+	   			if (clas.goodFort) 
+	   				fortSave.put("Base", fortSave.get("Base")+1);
+	   			if (clas.goodRef)
+	   				refSave.put("Base", refSave.get("Base")+1);
+	   			if (clas.goodWill)
+	   				willSave.put("Base", willSave.get("Base")+1);
+	   		}
+	   		if ((i+1 % 3) == 0) { // checks for every 3rd level in a class, when a poor save progression is incremented
+	   			if (!clas.goodFort) 
+	   				fortSave.put("Base", fortSave.get("Base")+1);
+	   			if (!clas.goodRef)
+	   				refSave.put("Base", refSave.get("Base")+1);
+	   			if (!clas.goodWill)
+	   				willSave.put("Base", willSave.get("Base")+1);
+	   		}
 	   	}
 
    		// still to be done: bab, saves, skills
@@ -191,6 +227,9 @@ class character {
 		System.out.format("Int %d (%d)\n", intelligence, intMod);
 		System.out.format("Wis %d (%d)\n", wisdom, wisMod);
 		System.out.format("Cha %d (%d)\n", charisma, chaMod);
+		System.out.println("Fort " + fortSave);
+		System.out.println("Ref " + refSave);
+		System.out.println("Will " + willSave);
 
 		System.out.println(specialList);
 	}
@@ -198,8 +237,7 @@ class character {
 	public static void main(String[] args) {
 		character c = new character("Jim", "Halfling", "Barbarian");
 		c.levelUp("Barbarian", 4);
-		c.levelUp("Wizard", 1);
-		c.levelUp("Barbarian", 3);
+
 		
 		c.printCharacter();
 
