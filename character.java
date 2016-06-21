@@ -90,7 +90,7 @@ class character {
 		}
 		if (nnew) { // if it is a new class
 			characterClass newClass = new characterClass(cName); // create the characterClass
-			classes.put(newClass, 1); // put it into classes at level 1 so getClassFeatures() works properly
+			classes.put(newClass, 0); // put it into classes at level 0 so getClassFeatures() works properly
 			getClassFeatures(newClass, levels); // will the class's features from level 1 to levels
 			classes.put(newClass, levels); // update classes with the actual level. 
 		}
@@ -108,17 +108,28 @@ class character {
 	   	// this just needs to run levels number of times
 	   	for(int i=0; i < levels; i++) {
 	   		int currentLevel = i + classes.get(clas);
-	   		System.out.format("Going from level %1$d to %2$d...\n", currentLevel, currentLevel + 1);
-	   		ArrayList<String> newFeatures = clas.special.get(currentLevel+1);
+	   		System.out.format("**Going from level %1$d to %2$d...\n", currentLevel, currentLevel + 1);
+	   		ArrayList<String> newFeatures = clas.special.get(currentLevel);
+	   		System.out.println("newFeatures of Lv" + (currentLevel+1) + ": " + newFeatures);
 	   		for(int j=0; j < newFeatures.size(); j++) {
 	   			specialList.add(newFeatures.get(j));
 	   		}
+
 	   		Random r = new Random();
 	   		hitPoints = hitPoints + r.nextInt(clas.hitDie) + conMod + 1;
 	   		System.out.println("hitPoints increasesd to " + hitPoints);
-	   		// the current level being processed is equal to i + 1
-	   		// using that we can calculate saves
-	   		if ((i+1 % 2) == 0) { // if the level is even, when a goodSave progression increments
+
+	   		if ((currentLevel+1) == 1) {
+	   			System.out.println("1st level of a class. +2 to Saves!");
+	   			if (clas.goodFort)
+	   				fortSave.put("plusTwo", 2);
+	   			if (clas.goodRef)
+	   				refSave.put("plusTwo", 2);
+	   			if (clas.goodWill)
+	   				willSave.put("plusTwo", 2);
+	   		}
+	   		if (((currentLevel+1) % 2) == 0) { // if the level is even, when a goodSave progression increments
+	   			System.out.println("Even level. Good saves going up!");
 	   			if (clas.goodFort) 
 	   				fortSave.put("Base", fortSave.get("Base")+1);
 	   			if (clas.goodRef)
@@ -126,7 +137,7 @@ class character {
 	   			if (clas.goodWill)
 	   				willSave.put("Base", willSave.get("Base")+1);
 	   		}
-	   		if ((i+1 % 3) == 0) { // checks for every 3rd level in a class, when a poor save progression is incremented
+	   		if (((currentLevel+1) % 3) == 0) { // checks for every 3rd level in a class, when a poor save progression is incremented
 	   			if (!clas.goodFort) 
 	   				fortSave.put("Base", fortSave.get("Base")+1);
 	   			if (!clas.goodRef)
@@ -134,8 +145,23 @@ class character {
 	   			if (!clas.goodWill)
 	   				willSave.put("Base", willSave.get("Base")+1);
 	   		}
+	   		System.out.println("*************************");
 	   	}
+	   	// here i will calculate the character's total save bonus
+	   	int fortTotal = (fortSave.get("Total") * -1) + conMod; // initialize it to this so when we add them all together, the preexisting total does not throw it off
+	   	for (int i : fortSave.values())
+	   		fortTotal += i;
+	   	fortSave.put("Total", fortTotal);
 
+	   	int refTotal = (refSave.get("Total") * -1) + dexMod; // initialize it to this so when we add them all together, the preexisting total does not throw it off
+	   	for (int i : refSave.values())
+	   		refTotal += i;
+	   	refSave.put("Total", refTotal);
+
+	   	int willTotal = (willSave.get("Total") * -1) + wisMod; // initialize it to this so when we add them all together, the preexisting total does not throw it off
+	   	for (int i : willSave.values())
+	   		willTotal += i;
+	   	willSave.put("Total", willTotal);
    		// still to be done: bab, saves, skills
    	}
 
@@ -158,6 +184,11 @@ class character {
    	intMod = calcMod(intelligence);
    	wisMod = calcMod(wisdom);
    	chaMod = calcMod(charisma);
+
+   	fortSave.put("Misc", (fortSave.get("Misc")+race.saveAdjust[0]));
+   	refSave.put("Misc", (refSave.get("Misc")+race.saveAdjust[0]));
+   	willSave.put("Misc", (willSave.get("Misc")+race.saveAdjust[0]));
+
    	// i now need to calculate ability score mods
    	// adjust skills
    	// and do languages
@@ -237,7 +268,8 @@ class character {
 	public static void main(String[] args) {
 		character c = new character("Jim", "Halfling", "Barbarian");
 		c.levelUp("Barbarian", 4);
-
+		c.levelUp("Barbarian", 3);
+		c.levelUp("Rogue", 1);
 		
 		c.printCharacter();
 
@@ -254,6 +286,7 @@ class playerRace {
 	int size;
 	ArrayList<String> special;
 	HashMap<String, Integer> skillAdjust;
+	int[] saveAdjust;
 	ArrayList<String> autoLanguages;
 	ArrayList<String> bonusLanguages;
 
@@ -264,6 +297,7 @@ class playerRace {
 		size = 0;
 		special = new ArrayList<String>();
 		skillAdjust = new HashMap<String, Integer>();
+		saveAdjust = new int[] {0, 0, 0};
 		autoLanguages = new ArrayList<String>();
 		bonusLanguages = new ArrayList<String>();
 		setSpecial(raceName);
@@ -326,7 +360,13 @@ class playerRace {
 			skillAdjust.put("Jump", 2);
 			skillAdjust.put("Listen", 2);
 			skillAdjust.put("Move Silently", 2);
-			special.addAll(Arrays.asList("Halfling Fearlessness", "Halfling Thrown Weapon Mastery", "Halfling Luck"));
+			special.addAll(Arrays.asList("Halfling Fearlessness", "Halfling Thrown Weapon Mastery"));
+			// fortSave.put("Misc", fortSave.get("Misc")+1);
+			// refSave.put("Misc", refSave.get("Misc")+1);
+			// willSave.put("Misc", willSave.get("Misc")+1);
+			saveAdjust[0] = 1;
+			saveAdjust[1] = 1;
+			saveAdjust[2] = 1;
 			autoLanguages.addAll(Arrays.asList("Common", "Halfling"));
 			bonusLanguages.addAll(Arrays.asList("Dwarven", "Elven", "Gnome", "Goblin", "Orc"));
 		}
