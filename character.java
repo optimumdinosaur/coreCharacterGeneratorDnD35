@@ -20,24 +20,16 @@ class character {
 	private HashMap<characterClass,Integer> classes = new HashMap<characterClass,Integer>();
 	private int hitPoints;
 
-	private int strength;
-	private int strMod;
-	private int dexterity;
-	private int dexMod;
-	private int consitution;
-	private int conMod;
-	private int intelligence;
-	private int intMod;
-	private int wisdom;
-	private int wisMod;
-	private int charisma;
-	private int chaMod;
+	private int[] abilityScores;
+	private int[] abiMods;
+
+
 
 	private HashMap<String,Integer> fortSave;
 	private HashMap<String,Integer> refSave;
 	private HashMap<String,Integer> willSave;
 
-	// private HashMap<String, int[]> skills;
+	private HashMap<String, HashMap<String, Integer>> skills;
 
 	private Set<String> specialList;
 
@@ -51,6 +43,7 @@ class character {
 		classes.put(clas, 0);
 
 		hitPoints = 0;
+		abiMods = new int[] {0, 0, 0, 0, 0, 0};
 		assignRolls(rollStats());
 
 		fortSave = new HashMap<String,Integer>();
@@ -66,7 +59,8 @@ class character {
 		willSave.put("Base", 0);
 		willSave.put("Misc", 0);
 		
-		// skills = new HashMap<String, int[]>();
+		skills = new HashMap<String, HashMap<String, Integer>>();
+
 		specialList = new HashSet<String>();
 		getRacialTraits();
 		getClassFeatures(clas, 1);
@@ -79,10 +73,10 @@ class character {
 		boolean nnew = true; // whether or not the class represented by cName is a new one or not
 		Set<characterClass> cSet = classes.keySet();
 		Iterator<characterClass> cIterator = cSet.iterator();
-		while (cIterator.hasNext()) {
+		while (cIterator.hasNext()) { // check each class the character has
 			characterClass currClass = cIterator.next();
 			if (currClass.className.equals(cName)) { // if we find a match
-				getClassFeatures(currClass, levels);
+				getClassFeatures(currClass, levels); // do the thing
 				classes.put(currClass, classes.get(currClass) + levels);
 				nnew = false; // this class is not new
 				return; // we're done here
@@ -116,7 +110,7 @@ class character {
 	   		}
 
 	   		Random r = new Random();
-	   		hitPoints = hitPoints + r.nextInt(clas.hitDie) + conMod + 1;
+	   		hitPoints = hitPoints + r.nextInt(clas.hitDie) + abiMods[2] + 1;
 	   		System.out.println("hitPoints increasesd to " + hitPoints);
 
 	   		if ((currentLevel+1) == 1) {
@@ -148,17 +142,17 @@ class character {
 	   		System.out.println("*************************");
 	   	}
 	   	// here i will calculate the character's total save bonus
-	   	int fortTotal = (fortSave.get("Total") * -1) + conMod; // initialize it to this so when we add them all together, the preexisting total does not throw it off
+	   	int fortTotal = (fortSave.get("Total") * -1) + abiMods[2]; // initialize it to this so when we add them all together, the preexisting total does not throw it off
 	   	for (int i : fortSave.values())
 	   		fortTotal += i;
 	   	fortSave.put("Total", fortTotal);
 
-	   	int refTotal = (refSave.get("Total") * -1) + dexMod; // initialize it to this so when we add them all together, the preexisting total does not throw it off
+	   	int refTotal = (refSave.get("Total") * -1) + abiMods[1]; // initialize it to this so when we add them all together, the preexisting total does not throw it off
 	   	for (int i : refSave.values())
 	   		refTotal += i;
 	   	refSave.put("Total", refTotal);
 
-	   	int willTotal = (willSave.get("Total") * -1) + wisMod; // initialize it to this so when we add them all together, the preexisting total does not throw it off
+	   	int willTotal = (willSave.get("Total") * -1) + abiMods[4]; // initialize it to this so when we add them all together, the preexisting total does not throw it off
 	   	for (int i : willSave.values())
 	   		willTotal += i;
 	   	willSave.put("Total", willTotal);
@@ -172,18 +166,11 @@ class character {
    	}
 
    	// i also need to adjust ability scores
-   	strength += race.abiScoreAdjustments[0];
-   	dexterity += race.abiScoreAdjustments[1];
-   	consitution += race.abiScoreAdjustments[2];
-   	intelligence += race.abiScoreAdjustments[3];
-   	wisdom += race.abiScoreAdjustments[4];
-   	charisma += race.abiScoreAdjustments[5];
-   	strMod = calcMod(strength);
-   	dexMod = calcMod(dexterity);
-   	conMod = calcMod(consitution);
-   	intMod = calcMod(intelligence);
-   	wisMod = calcMod(wisdom);
-   	chaMod = calcMod(charisma);
+   	for (int i=0; i<6; i++) {
+   		abilityScores[i] += race.abiScoreAdjustments[0];
+   		abiMods[i] = calcMod(abilityScores[i]);
+   	}
+
 
    	fortSave.put("Misc", (fortSave.get("Misc")+race.saveAdjust[0]));
    	refSave.put("Misc", (refSave.get("Misc")+race.saveAdjust[0]));
@@ -225,6 +212,8 @@ class character {
 				finalRolls[i] = finalRolls[i] - rolls[0];
 			}
 		}
+		for (int i=0; i<6; i++)
+			System.out.println(finalRolls[i]);
 		return finalRolls;
 	}
 
@@ -233,18 +222,9 @@ class character {
 	also calculates and assigns the mod for each stat
 	@param: rolls, must be an integer array of length 6, presumably one generated from rollStats() */
 	private void assignRolls(int[] rolls) {
-		strength = rolls[0];
-		strMod = calcMod(strength);
-		dexterity = rolls[1];
-		dexMod = calcMod(dexterity);
-		consitution = rolls[2];
-		conMod = calcMod(consitution);
-		intelligence = rolls[3];
-		intMod = calcMod(intelligence);
-		wisdom = rolls[4];
-		wisMod = calcMod(wisdom);
-		charisma = rolls[5];
-		chaMod = calcMod(charisma);
+		abilityScores = rolls;
+		for (int i=0; i<6; i++) 
+			abiMods[i] = calcMod(abilityScores[i]);
 	}
 
 	public void printCharacter() {
@@ -252,12 +232,12 @@ class character {
 		System.out.println("Race: " + race);
 		System.out.println(classes);
 		System.out.println("HP " + hitPoints);
-		System.out.format("Str %d (%d)\n", strength, strMod);
-		System.out.format("Dex %d (%d)\n", dexterity, dexMod);
-		System.out.format("Con %d (%d)\n", consitution, conMod);
-		System.out.format("Int %d (%d)\n", intelligence, intMod);
-		System.out.format("Wis %d (%d)\n", wisdom, wisMod);
-		System.out.format("Cha %d (%d)\n", charisma, chaMod);
+		System.out.format("Str %d (%d)\n", abilityScores[0], abiMods[0]);
+		System.out.format("Dex %d (%d)\n", abilityScores[1], abiMods[1]);
+		System.out.format("Con %d (%d)\n", abilityScores[2], abiMods[2]);
+		System.out.format("Int %d (%d)\n", abilityScores[3], abiMods[3]);
+		System.out.format("Wis %d (%d)\n", abilityScores[4], abiMods[4]);
+		System.out.format("Cha %d (%d)\n", abilityScores[5], abiMods[5]);
 		System.out.println("Fort " + fortSave);
 		System.out.println("Ref " + refSave);
 		System.out.println("Will " + willSave);
