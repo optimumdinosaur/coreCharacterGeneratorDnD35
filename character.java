@@ -23,6 +23,8 @@ class character {
 	
 	private int hitPoints;
 
+	private int size; // medium = 0, small = -1, large = +1, huge = +2, etc.
+
 	// these int[] store info for the ability scores in order:
 	// 0-Strength, 1-Dexterity, 2-Constitution, 3-Intelligence, 4-Wisdom, 5-Charisma
 	private int[] abilityScores;
@@ -68,8 +70,129 @@ class character {
 		willSave.put("Total", 0);
 		willSave.put("Base", 0);
 		willSave.put("Misc", 0);
-		
+
+		// time to initialize the skills hashmap for the character		
 		skills = new HashMap<String, HashMap<String, Integer>>();
+		// and a HashMap for each of the skills, then place it in the character's skills HashMap
+		HashMap<String, Integer> appraise = new HashMap<String, Integer>();
+		skills.put("Appraise", appraise);
+		HashMap<String, Integer> balance = new HashMap<String, Integer>();
+		skills.put("Balance", balance);
+		HashMap<String, Integer> bluff = new HashMap<String, Integer>();
+		skills.put("Bluff", bluff);
+		HashMap<String, Integer> climb = new HashMap<String, Integer>();
+		skills.put("Climb", climb);
+		HashMap<String, Integer> concentration = new HashMap<String, Integer>();
+		skills.put("Concentration", concentration);
+		HashMap<String, Integer> craft = new HashMap<String, Integer>();
+		skills.put("Craft", craft);
+		HashMap<String, Integer> decipherScript = new HashMap<String, Integer>();
+		skills.put("Decipher Script", decipherScript);
+		HashMap<String, Integer> diplomacy = new HashMap<String, Integer>();
+		skills.put("Diplomacy", diplomacy);
+		HashMap<String, Integer> disableDevice = new HashMap<String, Integer>();
+		skills.put("Disable Device", disableDevice);
+		HashMap<String, Integer> disguise = new HashMap<String, Integer>();
+		skills.put("Disguise", disguise);
+		HashMap<String, Integer> escapeArtist = new HashMap<String, Integer>();
+		skills.put("Escape Artist", escapeArtist);
+		HashMap<String, Integer> forgery = new HashMap<String, Integer>();
+		skills.put("Forgery", forgery);
+		HashMap<String, Integer> gatherInformation = new HashMap<String, Integer>();
+		skills.put("Gather Information", gatherInformation);
+		HashMap<String, Integer> handleAnimal = new HashMap<String, Integer>();
+		skills.put("Handle Animal", handleAnimal);
+		HashMap<String, Integer> heal = new HashMap<String, Integer>();
+		skills.put("Heal", heal);
+		HashMap<String, Integer> hide = new HashMap<String, Integer>();
+		skills.put("Hide", hide);
+		HashMap<String, Integer> intimidate = new HashMap<String, Integer>();
+		skills.put("Intimidate", intimidate);
+		HashMap<String, Integer> jump= new HashMap<String, Integer>();
+		skills.put("Jump", jump);
+		HashMap<String, Integer> knowledgeArcana = new HashMap<String, Integer>();
+		skills.put("Knowledge(Arcana)", knowledgeArcana);
+		HashMap<String, Integer> knowledgeArchitecture= new HashMap<String, Integer>();
+		skills.put("Knowledge(Architecture & Engineering", knowledgeArchitecture);
+		HashMap<String, Integer> knowledgeDungeoneering = new HashMap<String, Integer>();
+		skills.put("Knowledge(Dungeoneering)", knowledgeDungeoneering);
+		HashMap<String, Integer> knowledgeGeography = new HashMap<String, Integer>();
+		skills.put("Knowledge(Geography)", knowledgeGeography);
+		HashMap<String, Integer> knowledgeHistory = new HashMap<String, Integer>();
+		skills.put("Knowledge(History)", knowledgeHistory);
+		HashMap<String, Integer> knowledgeLocal = new HashMap<String, Integer>();
+		skills.put("Knowledge(Local)", knowledgeLocal);
+		HashMap<String, Integer> knowledgeNature = new HashMap<String, Integer>();
+		skills.put("Knowledge(Nature)", knowledgeNature);
+		HashMap<String, Integer> knowledgeNobility = new HashMap<String, Integer>();
+		skills.put("Knowledge(Nobility & Royalty)", knowledgeNobility);
+		HashMap<String, Integer> knowledgeReligion = new HashMap<String, Integer>();
+		skills.put("Knowledge(Religion)", knowledgeReligion);
+		HashMap<String, Integer> knowledgePlanes = new HashMap<String, Integer>();
+		skills.put("Knowledge(The Planes)", knowledgePlanes);
+		HashMap<String, Integer> listen = new HashMap<String, Integer>();
+		skills.put("Listen", listen);
+		HashMap<String, Integer> moveSilently = new HashMap<String, Integer>();
+		skills.put("Move Silently", moveSilently);
+		HashMap<String, Integer> openLock = new HashMap<String, Integer>();
+		skills.put("Open Lock", openLock);
+		HashMap<String, Integer> perform = new HashMap<String, Integer>();
+		skills.put("Perform", perform);
+		HashMap<String, Integer> profession = new HashMap<String, Integer>();
+		skills.put("Profession", profession);
+		HashMap<String, Integer> ride = new HashMap<String, Integer>();
+		skills.put("Ride", ride);
+		HashMap<String, Integer> search = new HashMap<String, Integer>();
+		skills.put("Search", search);
+		HashMap<String, Integer> senseMotive = new HashMap<String, Integer>();
+		skills.put("Sense Motive", senseMotive);
+		HashMap<String, Integer> sleightOfHand = new HashMap<String, Integer>();
+		skills.put("Sleight of Hand", sleightOfHand);
+		HashMap<String, Integer> spellcraft = new HashMap<String, Integer>();
+		skills.put("Spellcraft", spellcraft);
+		HashMap<String, Integer> spot= new HashMap<String, Integer>();
+		skills.put("Spot", spot);
+		HashMap<String, Integer> survival = new HashMap<String, Integer>();
+		skills.put("Survival", survival);
+		HashMap<String, Integer> swim = new HashMap<String, Integer>();
+		skills.put("Swim", swim);
+		HashMap<String, Integer> tumble = new HashMap<String, Integer>();
+		skills.put("Tumble", tumble);
+		HashMap<String, Integer> useMagicDevice = new HashMap<String, Integer>();
+		skills.put("Use Magic Device", useMagicDevice);
+		HashMap<String, Integer> useRope = new HashMap<String, Integer>();
+		skills.put("Use Rope", useRope);
+
+		// these lists are for setting up the appropriate ability score modifier to each skill
+		String[] strSkills = {"Climb", "Jump", "Swim"};
+		String[] dexSkills = {"Balance", "Escape Artist", "Hide", "Move Silently", "Open Lock", "Ride", "Sleight of Hand", "Tumble", "Use Rope"};
+		String[] conSkills = {"Concentration"};
+		String[] intSkills = {"Appraise", "Craft", "Decipher Script", "Disable Device", "Forgery", "Knowledge(Arcana)", "Knowledge(Architecture & Engineering", "Knowledge(Dungeoneering)", "Knowledge(Geography)", "Knowledge(History)", "Knowledge(Local)", "Knowledge(Nature)", "Knowledge(Nobility & Royalty)", "Knowledge(Religion)", "Knowledge(The Planes)", "Search", "Spellcraft"};
+		String[] wisSkills = {"Heal", "Listen", "Profession", "Sense Motive", "Spot", "Survival"};
+		String[] chaSkills = {"Bluff", "Diplomacy", "Disguise", "Gather Information", "Handle Animal", "Intimidate", "Perform", "Use Magic Device"};
+		String[][] skillsByMod = {strSkills, dexSkills, conSkills, intSkills, wisSkills, chaSkills}; // with this we can use nested loops to do all the ability scores
+
+		for (int i=0; i < 6; i++) {
+			for (int j=0; j < skillsByMod[i].length; j++) {
+				skills.get(skillsByMod[i][j]).put("AbiMod", i);
+			}
+			skills.get(skillsByMod[i]);
+		}
+
+		// here we can use for loops to assign AbiMod for each skill rather than doing them one at a time. 		
+		// for(int i=0; i < strSkills.length; i++) 
+		// 	skills.get(strSkills[i]).put("AbiMod", 0);
+		// for(int i=0; i < dexSkills.length; i++) 
+		// 	skills.get(dexSkills[i]).put("AbiMod", 1);
+		// for(int i=0; i < conSkills.length; i++) 
+		// 	skills.get(conSkills[i]).put("AbiMod", 2);	
+		// for(int i=0; i < intSkills.length; i++) 
+		// 	skills.get(intSkills[i]).put("AbiMod", 3);
+		// for(int i=0; i < wisSkills.length; i++) 
+		// 	skills.get(wisSkills[i]).put("AbiMod", 4);	
+		// for(int i=0; i < chaSkills.length; i++)
+		// 	skills.get(chaSkills[i]).put("AbiMod", 5);
+
 		classSkills = new HashSet<String>();
 		prioritySkills = new HashSet<String>();
 
@@ -182,15 +305,23 @@ class character {
 
    private void getRacialTraits() {
    	System.out.println("Getting racial traits...");
-   	for(int i=0; i<race.special.size(); i++) {
-   		specialList.add(race.special.get(i));
-   	}
-
-   	// i also need to adjust ability scores
+   	size = race.size;
+   	// Ability Scores
    	for (int i=0; i<6; i++) {
    		abilityScores[i] += race.abiScoreAdjustments[0];
    		abiMods[i] = calcMod(abilityScores[i]);
    	}
+   	// Special abilities
+   	for(int i=0; i<race.special.size(); i++) {
+   		specialList.add(race.special.get(i));
+   	}
+   	// Skills
+   	System.out.println("Adjusting skills...");
+   	for (String key : race.skillAdjust.keySet()) {
+   		System.out.println(key);
+
+   	}
+   	
 
 
    	fortSave.put("Misc", (fortSave.get("Misc")+race.saveAdjust[0]));
@@ -251,6 +382,7 @@ class character {
 	public void printCharacter() {
 		System.out.println("Name: " + name);
 		System.out.println("Race: " + race);
+		System.out.println("Size: " + size);
 		System.out.println(classes);
 		System.out.println("HP " + hitPoints);
 		System.out.format("Str %d (%d)\n", abilityScores[0], abiMods[0]);
@@ -363,9 +495,9 @@ class playerRace {
 			skillAdjust.put("Listen", 2);
 			skillAdjust.put("Move Silently", 2);
 			special.addAll(Arrays.asList("Halfling Fearlessness", "Halfling Thrown Weapon Mastery"));
-			// fortSave.put("Misc", fortSave.get("Misc")+1);
-			// refSave.put("Misc", refSave.get("Misc")+1);
-			// willSave.put("Misc", willSave.get("Misc")+1);
+			for(int i=0; i<3; i++) 
+				saveAdjust[i] =1;
+
 			saveAdjust[0] = 1;
 			saveAdjust[1] = 1;
 			saveAdjust[2] = 1;
@@ -505,6 +637,7 @@ class characterClass {
 			goodRef = false;
 			goodWill = true;
 			classSkills = new ArrayList<String>(Arrays.asList("Concentration", "Craft", "Diplomacy", "Heal", "Knowledge(Arcana)", "Knowledge(History)", "Knowledge(Religion)", "Knowledge(The Planes)", "Profession", "Spellcraft"));
+			prioritySkills.add("Knowledge(Religion)");
 			skillPointsPerLevel = 2;
 			special.get(0).add("Turn or Rebuke Undead");
 		}
@@ -515,6 +648,7 @@ class characterClass {
 			goodRef = false;
 			goodWill = true;
 			classSkills = new ArrayList<String>(Arrays.asList("Concentration", "Craft", "Diplomacy", "Handle Animal", "Heal", "Knowledge(Nature)", "Listen", "Profession", "Ride", "Spellcraft", "Spot", "Survival", "Swim"));
+			prioritySkills.add("Knowledge(Nature)");
 			skillPointsPerLevel = 4;
 			special.get(0).add("Animal Companion");
 			special.get(0).add("Nature Sense");
@@ -717,6 +851,7 @@ class characterClass {
 			goodRef = false;
 			goodWill = true;
 			classSkills = new ArrayList<String>(Arrays.asList("Concentration", "Craft", "Decipher Script", "Knowledge(Arcana)", "Knowledge(Architecture & Engineering)", "Knowledge(Dungeoneering)", "Knowledge(Geography)", "Knowledge(History)", "Knowledge(Local)", "Knowledge(Nature)", "Knowledge(Nobility & Royalty)", "Knowledge(Religion)", "Knowledge(The Planes)", "Profession", "Spellcraft"));
+			prioritySkills.add("Knowledge(Arcana)");
 			skillPointsPerLevel = 2;
 			special.get(0).add("Summon Familiar");
 			special.get(0).add("Scribe Scroll");
