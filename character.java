@@ -15,23 +15,33 @@ import java.util.*;
 */
 class character {
 	
-	private String name;
-	private playerRace race;
-	private HashMap<characterClass,Integer> classes = new HashMap<characterClass,Integer>();
+	private String name; // character's name
+	private playerRace race; // character's race
+
+	// hashmap with characterClasses as the keys, and the character's number of levels in that class as the value
+	private HashMap<characterClass,Integer> classes = new HashMap<characterClass,Integer>(); 
+	
 	private int hitPoints;
 
+	// these int[] store info for the ability scores in order:
+	// 0-Strength, 1-Dexterity, 2-Constitution, 3-Intelligence, 4-Wisdom, 5-Charisma
 	private int[] abilityScores;
 	private int[] abiMods;
 
-
-
+	// each part of the total save bonus is stored separately
+	// keys include: "Total", "Base", "Misc"
 	private HashMap<String,Integer> fortSave;
 	private HashMap<String,Integer> refSave;
 	private HashMap<String,Integer> willSave;
 
+	// skills is the master hashmap for all the character's skills
+	// the skill name serves as a key, and returns a value that is another hashmap
+	// this inner hashmap is structured similarly to the ones for saves
 	private HashMap<String, HashMap<String, Integer>> skills;
+	private Set<String> classSkills; // a set containing the class skills of all the classes of the character
+	private Set<String> prioritySkills; // a set containing priority skills for the character
 
-	private Set<String> specialList;
+	private Set<String> specialList; // the character's special abilities, class features, racial traits, etc.
 
 
 	character(String newName, String newRace, String newClass) {
@@ -60,6 +70,8 @@ class character {
 		willSave.put("Misc", 0);
 		
 		skills = new HashMap<String, HashMap<String, Integer>>();
+		classSkills = new HashSet<String>();
+		prioritySkills = new HashSet<String>();
 
 		specialList = new HashSet<String>();
 		getRacialTraits();
@@ -68,6 +80,8 @@ class character {
 	}
 
 	// Function to add levels to a new or already existing class
+	// @param: cName - the name of the class the character is gaining levels in
+	// @param: levels - the number of levels
 	private void levelUp(String cName, int levels) {
 		// first we check if the given class is already in classes
 		boolean nnew = true; // whether or not the class represented by cName is a new one or not
@@ -98,8 +112,9 @@ class character {
 	   	System.out.format("Getting class features for %s...\n", clas.className);
 	   	System.out.println("Current level: " + classes.get(clas));
 	   	System.out.format("Leveling up %1$d times, getting to Level %2$d.\n", levels, classes.get(clas)+levels);
-	   	// for(int i=classes.get(clas)-1; i < levels + classes.get(clas); i++) {
-	   	// this just needs to run levels number of times
+
+
+	   	Random r = new Random(); // Random object I'll need later to roll for hit points
 	   	for(int i=0; i < levels; i++) {
 	   		int currentLevel = i + classes.get(clas);
 	   		System.out.format("**Going from level %1$d to %2$d...\n", currentLevel, currentLevel + 1);
@@ -109,12 +124,18 @@ class character {
 	   			specialList.add(newFeatures.get(j));
 	   		}
 
-	   		Random r = new Random();
 	   		hitPoints = hitPoints + r.nextInt(clas.hitDie) + abiMods[2] + 1;
 	   		System.out.println("hitPoints increasesd to " + hitPoints);
 
 	   		if ((currentLevel+1) == 1) {
-	   			System.out.println("1st level of a class. +2 to Saves!");
+	   			System.out.println("1st level of a class.");
+
+	   			// let's set up some skills here, basically just import the class and priority skills of the class and add them to the corresponding lists of the character
+	   			// clas.classSkills isnt an arraylist, its just an array so ill have to loop through it
+	   			classSkills.addAll(clas.classSkills);
+	   			prioritySkills.addAll(clas.prioritySkills);
+
+	   			
 	   			if (clas.goodFort)
 	   				fortSave.put("plusTwo", 2);
 	   			if (clas.goodRef)
@@ -156,7 +177,7 @@ class character {
 	   	for (int i : willSave.values())
 	   		willTotal += i;
 	   	willSave.put("Total", willTotal);
-   		// still to be done: bab, saves, skills
+   		// still to be done: bab, skills, spells
    	}
 
    private void getRacialTraits() {
@@ -242,14 +263,15 @@ class character {
 		System.out.println("Ref " + refSave);
 		System.out.println("Will " + willSave);
 
-		System.out.println(specialList);
+		System.out.println("Special: " + specialList);
+		System.out.println("Class Skills: " +classSkills);
+		System.out.println("Priority Skills: " + prioritySkills);
 	}
 
 	public static void main(String[] args) {
-		character c = new character("Jim", "Halfling", "Barbarian");
-		c.levelUp("Barbarian", 4);
-		c.levelUp("Barbarian", 3);
-		c.levelUp("Rogue", 1);
+		character c = new character("Jim", "Halfling", "Bard");
+		c.levelUp("Bard", 4);
+
 		
 		c.printCharacter();
 
@@ -362,8 +384,6 @@ class playerRace {
 }
 
 
-
-
 // class to store all the features of a D&D 3.5 Character Class
 class characterClass {
 	String className; // the name of the class
@@ -372,10 +392,11 @@ class characterClass {
 	boolean goodFort; // whether the class has a good save or not
 	boolean goodRef;
 	boolean goodWill;
-	String[] classSkills; // an array containing names of all of the class's class skills
+	ArrayList<String> classSkills; // an array list containing names of all of the class's class skills
+	ArrayList<String> prioritySkills; // an array list containing skills that are vital to the class's functionality
 	int skillPointsPerLevel; // the number of skill points a member of this class gains at each level, not counting their int bonus
 	int numOfLevels; //for now I'll keep this commented out and default to 20, but if prestige classes are going to be involved i'll have to deal with it
-	ArrayList<ArrayList<String>> special; // an array of array lists to store the class's special features
+	ArrayList<ArrayList<String>> special; // an array list of array lists to store the class's special features
 
 
 	characterClass(String name) {
@@ -385,10 +406,13 @@ class characterClass {
 		special = new ArrayList<ArrayList<String>>(numOfLevels);
 		for (int i=0; i<numOfLevels; i++)
 			special.add(new ArrayList<String>());
+		prioritySkills = new ArrayList<String>();
 		setSpecial(className);
+		System.out.println("Character Class Created: " + className);
+
 	}
 
-	characterClass(String name, int hd, float bab, boolean fort, boolean ref, boolean will, String[] cskills, int sppl) {
+	characterClass(String name, int hd, float bab, boolean fort, boolean ref, boolean will, ArrayList<String> cskills, int sppl) {
 		className = name;
 		hitDie = hd;
 		baseAttackBonus = bab;
@@ -417,7 +441,7 @@ class characterClass {
 			goodFort = true;
 			goodRef = false;
 			goodWill = false;
-			String[] classSkills = {"Climb", "Craft", "Handle Animal", "Intimidate", "Jump", "Listen", "Ride", "Survival", "Swim"};
+			classSkills = new ArrayList<String>(Arrays.asList("Climb", "Craft", "Handle Animal", "Intimidate", "Jump", "Listen", "Ride", "Survival", "Swim"));
 			skillPointsPerLevel = 4;
 			special.get(0).add("Fast Movement");
 			special.get(0).add("Illiteracy");
@@ -451,7 +475,12 @@ class characterClass {
 			goodFort = false;
 			goodRef = true;
 			goodWill = true;
-			String[] classSkills = {"Appraise", "Balance", "Bluff", "Climb", "Concentration", "Craft", "Decipher Script", "Diplomacy", "Disguise", "Escape Artist", "Gather Information", "Hide", "Jump", "Knowledge(Arcana)", "Knowledge(Architecture & Engineering)", "Knowledge(Dungeoneering)", "Knowledge(Geography)", "Knowledge(History)", "Knowledge(Local)", "Knowledge(Nature)", "Knowledge(Nobility & Royalty)", "Knowledge(Religion)", "Knowledge(The Planes)", "Listen", "Move Silently", "Perform", "Profession", "Sense Motive", "Sleight of Hand", "Speak Language", "Spellcraft", "Swim", "Tumble", "Use Magic Device"};
+			classSkills = new ArrayList<String>(Arrays.asList("Appraise", "Balance", "Bluff", "Climb", "Concentration", "Craft", "Decipher Script", "Diplomacy", "Disguise", "Escape Artist", "Gather Information", "Hide", "Jump", "Knowledge(Arcana)", "Knowledge(Architecture & Engineering)", "Knowledge(Dungeoneering)", "Knowledge(Geography)", "Knowledge(History)", "Knowledge(Local)", "Knowledge(Nature)", "Knowledge(Nobility & Royalty)", "Knowledge(Religion)", "Knowledge(The Planes)", "Listen", "Move Silently", "Perform", "Profession", "Sense Motive", "Sleight of Hand", "Speak Language", "Spellcraft", "Swim", "Tumble", "Use Magic Device"));
+			String[] performChoices = {"Act", "Comedy", "Dance", "Keyboard", "Oratory", "Percussion", "Strings", "Wind", "Sing"};
+			Random r = new Random();
+			int randomIndex = r.nextInt(performChoices.length);
+			String priorityPerform = "Perform(" + performChoices[randomIndex]+")";
+			prioritySkills.add(priorityPerform);
 			skillPointsPerLevel = 6;
 			special.get(0).add("Bardic Music");
 			special.get(0).add("Bardic Knowledge");
@@ -475,7 +504,7 @@ class characterClass {
 			goodFort = true;
 			goodRef = false;
 			goodWill = true;
-			String[] classSkills = {"Concentration", "Craft", "Diplomacy", "Heal", "Knowledge(Arcana)", "Knowledge(History)", "Knowledge(Religion)", "Knowledge(The Planes)", "Profession", "Spellcraft"};
+			classSkills = new ArrayList<String>(Arrays.asList("Concentration", "Craft", "Diplomacy", "Heal", "Knowledge(Arcana)", "Knowledge(History)", "Knowledge(Religion)", "Knowledge(The Planes)", "Profession", "Spellcraft"));
 			skillPointsPerLevel = 2;
 			special.get(0).add("Turn or Rebuke Undead");
 		}
@@ -485,7 +514,7 @@ class characterClass {
 			goodFort = true;
 			goodRef = false;
 			goodWill = true;
-			String[] classSkills = {"Concentration", "Craft", "Diplomacy", "Handle Animal", "Heal", "Knowledge(Nature)", "Listen", "Profession", "Ride", "Spellcraft", "Spot", "Survival", "Swim"};
+			classSkills = new ArrayList<String>(Arrays.asList("Concentration", "Craft", "Diplomacy", "Handle Animal", "Heal", "Knowledge(Nature)", "Listen", "Profession", "Ride", "Spellcraft", "Spot", "Survival", "Swim"));
 			skillPointsPerLevel = 4;
 			special.get(0).add("Animal Companion");
 			special.get(0).add("Nature Sense");
@@ -517,7 +546,7 @@ class characterClass {
 			goodFort = true;
 			goodRef = false;
 			goodWill = false;
-			String[] classSkills = {"Climb", "Craft", "Handle Animal", "Intimidate", "Jump", "Ride", "Swim"};
+			classSkills = new ArrayList<String>(Arrays.asList("Climb", "Craft", "Handle Animal", "Intimidate", "Jump", "Ride", "Swim"));
 			skillPointsPerLevel = 2;
 			special.get(0).add("Bonus Fighter Feat");
 			special.get(1).add("Bonus Fighter Feat");
@@ -537,7 +566,7 @@ class characterClass {
 			goodFort = true;
 			goodRef = true;
 			goodWill = true;
-			String[] classSkills = {"Balance", "Climb", "Concentration", "Craft", "Diplomacy", "Escape Artist", "Hide", "Jump", "Knowledge(Arcana)", "Knowledge(Religion)", "Listen", "Move Silently", "Perform", "Profession", "Sense Motive", "Spot", "Swim", "Tumble"};
+			classSkills = new ArrayList<String>(Arrays.asList("Balance", "Climb", "Concentration", "Craft", "Diplomacy", "Escape Artist", "Hide", "Jump", "Knowledge(Arcana)", "Knowledge(Religion)", "Listen", "Move Silently", "Perform", "Profession", "Sense Motive", "Spot", "Swim", "Tumble"));
 			skillPointsPerLevel = 4;
 			special.get(0).add("Monk AC Bonus");
 			special.get(0).add("Flurry of Blows");
@@ -591,7 +620,7 @@ class characterClass {
 			goodFort = true;
 			goodRef = false;
 			goodWill = false;
-			String[] classSkills = {"Concentration", "Craft", "Diplomacy", "Handle Animal", "Heal", "Knowledge(Nobility & Royalty)", "Knowledge(Religion)", "Profession", "Ride", "Sense Motive"};
+			classSkills = new ArrayList<String>(Arrays.asList("Concentration", "Craft", "Diplomacy", "Handle Animal", "Heal", "Knowledge(Nobility & Royalty)", "Knowledge(Religion)", "Profession", "Ride", "Sense Motive"));
 			skillPointsPerLevel = 2;
 			special.get(0).add("Aura of Good");
 			special.get(0).add("Detect Evil");
@@ -618,7 +647,7 @@ class characterClass {
 			goodFort = true;
 			goodRef = true;
 			goodWill = false;
-			String[] classSkills = {"Climb", "Concentration", "Craft", "Handle Animal", "Heal", "Hide", "Jump", "Knowledge(Dungeoneering)", "Knowledge(Geography)", "Knowledge(Nature)", "Listen", "Move Silently", "Profession", "Ride", "Search", "Spot", "Survival", "Swim", "Use Rope"};
+			classSkills = new ArrayList<String>(Arrays.asList("Climb", "Concentration", "Craft", "Handle Animal", "Heal", "Hide", "Jump", "Knowledge(Dungeoneering)", "Knowledge(Geography)", "Knowledge(Nature)", "Listen", "Move Silently", "Profession", "Ride", "Search", "Spot", "Survival", "Swim", "Use Rope"));
 			skillPointsPerLevel = 6;
 			special.get(0).add("1st Favored Enemy");
 			special.get(0).add("Track");
@@ -644,7 +673,7 @@ class characterClass {
 			goodFort = false;
 			goodRef = true;
 			goodWill = false;
-			String[] classSkills = {"Appraise", "Balance", "Bluff", "Climb", "Craft", "Decipher Script", "Diplomacy", "Disable Device", "Disguise", "Escape Artist", "Forgery", "Gather Information", "Hide", "Intimidate", "Jump", "Knowledge(Local)", "Listen", "Move Silently", "Open Lock", "Perform", "Profession", "Search", "Sense Motive", "Sleight of Hand", "Spot", "Swim", "Tumble", "Use Magic Device", "Use Rope"};
+			classSkills = new ArrayList<String>(Arrays.asList("Appraise", "Balance", "Bluff", "Climb", "Craft", "Decipher Script", "Diplomacy", "Disable Device", "Disguise", "Escape Artist", "Forgery", "Gather Information", "Hide", "Intimidate", "Jump", "Knowledge(Local)", "Listen", "Move Silently", "Open Lock", "Perform", "Profession", "Search", "Sense Motive", "Sleight of Hand", "Spot", "Swim", "Tumble", "Use Magic Device", "Use Rope"));
 			skillPointsPerLevel = 8;
 			special.get(0).add("Sneak Attack +1d6");
 			special.get(0).add("Trapfinding");
@@ -677,7 +706,7 @@ class characterClass {
 			goodFort = false;
 			goodRef = false;
 			goodWill = true;
-			String[] classSkills = {"Bluff", "Concentration", "Craft", "Knowledge(Arcana)", "Profession", "Spellcraft"};
+			classSkills = new ArrayList<String>(Arrays.asList("Bluff", "Concentration", "Craft", "Knowledge(Arcana)", "Profession", "Spellcraft"));
 			skillPointsPerLevel = 2;
 			special.get(0).add("Summon Familiar");
 		}
@@ -687,7 +716,7 @@ class characterClass {
 			goodFort = false;
 			goodRef = false;
 			goodWill = true;
-			String[] classSkills = {"Concentration", "Craft", "Decipher Script", "Knowledge(Arcana)", "Knowledge(Architecture & Engineering)", "Knowledge(Dungeoneering)", "Knowledge(Geography)", "Knowledge(History)", "Knowledge(Local)", "Knowledge(Nature)", "Knowledge(Nobility & Royalty)", "Knowledge(Religion)", "Knowledge(The Planes)", "Profession", "Spellcraft"};
+			classSkills = new ArrayList<String>(Arrays.asList("Concentration", "Craft", "Decipher Script", "Knowledge(Arcana)", "Knowledge(Architecture & Engineering)", "Knowledge(Dungeoneering)", "Knowledge(Geography)", "Knowledge(History)", "Knowledge(Local)", "Knowledge(Nature)", "Knowledge(Nobility & Royalty)", "Knowledge(Religion)", "Knowledge(The Planes)", "Profession", "Spellcraft"));
 			skillPointsPerLevel = 2;
 			special.get(0).add("Summon Familiar");
 			special.get(0).add("Scribe Scroll");
