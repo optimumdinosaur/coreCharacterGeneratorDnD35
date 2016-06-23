@@ -171,31 +171,22 @@ class character {
 		String[] wisSkills = {"Heal", "Listen", "Profession", "Sense Motive", "Spot", "Survival"};
 		String[] chaSkills = {"Bluff", "Diplomacy", "Disguise", "Gather Information", "Handle Animal", "Intimidate", "Perform", "Use Magic Device"};
 		String[][] skillsByMod = {strSkills, dexSkills, conSkills, intSkills, wisSkills, chaSkills}; // with this we can use nested loops to do all the ability scores
-
-		for (int i=0; i < 6; i++) {
-			for (int j=0; j < skillsByMod[i].length; j++) {
+		for (int i=0; i < 6; i++) { // for each ability score
+			for (int j=0; j < skillsByMod[i].length; j++) { // for each skill in the String[]
 				skills.get(skillsByMod[i][j]).put("AbiMod", i);
 			}
 			skills.get(skillsByMod[i]);
 		}
+		// next i need to initialize Ranks, Misc, and Total all to 0 for each skill. 
+		for (String skl : skills.keySet()) {
+			HashMap<String, Integer> sklMap = skills.get(skl);
+			sklMap.put("Ranks", 0);
+			sklMap.put("Misc", 0);
+			sklMap.put("Total", 0);
+		}
 
-		// here we can use for loops to assign AbiMod for each skill rather than doing them one at a time. 		
-		// for(int i=0; i < strSkills.length; i++) 
-		// 	skills.get(strSkills[i]).put("AbiMod", 0);
-		// for(int i=0; i < dexSkills.length; i++) 
-		// 	skills.get(dexSkills[i]).put("AbiMod", 1);
-		// for(int i=0; i < conSkills.length; i++) 
-		// 	skills.get(conSkills[i]).put("AbiMod", 2);	
-		// for(int i=0; i < intSkills.length; i++) 
-		// 	skills.get(intSkills[i]).put("AbiMod", 3);
-		// for(int i=0; i < wisSkills.length; i++) 
-		// 	skills.get(wisSkills[i]).put("AbiMod", 4);	
-		// for(int i=0; i < chaSkills.length; i++)
-		// 	skills.get(chaSkills[i]).put("AbiMod", 5);
-
-		classSkills = new HashSet<String>();
+		classSkills = new HashSet<String>(); // both this and prioritySkills are actually set up in getClassFeatures()
 		prioritySkills = new HashSet<String>();
-
 		specialList = new HashSet<String>();
 		getRacialTraits();
 		getClassFeatures(clas, 1);
@@ -318,11 +309,12 @@ class character {
    	// Skills
    	System.out.println("Adjusting skills...");
    	for (String key : race.skillAdjust.keySet()) {
-   		System.out.println(key);
+   		System.out.println("Skill: "+key);
+   		System.out.println("skillAdjust: "+race.skillAdjust.get(key));
+   		skills.get(key).put("Misc", race.skillAdjust.get(key));
+
 
    	}
-   	
-
 
    	fortSave.put("Misc", (fortSave.get("Misc")+race.saveAdjust[0]));
    	refSave.put("Misc", (refSave.get("Misc")+race.saveAdjust[0]));
@@ -333,6 +325,13 @@ class character {
    	// and do languages
    }
 
+
+   private void calcSkillTotals() {
+   		for (String skl : skills.keySet()) {
+   			HashMap<String, Integer> sklMap = skills.get(skl);
+   			sklMap.put("Total", (sklMap.get("Ranks") + sklMap.get("Misc") + abiMods[sklMap.get("AbiMod")]));
+   		}
+   }
 
 
 	/* public static int calcMod(int score)
@@ -398,11 +397,13 @@ class character {
 		System.out.println("Special: " + specialList);
 		System.out.println("Class Skills: " +classSkills);
 		System.out.println("Priority Skills: " + prioritySkills);
+		System.out.println("Character Skill w/ Bonuses: " + skills);
 	}
 
 	public static void main(String[] args) {
 		character c = new character("Jim", "Halfling", "Bard");
 		c.levelUp("Bard", 4);
+		c.calcSkillTotals();
 
 		
 		c.printCharacter();
