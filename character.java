@@ -117,7 +117,7 @@ class character {
 		HashMap<String, Integer> knowledgeArcana = new HashMap<String, Integer>();
 		skills.put("Knowledge(Arcana)", knowledgeArcana);
 		HashMap<String, Integer> knowledgeArchitecture= new HashMap<String, Integer>();
-		skills.put("Knowledge(Architecture & Engineering", knowledgeArchitecture);
+		skills.put("Knowledge(Architecture & Engineering)", knowledgeArchitecture);
 		HashMap<String, Integer> knowledgeDungeoneering = new HashMap<String, Integer>();
 		skills.put("Knowledge(Dungeoneering)", knowledgeDungeoneering);
 		HashMap<String, Integer> knowledgeGeography = new HashMap<String, Integer>();
@@ -171,7 +171,7 @@ class character {
 		String[] strSkills = {"Climb", "Jump", "Swim"};
 		String[] dexSkills = {"Balance", "Escape Artist", "Hide", "Move Silently", "Open Lock", "Ride", "Sleight of Hand", "Tumble", "Use Rope"};
 		String[] conSkills = {"Concentration"};
-		String[] intSkills = {"Appraise", "Craft", "Decipher Script", "Disable Device", "Forgery", "Knowledge(Arcana)", "Knowledge(Architecture & Engineering", "Knowledge(Dungeoneering)", "Knowledge(Geography)", "Knowledge(History)", "Knowledge(Local)", "Knowledge(Nature)", "Knowledge(Nobility & Royalty)", "Knowledge(Religion)", "Knowledge(The Planes)", "Search", "Spellcraft"};
+		String[] intSkills = {"Appraise", "Craft", "Decipher Script", "Disable Device", "Forgery", "Knowledge(Arcana)", "Knowledge(Architecture & Engineering)", "Knowledge(Dungeoneering)", "Knowledge(Geography)", "Knowledge(History)", "Knowledge(Local)", "Knowledge(Nature)", "Knowledge(Nobility & Royalty)", "Knowledge(Religion)", "Knowledge(The Planes)", "Search", "Spellcraft"};
 		String[] wisSkills = {"Heal", "Listen", "Profession", "Sense Motive", "Spot", "Survival"};
 		String[] chaSkills = {"Bluff", "Diplomacy", "Disguise", "Gather Information", "Handle Animal", "Intimidate", "Perform", "Use Magic Device"};
 		String[][] skillsByMod = {strSkills, dexSkills, conSkills, intSkills, wisSkills, chaSkills}; // with this we can use nested loops to do all the ability scores
@@ -234,6 +234,7 @@ class character {
 
 
 	   	Random r = new Random(); // Random object I'll need later to roll for hit points
+	   	
 	   	for(int i=0; i < levels; i++) {
 	   		int currentLevel = i + classes.get(clas);
 	   		System.out.format("**Going from level %1$d to %2$d...\n", currentLevel, currentLevel + 1);
@@ -253,14 +254,23 @@ class character {
 	   			// clas.classSkills isnt an arraylist, its just an array so ill have to loop through it
 	   			classSkills.addAll(clas.classSkills);
 	   			prioritySkills.addAll(clas.prioritySkills);
-
-	   			
+	   			// i need to initialize the priority perform skill
+	   			for (String ps : prioritySkills) {
+	   				if (ps.startsWith("Perform")) {
+	   					skills.put(ps, new HashMap<String, Integer>());
+	   					skills.get(ps).put("Total", 0);
+	   					skills.get(ps).put("Ranks", 0);
+	   					skills.get(ps).put("Misc", 0);
+	   					skills.get(ps).put("AbiMod", 5);
+	   				}
+	   			}
 	   			if (clas.goodFort)
 	   				fortSave.put("plusTwo", 2);
 	   			if (clas.goodRef)
 	   				refSave.put("plusTwo", 2);
 	   			if (clas.goodWill)
 	   				willSave.put("plusTwo", 2);
+
 	   		}
 	   		if (((currentLevel+1) % 2) == 0) { // if the level is even, when a goodSave progression increments
 	   			System.out.println("Even level. Good saves going up!");
@@ -279,6 +289,41 @@ class character {
 	   			if (!clas.goodWill)
 	   				willSave.put("Base", willSave.get("Base")+1);
 	   		}
+
+	   		int sppl = clas.skillPointsPerLevel + abiMods[3]; // skill points per level
+	   		if (race.raceName.equals("Human")) 
+	   			sppl++; // if human, get one more skill point per level
+	   		if (sppl < 1)
+	   			sppl = 1; // everybody gets at least one skill point per level
+	   		if (classes.get(clas) == 0 && classes.size() == 1)
+	   			sppl = sppl * 4; // characters get quadruple hit points on their first ever level
+
+	   		Set<String> skillsToRankUp = new HashSet<String>();
+	   		int maxRank = currentLevel+4; // the maximum rank for a class skill at this level
+	   		for (String pSkillName : prioritySkills) {
+	   			//if (skills.get(pSkillName).get("Ranks") < maxRank)
+	   			skillsToRankUp.add(pSkillName);
+	   		}
+	   		while (skillsToRankUp.size() < sppl) {
+	   			int randomIndex = r.nextInt(classSkills.size());
+	   			int j = 0;
+	   			for (String s : classSkills) {
+	   				System.out.println("In this while loop. s : "+s);
+	   				if (j == randomIndex) {
+	   					System.out.println("Adding this one. s : "+s);
+	   					skillsToRankUp.add(s);
+	   					j++;
+	   					break;
+	   				}
+	   				j++;
+	   			}
+	   		}
+	   		for (String s : skillsToRankUp) {
+	   			System.out.println("s : " + s);
+	   			System.out.println("skills.get(s) : " + skills.get(s));
+	   			skills.get(s).put("Ranks", (skills.get(s).get("Ranks") + 1));
+	   		}
+
 	   		System.out.println("*************************");
 	   	}
 	   	// here i will calculate the character's total save bonus
@@ -498,9 +543,8 @@ class character {
 	}
 
 	public static void main(String[] args) {
-		character c = new character("Jim", "Halfling", "Rogue");
-		c.levelUp("Druid", 2);
-		c.levelUp("Rogue", 6);
+		character c = new character("Jim", "Halfling", "Bard");
+		c.levelUp("Bard", 6);
 		c.calcSkillTotals();
 
 		
@@ -705,7 +749,7 @@ class characterClass {
 			goodFort = false;
 			goodRef = true;
 			goodWill = true;
-			classSkills = new ArrayList<String>(Arrays.asList("Appraise", "Balance", "Bluff", "Climb", "Concentration", "Craft", "Decipher Script", "Diplomacy", "Disguise", "Escape Artist", "Gather Information", "Hide", "Jump", "Knowledge(Arcana)", "Knowledge(Architecture & Engineering)", "Knowledge(Dungeoneering)", "Knowledge(Geography)", "Knowledge(History)", "Knowledge(Local)", "Knowledge(Nature)", "Knowledge(Nobility & Royalty)", "Knowledge(Religion)", "Knowledge(The Planes)", "Listen", "Move Silently", "Perform", "Profession", "Sense Motive", "Sleight of Hand", "Speak Language", "Spellcraft", "Swim", "Tumble", "Use Magic Device"));
+			classSkills = new ArrayList<String>(Arrays.asList("Appraise", "Balance", "Bluff", "Climb", "Concentration", "Craft", "Decipher Script", "Diplomacy", "Disguise", "Escape Artist", "Gather Information", "Hide", "Jump", "Knowledge(Arcana)", "Knowledge(Architecture & Engineering)", "Knowledge(Dungeoneering)", "Knowledge(Geography)", "Knowledge(History)", "Knowledge(Local)", "Knowledge(Nature)", "Knowledge(Nobility & Royalty)", "Knowledge(Religion)", "Knowledge(The Planes)", "Listen", "Move Silently", "Perform", "Profession", "Sense Motive", "Sleight of Hand", "Spellcraft", "Swim", "Tumble", "Use Magic Device"));
 			String[] performChoices = {"Act", "Comedy", "Dance", "Keyboard", "Oratory", "Percussion", "Strings", "Wind", "Sing"};
 			Random r = new Random();
 			int randomIndex = r.nextInt(performChoices.length);
