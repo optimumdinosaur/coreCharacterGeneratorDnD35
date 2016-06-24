@@ -234,7 +234,11 @@ class character {
 
 
 	   	Random r = new Random(); // Random object I'll need later to roll for hit points
-	   	
+	   	int sumOfLevels = 0; // the number of levels the character has in classes that are not clas
+	   	for (int lv : classes.values())
+	   		sumOfLevels += lv;
+	   	sumOfLevels -= classes.get(clas);
+
 	   	for(int i=0; i < levels; i++) {
 	   		int currentLevel = i + classes.get(clas);
 	   		System.out.format("**Going from level %1$d to %2$d...\n", currentLevel, currentLevel + 1);
@@ -255,14 +259,16 @@ class character {
 	   			classSkills.addAll(clas.classSkills);
 	   			prioritySkills.addAll(clas.prioritySkills);
 	   			// i need to initialize the priority perform skill
-	   			for (String ps : prioritySkills) {
-	   				if (ps.startsWith("Perform")) {
-	   					skills.put(ps, new HashMap<String, Integer>());
-	   					skills.get(ps).put("Total", 0);
-	   					skills.get(ps).put("Ranks", 0);
-	   					skills.get(ps).put("Misc", 0);
-	   					skills.get(ps).put("AbiMod", 5);
-	   				}
+	   			if (clas.className.equals("Bard")) {
+		   			for (String ps : prioritySkills) {
+		   				if (ps.startsWith("Perform")) {
+		   					skills.put(ps, new HashMap<String, Integer>());
+		   					skills.get(ps).put("Total", 0);
+		   					skills.get(ps).put("Ranks", 0);
+		   					skills.get(ps).put("Misc", 0);
+		   					skills.get(ps).put("AbiMod", 5);
+		   				}
+		   			}
 	   			}
 	   			if (clas.goodFort)
 	   				fortSave.put("plusTwo", 2);
@@ -298,30 +304,37 @@ class character {
 	   		if (classes.get(clas) == 0 && classes.size() == 1)
 	   			sppl = sppl * 4; // characters get quadruple hit points on their first ever level
 
-	   		Set<String> skillsToRankUp = new HashSet<String>();
-	   		int maxRank = currentLevel+4; // the maximum rank for a class skill at this level
-	   		for (String pSkillName : prioritySkills) {
-	   			//if (skills.get(pSkillName).get("Ranks") < maxRank)
-	   			skillsToRankUp.add(pSkillName);
-	   		}
-	   		while (skillsToRankUp.size() < sppl) {
-	   			int randomIndex = r.nextInt(classSkills.size());
-	   			int j = 0;
-	   			for (String s : classSkills) {
-	   				System.out.println("In this while loop. s : "+s);
-	   				if (j == randomIndex) {
-	   					System.out.println("Adding this one. s : "+s);
-	   					skillsToRankUp.add(s);
-	   					j++;
-	   					break;
-	   				}
-	   				j++;
+	   		System.out.println("Skill points this level: " + sppl);
+
+	   		// i think im going to do two separate loops, but with one counter - sppl
+	   		int maxRank = currentLevel + sumOfLevels + 4; // level + 3
+	   		// to get levels from other classes for maxRank i'll have to iterate through
+	   		// classes.values, but i am now thinking i should do this outside of the level for 
+	   		// loop and then just add it here
+
+
+
+
+
+
+	   		for (String pSkill : prioritySkills) {
+	   			System.out.println("Adjust priority skill " + pSkill +"...");
+	   			System.out.println("Current maxRank: " + maxRank);
+	   			while (skills.get(pSkill).get("Ranks") < maxRank) {
+	   				// decrement sppl, increment Ranks for pSkill
+	   				sppl--;
+	   				skills.get(pSkill).put("Ranks", (skills.get(pSkill).get("Ranks")+1));
+	   				System.out.println(pSkill + " : " + skills.get(pSkill).get("Ranks"));
+	   				System.out.println("Remaining skill points: " + sppl);
 	   			}
 	   		}
-	   		for (String s : skillsToRankUp) {
-	   			System.out.println("s : " + s);
-	   			System.out.println("skills.get(s) : " + skills.get(s));
-	   			skills.get(s).put("Ranks", (skills.get(s).get("Ranks") + 1));
+	   		String[] cSkill = classSkills.toArray(new String[classSkills.size()]);
+	   		for (int j=0; j < sppl; j++) {
+	   			// here we'll assign the remaining skill points randomly. 
+	   			// which means for each skill point, i should find a skill to adjust
+	   			// class skills are stored in a set, which is the problem
+	   			String skillToRankUp = cSkill[r.nextInt(cSkill.length)];
+	   			skills.get(skillToRankUp).put("Ranks", (skills.get(skillToRankUp).get("Ranks")+1));
 	   		}
 
 	   		System.out.println("*************************");
@@ -525,7 +538,11 @@ class character {
 		System.out.println("Name: " + name);
 		System.out.println("Race: " + race.raceName);
 		System.out.println("Size: " + size);
-		System.out.println(classes);
+		System.out.print("{");
+		for (characterClass item : classes.keySet()) {
+			System.out.print("["+item.className + " : " + classes.get(item)+"]");
+		}
+		System.out.print("}\n");
 		System.out.println("HP " + hitPoints);
 		System.out.format("Str %d (%d)\n", abilityScores[0], abiMods[0]);
 		System.out.format("Dex %d (%d)\n", abilityScores[1], abiMods[1]);
@@ -540,12 +557,16 @@ class character {
 		System.out.println("Special: " + specialList);
 		System.out.println("Class Skills: " +classSkills);
 		System.out.println("Priority Skills: " + prioritySkills);
-		System.out.println("Character Skill w/ Bonuses: " + skills);
+		for (String item : prioritySkills) {
+			System.out.println(item + " : " + skills.get(item));
+		}
+		//System.out.println("Character Skill w/ Bonuses: " + skills);
 	}
 
 	public static void main(String[] args) {
 		character c = new character("Jim", "Halfling", "Bard");
-		c.levelUp("Bard", 6);
+		c.levelUp("Bard", 3);
+		c.levelUp("Rogue", 2);
 		c.calcSkillTotals();
 
 		
