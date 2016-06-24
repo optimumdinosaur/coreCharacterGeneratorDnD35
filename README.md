@@ -5,7 +5,7 @@ Allows for more intricate building of characters.
 Has functionality for multiclassing. 
 
 Current races supported:
-Dwarf, Elf, Half-Elf, Half-Orc, Halfling, Human
+Dromite, Duergar,Dwarf, Elan, Elf, Half-Elf, Half-Giant Half-Orc, Halfling, Human, Maenad, and Xeph
 
 Current classes supported:
 Barbarian, Bard, Cleric, Druid, Fighter, Monk, Ranger, Rogue, Sorcerer, Wizard
