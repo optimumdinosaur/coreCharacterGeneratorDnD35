@@ -303,8 +303,9 @@ class character {
    	System.out.println("Getting racial traits...");
    	size = race.size;
    	// Ability Scores
+   	System.out.println("Adjusting ability scores...");
    	for (int i=0; i<6; i++) {
-   		abilityScores[i] += race.abiScoreAdjustments[0];
+   		abilityScores[i] += race.abiScoreAdjustments[i];
    		abiMods[i] = calcMod(abilityScores[i]);
    	}
    	// Special abilities
@@ -312,13 +313,8 @@ class character {
    		specialList.add(race.special.get(i));
    	}
    	// Skills
-   	System.out.println("Adjusting skills...");
    	for (String key : race.skillAdjust.keySet()) {
-   		System.out.println("Skill: "+key);
-   		System.out.println("skillAdjust: "+race.skillAdjust.get(key));
    		skills.get(key).put("Misc", race.skillAdjust.get(key));
-
-
    	}
 
    	fortSave.put("Misc", (fortSave.get("Misc")+race.saveAdjust[0]));
@@ -338,7 +334,6 @@ class character {
    		}
    }
 
-
 	/* public static int calcMod(int score)
 	   takes an int score as its only parameter and returns the 
 	   corresponding modifier for that score */
@@ -348,7 +343,6 @@ class character {
 		else
 			return (score - 11) / 2;
 	}
-
 
 	/* private static int[] rollStats() 
 	Function to roll for ability scores in the standard way
@@ -483,7 +477,7 @@ class character {
 
 	public void printCharacter() {
 		System.out.println("Name: " + name);
-		System.out.println("Race: " + race);
+		System.out.println("Race: " + race.raceName);
 		System.out.println("Size: " + size);
 		System.out.println(classes);
 		System.out.println("HP " + hitPoints);
@@ -504,8 +498,9 @@ class character {
 	}
 
 	public static void main(String[] args) {
-		character c = new character("Jim", "Halfling", "Bard");
-		c.levelUp("Bard", 4);
+		character c = new character("Jim", "Halfling", "Rogue");
+		c.levelUp("Druid", 2);
+		c.levelUp("Rogue", 6);
 		c.calcSkillTotals();
 
 		
@@ -612,8 +607,6 @@ class playerRace {
 			special.addAll(Arrays.asList("Human Bonus Feat", "Human Skill"));
 			autoLanguages.add("Common");
 			bonusLanguages.addAll(Arrays.asList("Abyssal", "Aquan", "Auran", "Celestial", "Draconic", "Dwarven", "Giant", "Gnome", "Goblin", "Gnoll", "Halfling", "Ignan", "Infernal", "Orc", "Sylvan", "Terran", "Undercommon"));
-
-
 		}
 	}
 
@@ -638,7 +631,6 @@ class characterClass {
 
 	characterClass(String name) {
 		className = name;
-
 		numOfLevels = 20;
 		special = new ArrayList<ArrayList<String>>(numOfLevels);
 		for (int i=0; i<numOfLevels; i++)
@@ -647,7 +639,6 @@ class characterClass {
 		skillAdjust = new HashMap<String, Integer>();
 		setSpecial(className);
 		System.out.println("Character Class Created: " + className);
-
 	}
 
 	characterClass(String name, int hd, float bab, boolean fort, boolean ref, boolean will, ArrayList<String> cskills, int sppl) {
