@@ -9,3 +9,5 @@ Dwarf, Elf, Half-Elf, Half-Orc, Halfling, Human
 
 Current classes supported:
 Barbarian, Bard, Cleric, Druid, Fighter, Monk, Ranger, Rogue, Sorcerer, Wizard
+
+Special features, saves, hit points, and skills from classes are all taken into account when creating a character. Skill points are allocated with the character's classes in mind, meaning each character will have the skills necessary for their class's abilities. 
