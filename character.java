@@ -36,6 +36,8 @@ class character {
 	private HashMap<String,Integer> refSave;
 	private HashMap<String,Integer> willSave;
 
+	private int baseAttackBonus;
+
 	// skills is the master hashmap for all the character's skills
 	// the skill name serves as a key, and returns a value that is another hashmap
 	// this inner hashmap is structured similarly to the ones for saves
@@ -74,6 +76,8 @@ class character {
 		willSave.put("Total", 0);
 		willSave.put("Base", 0);
 		willSave.put("Misc", 0);
+
+		baseAttackBonus = 0;
 
 		// time to initialize the skills hashmap for the character		
 		skills = new HashMap<String, HashMap<String, Integer>>();
@@ -253,13 +257,9 @@ class character {
 
 	   		if ((currentLevel+1) == 1) {
 	   			System.out.println("1st level of a class.");
-
-	   			// let's set up some skills here, basically just import the class and priority skills of the class and add them to the corresponding lists of the character
-	   			// clas.classSkills isnt an arraylist, its just an array so ill have to loop through it
 	   			classSkills.addAll(clas.classSkills);
 	   			prioritySkills.addAll(clas.prioritySkills);
-	   			// i need to initialize the priority perform skill
-	   			if (clas.className.equals("Bard")) {
+	   			if (clas.className.equals("Bard")) { // if this is the character's first level in bard then her priorityPerform skill needs to be set up
 		   			for (String ps : prioritySkills) {
 		   				if (ps.startsWith("Perform")) {
 		   					skills.put(ps, new HashMap<String, Integer>());
@@ -267,6 +267,7 @@ class character {
 		   					skills.get(ps).put("Ranks", 0);
 		   					skills.get(ps).put("Misc", 0);
 		   					skills.get(ps).put("AbiMod", 5);
+		   					break; // we can break out of this for loop because there should only be one Perform skill here, no point in going through the rest
 		   				}
 		   			}
 	   			}
@@ -276,16 +277,15 @@ class character {
 	   				refSave.put("plusTwo", 2);
 	   			if (clas.goodWill)
 	   				willSave.put("plusTwo", 2);
-
 	   		}
 	   		if (((currentLevel+1) % 2) == 0) { // if the level is even, when a goodSave progression increments
-	   			System.out.println("Even level. Good saves going up!");
 	   			if (clas.goodFort) 
 	   				fortSave.put("Base", fortSave.get("Base")+1);
 	   			if (clas.goodRef)
 	   				refSave.put("Base", refSave.get("Base")+1);
 	   			if (clas.goodWill)
 	   				willSave.put("Base", willSave.get("Base")+1);
+	   		
 	   		}
 	   		if (((currentLevel+1) % 3) == 0) { // checks for every 3rd level in a class, when a poor save progression is incremented
 	   			if (!clas.goodFort) 
@@ -305,40 +305,25 @@ class character {
 	   			sppl = sppl * 4; // characters get quadruple hit points on their first ever level
 
 	   		System.out.println("Skill points this level: " + sppl);
-
-	   		// i think im going to do two separate loops, but with one counter - sppl
+	
 	   		int maxRank = currentLevel + sumOfLevels + 4; // level + 3
-	   		// to get levels from other classes for maxRank i'll have to iterate through
-	   		// classes.values, but i am now thinking i should do this outside of the level for 
-	   		// loop and then just add it here
-
-
-
-
-
-
 	   		for (String pSkill : prioritySkills) {
 	   			System.out.println("Adjust priority skill " + pSkill +"...");
 	   			System.out.println("Current maxRank: " + maxRank);
 	   			while (skills.get(pSkill).get("Ranks") < maxRank) {
-	   				// decrement sppl, increment Ranks for pSkill
-	   				sppl--;
+	   				sppl--; // decrement sppl, increment Ranks for pSkill
 	   				skills.get(pSkill).put("Ranks", (skills.get(pSkill).get("Ranks")+1));
 	   				System.out.println(pSkill + " : " + skills.get(pSkill).get("Ranks"));
 	   				System.out.println("Remaining skill points: " + sppl);
 	   			}
 	   		}
-	   		String[] cSkill = classSkills.toArray(new String[classSkills.size()]);
-	   		for (int j=0; j < sppl; j++) {
-	   			// here we'll assign the remaining skill points randomly. 
-	   			// which means for each skill point, i should find a skill to adjust
-	   			// class skills are stored in a set, which is the problem
+	   		String[] cSkill = classSkills.toArray(new String[classSkills.size()]); // put all the classSkills into a String[] so accessing them randomly is much easier
+	   		for (int j=0; j < sppl; j++) { // for the remaining skill points
 	   			String skillToRankUp = cSkill[r.nextInt(cSkill.length)];
 	   			skills.get(skillToRankUp).put("Ranks", (skills.get(skillToRankUp).get("Ranks")+1));
 	   		}
-
 	   		System.out.println("*************************");
-	   	}
+	   	} // end for (i=0; i < levels; i++)
 	   	// here i will calculate the character's total save bonus
 	   	int fortTotal = (fortSave.get("Total") * -1) + abiMods[2]; // initialize it to this so when we add them all together, the preexisting total does not throw it off
 	   	for (int i : fortSave.values())
@@ -390,6 +375,10 @@ class character {
    		for (String skl : skills.keySet()) {
    			HashMap<String, Integer> sklMap = skills.get(skl);
    			sklMap.put("Total", (sklMap.get("Ranks") + sklMap.get("Misc") + abiMods[sklMap.get("AbiMod")]));
+   		}
+   		baseAttackBonus = 0; // make sure it's 0
+   		for (characterClass clas : classes.keySet()) {
+   			baseAttackBonus += (clas.baseAttackBonus * classes.get(clas));
    		}
    }
 
@@ -550,6 +539,7 @@ class character {
 		System.out.format("Int %d (%d)\n", abilityScores[3], abiMods[3]);
 		System.out.format("Wis %d (%d)\n", abilityScores[4], abiMods[4]);
 		System.out.format("Cha %d (%d)\n", abilityScores[5], abiMods[5]);
+		System.out.println("BAB " + baseAttackBonus);
 		System.out.println("Fort " + fortSave);
 		System.out.println("Ref " + refSave);
 		System.out.println("Will " + willSave);
@@ -567,6 +557,7 @@ class character {
 		character c = new character("Jim", "Halfling", "Bard");
 		c.levelUp("Bard", 3);
 		c.levelUp("Rogue", 2);
+		c.levelUp("Barbarian", 1);
 		c.calcSkillTotals();
 
 		
