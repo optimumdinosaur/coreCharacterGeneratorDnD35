@@ -347,6 +347,7 @@ class character {
    private void getRacialTraits() {
    	System.out.println("Getting racial traits...");
    	size = race.size;
+   	skills.get("Hide").put("Misc", (skills.get("Hide").get("Misc") + (-4 * size)));
    	// Ability Scores
    	System.out.println("Adjusting ability scores...");
    	for (int i=0; i<6; i++) {
