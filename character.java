@@ -45,7 +45,11 @@ class character {
 
 	private Set<String> specialList; // the character's special abilities, class features, racial traits, etc.
 
+	/* Basic constructor
+		Creates a level 1 character of the given race and class
+		Stats are rolled using the rollStats() method, 4d6 drop lowest
 
+	*/
 	character(String newName, String newRace, String newClass) {
 		name = newName;
 		//playerRace nRace = new playerRace(newRace);
@@ -180,9 +184,10 @@ class character {
 		// next i need to initialize Ranks, Misc, and Total all to 0 for each skill. 
 		for (String skl : skills.keySet()) {
 			HashMap<String, Integer> sklMap = skills.get(skl);
+			sklMap.put("Total", 0);
 			sklMap.put("Ranks", 0);
 			sklMap.put("Misc", 0);
-			sklMap.put("Total", 0);
+
 		}
 
 		classSkills = new HashSet<String>(); // both this and prioritySkills are actually set up in getClassFeatures()
@@ -373,9 +378,107 @@ class character {
 	also calculates and assigns the mod for each stat
 	@param: rolls, must be an integer array of length 6, presumably one generated from rollStats() */
 	private void assignRolls(int[] rolls) {
-		abilityScores = rolls;
-		for (int i=0; i<6; i++) 
-			abiMods[i] = calcMod(abilityScores[i]);
+		// at this point the keySet to the classes would only contain one element
+		// that element, being the only class the character has
+		characterClass[] clasArray = classes.keySet().toArray(new characterClass[1]);
+		characterClass firstClass = clasArray[0]; // the first and only element, or should be
+		String cName = firstClass.className;
+		System.out.println("Assigning rolls...");
+		System.out.println("Class found to be " + cName);
+		Arrays.sort(rolls);
+		System.out.format("Sorted rolls: [%1$d, %2$d, %3$d, %4$d, %5$d, %6$d]\n", rolls[0], rolls[1], rolls[2], rolls[3], rolls[4], rolls[5]);
+		// so by default they're sorted in increasing order
+		Random rand = new Random();
+		abilityScores = new int[6];
+		if (cName.equals("Barbarian")) { // barbarian prioritizes: Strength, then Con, Dex, Cha, Wis, and finally Int
+			abilityScores[0] = rolls[5];
+			abilityScores[2] = rolls[4];
+			abilityScores[1] = rolls[3];
+			abilityScores[5] = rolls[2];
+			abilityScores[4] = rolls[1];
+			abilityScores[3] = rolls[0];
+		}
+		else if (cName.equals("Bard")) {
+			abilityScores[5] = rolls[5]; // charisma
+			abilityScores[3] = rolls[4]; // intelligence
+			abilityScores[1] = rolls[3]; // dexterity
+			abilityScores[2] = rolls[2];
+			abilityScores[0] = rolls[1];
+			abilityScores[4] = rolls[0];
+		}
+		else if (cName.equals("Cleric")) {
+			abilityScores[4] = rolls[5]; // wis
+			abilityScores[5] = rolls[4]; // cha
+			abilityScores[2] = rolls[3]; // con
+			abilityScores[0] = rolls[2]; // str
+			abilityScores[3] = rolls[1]; // int
+			abilityScores[1] = rolls[0]; // dex
+		}
+		else if (cName.equals("Druid")) {
+			abilityScores[4] = rolls[5];
+			abilityScores[2] = rolls[4];
+			abilityScores[5] = rolls[3];
+			abilityScores[1] = rolls[2];
+			abilityScores[3] = rolls[1];
+			abilityScores[0] = rolls[0];
+		}
+		else if (cName.equals("Fighter")) {
+			abilityScores[2] = rolls[5];
+			abilityScores[0] = rolls[4];
+			abilityScores[1] = rolls[3];
+			abilityScores[3] = rolls[2];
+			abilityScores[4] = rolls[1];
+			abilityScores[5] = rolls[0];
+		}
+		else if (cName.equals("Monk")) {
+			abilityScores[4] = rolls[5];
+			abilityScores[1] = rolls[4];
+			abilityScores[0] = rolls[3];
+			abilityScores[2] = rolls[2];
+			abilityScores[3] = rolls[1];
+			abilityScores[5] = rolls[0];
+		}
+		else if (cName.equals("Paladin")) {
+			abilityScores[0] = rolls[5];
+			abilityScores[5] = rolls[4];
+			abilityScores[2] = rolls[3];
+			abilityScores[4] = rolls[2];
+			abilityScores[1] = rolls[1];
+			abilityScores[3] = rolls[0];
+		}
+		else if (cName.equals("Ranger")) {
+			abilityScores[0] = rolls[5];
+			abilityScores[1] = rolls[4];
+			abilityScores[4] = rolls[3];
+			abilityScores[2] = rolls[2];
+			abilityScores[3] = rolls[1];
+			abilityScores[5] = rolls[0];
+		}
+		else if (cName.equals("Rogue")) {
+			abilityScores[1] = rolls[5];
+			abilityScores[3] = rolls[4];
+			abilityScores[2] = rolls[3];
+			abilityScores[5] = rolls[2];
+			abilityScores[0] = rolls[1];
+			abilityScores[4] = rolls[0];
+		}
+		else if (cName.equals("Sorcerer")) {
+			abilityScores[5] = rolls[5];
+			abilityScores[2] = rolls[4];
+			abilityScores[1] = rolls[3];
+			abilityScores[3] = rolls[2];
+			abilityScores[4] = rolls[1];
+			abilityScores[0] = rolls[0];
+		}
+		else if (cName.equals("Wizard")) {
+			abilityScores[3] = rolls[5];
+			abilityScores[2] = rolls[4];
+			abilityScores[1] = rolls[3];
+			abilityScores[4] = rolls[2];
+			abilityScores[5] = rolls[1];
+			abilityScores[0] = rolls[0];
+		}
+
 	}
 
 	public void printCharacter() {
@@ -527,6 +630,7 @@ class characterClass {
 	boolean goodWill;
 	ArrayList<String> classSkills; // an array list containing names of all of the class's class skills
 	ArrayList<String> prioritySkills; // an array list containing skills that are vital to the class's functionality
+	HashMap<String, Integer> skillAdjust;
 	int skillPointsPerLevel; // the number of skill points a member of this class gains at each level, not counting their int bonus
 	int numOfLevels; //for now I'll keep this commented out and default to 20, but if prestige classes are going to be involved i'll have to deal with it
 	ArrayList<ArrayList<String>> special; // an array list of array lists to store the class's special features
@@ -540,6 +644,7 @@ class characterClass {
 		for (int i=0; i<numOfLevels; i++)
 			special.add(new ArrayList<String>());
 		prioritySkills = new ArrayList<String>();
+		skillAdjust = new HashMap<String, Integer>();
 		setSpecial(className);
 		System.out.println("Character Class Created: " + className);
 
@@ -557,6 +662,7 @@ class characterClass {
 		numOfLevels = 20;
 		// i figure i should initialize all the levels and stuff to be empty, that way I can just add stuff in
 		special = new ArrayList<ArrayList<String>>(numOfLevels);
+		skillAdjust = new HashMap<String, Integer>();
 		for(int i=0;i<numOfLevels;i++)
 			special.add(new ArrayList<String>());
 		// and now all the special lists for each level are empty
