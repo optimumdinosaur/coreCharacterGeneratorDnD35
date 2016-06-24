@@ -225,9 +225,7 @@ class character {
 			getClassFeatures(newClass, levels); // will the class's features from level 1 to levels
 			classes.put(newClass, levels); // update classes with the actual level. 
 		}
-
 	}
-
 
 	/* Function to add get class features from the given class
 	   according to the number of given levels in the class*/
@@ -235,7 +233,6 @@ class character {
 	   	System.out.format("Getting class features for %s...\n", clas.className);
 	   	System.out.println("Current level: " + classes.get(clas));
 	   	System.out.format("Leveling up %1$d times, getting to Level %2$d.\n", levels, classes.get(clas)+levels);
-
 
 	   	Random r = new Random(); // Random object I'll need later to roll for hit points
 	   	int sumOfLevels = 0; // the number of levels the character has in classes that are not clas
@@ -339,7 +336,7 @@ class character {
 	   	for (int i : willSave.values())
 	   		willTotal += i;
 	   	willSave.put("Total", willTotal);
-   		// still to be done: bab, skills, spells
+   		// still to be done: spells
    	}
 
    private void getRacialTraits() {
@@ -365,8 +362,6 @@ class character {
    	refSave.put("Misc", (refSave.get("Misc")+race.saveAdjust[0]));
    	willSave.put("Misc", (willSave.get("Misc")+race.saveAdjust[0]));
 
-   	// i now need to calculate ability score mods
-   	// adjust skills
    	// and do languages
    }
 
@@ -554,10 +549,8 @@ class character {
 	}
 
 	public static void main(String[] args) {
-		character c = new character("Jim", "Halfling", "Bard");
-		c.levelUp("Bard", 3);
-		c.levelUp("Rogue", 2);
-		c.levelUp("Barbarian", 1);
+		character c = new character("Jim", "Half-Giant", "Rogue");
+		c.levelUp("Rogue", 19);
 		c.calcSkillTotals();
 
 		
@@ -589,19 +582,45 @@ class playerRace {
 		skillAdjust = new HashMap<String, Integer>();
 		saveAdjust = new int[] {0, 0, 0};
 		autoLanguages = new ArrayList<String>();
+		autoLanguages.add("Common");
 		bonusLanguages = new ArrayList<String>();
 		setSpecial(raceName);
 	}
 
 	private void setSpecial(String name) {
-		if (name.equals("Dwarf")) {
+		if (name.equals("Dromite")) {
+			abiScoreAdjustments[5] = 2;
+			abiScoreAdjustments[0] = -2;
+			abiScoreAdjustments[4] = -2;
+			size = -1;
+			movement = 20;
+			special.addAll(Arrays.asList("Chitin", "Naturally Psionic", "Energy Ray 1/day", "Scent", "Blind-Fight"));
+			skillAdjust.put("Spot", 2);
+			bonusLanguages.addAll(Arrays.asList("Dwarven", "Gnome", "Goblin", "Terran"));
+		}
+		else if (name.equals("Duergar")) {
+			abiScoreAdjustments[2] = 2;
+			abiScoreAdjustments[5] = -4;
+			movement = 20;
+			special.addAll(Arrays.asList("Dwarven Movement", "Darkvision 120ft", "Immunity to Paralysis", "Immunity to Phantasms", "Immunity to Poison", "Duergar Spell Resistance", "Stability", "Stonecunning", "Expansion 1/day", "Invisibility 1/day", "Naturally Psionic", "Dwarven Orc & Goblinoid Tactics", "Dwarven Giant-Fighting Tactics", "Light Sensitivity"));
+			skillAdjust.put("Move Silently", 4);
+			skillAdjust.put("Listen", 1);
+			skillAdjust.put("Spot", 1);
+		}
+		else if (name.equals("Dwarf")) {
 			abiScoreAdjustments[2] = 2;
 			abiScoreAdjustments[5] = -2;
 			movement = 20;
-			special.addAll(Arrays.asList("Dwarven Movement", "Darkvisin 60ft", "Stonecunning", "Dwarven Weapon Familiarity", "Stability", "Dwarven Poison Resistance", "Dwarven Spell Resistance", "Dwarven Orc & Goblinoid Tactics", "Dwarven Giant-Fighting Tactics"));
-			autoLanguages.addAll(Arrays.asList("Common", "Dwarven"));
+			special.addAll(Arrays.asList("Dwarven Movement", "Darkvision 60ft", "Stonecunning", "Dwarven Weapon Familiarity", "Stability", "Dwarven Poison Resistance", "Dwarven Spell Resistance", "Dwarven Orc & Goblinoid Tactics", "Dwarven Giant-Fighting Tactics"));
+			autoLanguages.add("Dwarven");
 			bonusLanguages.addAll(Arrays.asList("Giant", "Gnome", "Goblin", "Orc", "Terran", "Undercommon"));
 		}
+		else if (name.equals("Elan")) {
+			abiScoreAdjustments[5] = -2;
+			special.addAll(Arrays.asList("Aberration", "Naturally Psionic", "Resistance", "Resilience", "Repletion"));
+			bonusLanguages.addAll(Arrays.asList("Abyssal", "Aquan", "Auran", "Celestial", "Draconic", "Dwarven", "Giant", "Gnome", "Goblin", "Gnoll", "Halfling", "Ignan", "Infernal", "Orc", "Sylvan", "Terran", "Undercommon"));
+		}	
+
 		else if (name.equals("Elf")) {
 			abiScoreAdjustments[1] = 2;
 			abiScoreAdjustments[2] = -2;
@@ -609,7 +628,7 @@ class playerRace {
 			skillAdjust.put("Listen", 2);
 			skillAdjust.put("Search", 2);
 			skillAdjust.put("Spot", 2);
-			autoLanguages.addAll(Arrays.asList("Common", "Elven"));
+			autoLanguages.add("Elven");
 			bonusLanguages.addAll(Arrays.asList("Draconic", "Gnoll", "Gnome", "Goblin", "Orc", "Sylvan"));		
 		}
 		else if (name.equals("Gnome")) {
@@ -620,7 +639,7 @@ class playerRace {
 			special.addAll(Arrays.asList("Low-Light Vision", "Gnomish Weapon Familiarity", "Gnomish Illusion Mastery", "Gnomish Kobold & Goblin Tactics", "Gnomish Giant-Fighting Tactics", "Gnomish Spell-Like Abilities"));
 			skillAdjust.put("Listen", 2);
 			skillAdjust.put("Craft(Alchemy)", 2);
-			autoLanguages.addAll(Arrays.asList("Common", "Gnome"));
+			autoLanguages.add("Gnome");
 			bonusLanguages.addAll(Arrays.asList("Draconic", "Dwarven", "Elven", "Giant", "Goblin", "Orc"));
 		}
 		else if (name.equals("Half-Elf")) {
@@ -630,15 +649,22 @@ class playerRace {
 			skillAdjust.put("Spot", 1);
 			skillAdjust.put("Diplomacy", 2);
 			skillAdjust.put("Gather Information", 2);
-			autoLanguages.addAll(Arrays.asList("Common", "Elven"));
+			autoLanguages.add("Elven");
 			bonusLanguages.addAll(Arrays.asList("Abyssal", "Aquan", "Auran", "Celestial", "Draconic", "Dwarven", "Giant", "Gnome", "Goblin", "Gnoll", "Halfling", "Ignan", "Infernal", "Orc", "Sylvan", "Terran", "Undercommon"));
+		}
+		else if (name.equals("Half-Giant")) {
+			abiScoreAdjustments[0] = 2;
+			abiScoreAdjustments[2] = 2;
+			abiScoreAdjustments[1] = -2;
+			special.addAll(Arrays.asList("Giant", "Low-Light Vision", "Fire Acclimiated", "Powerful Build", "Naturally Psionic", "Stomp 1/day"));
+			bonusLanguages.addAll(Arrays.asList("Draconic", "Giant", "Gnoll", "Ignan"));
 		}
 		else if (name.equals("Half-Orc")) {
 			abiScoreAdjustments[0] = 2;
 			abiScoreAdjustments[3] = -2;
 			abiScoreAdjustments[5] = -2;
 			special.addAll(Arrays.asList("Darkvision 60ft", "Orc Blood"));
-			autoLanguages.addAll(Arrays.asList("Common", "Orc"));
+			autoLanguages.add("Orc");
 			bonusLanguages.addAll(Arrays.asList("Draconic", "Giant", "Gnoll", "Goblin", "Abyssal"));
 		}
 		else if (name.equals("Halfling")) {
@@ -653,17 +679,24 @@ class playerRace {
 			special.addAll(Arrays.asList("Halfling Fearlessness", "Halfling Thrown Weapon Mastery"));
 			for(int i=0; i<3; i++) 
 				saveAdjust[i] =1;
-
-			saveAdjust[0] = 1;
-			saveAdjust[1] = 1;
-			saveAdjust[2] = 1;
-			autoLanguages.addAll(Arrays.asList("Common", "Halfling"));
+			autoLanguages.add("Halfling");
 			bonusLanguages.addAll(Arrays.asList("Dwarven", "Elven", "Gnome", "Goblin", "Orc"));
 		}
 		else if (name.equals("Human")) {
 			special.addAll(Arrays.asList("Human Bonus Feat", "Human Skill"));
-			autoLanguages.add("Common");
 			bonusLanguages.addAll(Arrays.asList("Abyssal", "Aquan", "Auran", "Celestial", "Draconic", "Dwarven", "Giant", "Gnome", "Goblin", "Gnoll", "Halfling", "Ignan", "Infernal", "Orc", "Sylvan", "Terran", "Undercommon"));
+		}
+		else if (name.equals("Maenad")) {
+			special.addAll(Arrays.asList("Naturally Psionic", "Energy Ray 1/day", "Maenad Outburst"));
+			autoLanguages.add("Maenad");
+			bonusLanguages.addAll(Arrays.asList("Aquan", "Draconic", "Dwarven", "Elven", "Goblin"));			
+		}
+		else if (name.equals("Xeph")) {
+			abiScoreAdjustments[1] = 2;
+			abiScoreAdjustments[0] = -2;
+			special.addAll(Arrays.asList("Darkvision 60ft", "Power & Spell Resistance", "Xeph Burst 3/day"));
+			autoLanguages.add("Xeph");
+			bonusLanguages.addAll(Arrays.asList("Draconic", "Elven", "Gnoll", "Goblin", "Halfling", "Sylvan"));
 		}
 	}
 
@@ -976,18 +1009,24 @@ class characterClass {
 			special.get(7).add("Improved Uncanny Dodge");
 			special.get(8).add("Sneak Attack +5d6");
 			special.get(8).add("Trap Sense +3");
-			special.get(9).add("Special Ability"); // HAVE TO DO SOMETHING WITH THESE
+			ArrayList<String> specialAbilities = new ArrayList<String>(Arrays.asList("Crippling Strike", "Defensive Roll", "Improved Evasion", "Opportunist", "Skill Mastery", "Slippery Mind"));
+			Random r = new Random();
+			int randomIndex = r.nextInt(specialAbilities.size());
+			special.get(9).add(specialAbilities.get(randomIndex));
 			special.get(10).add("Sneak Attack +6d6");
 			special.get(11).add("Trap Sense +4");
 			special.get(12).add("Sneak Attack +7d6");
-			special.get(12).add("Special Ability"); // AND THIS ONE
+			randomIndex = r.nextInt(specialAbilities.size());
+			special.get(12).add(specialAbilities.get(randomIndex));
 			special.get(14).add("Sneak Attack +8d6");
 			special.get(14).add("Trap Sense +5");
-			special.get(15).add("Special Ability"); // HERE TOO
+			randomIndex = r.nextInt(specialAbilities.size());
+			special.get(15).add(specialAbilities.get(randomIndex));
 			special.get(16).add("Sneak Attack +9d6");
 			special.get(17).add("Trap Sense +6");
 			special.get(18).add("Sneak Attack +10d6");
-			special.get(18).add("Special Ability"); // AND THIS
+			randomIndex = r.nextInt(specialAbilities.size());
+			special.get(18).add(specialAbilities.get(randomIndex));
 		}
 		else if (clas.equals("Sorcerer")) {
 			hitDie = 4;
