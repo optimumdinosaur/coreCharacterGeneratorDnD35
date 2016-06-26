@@ -552,8 +552,6 @@ class character {
 		character c = new character("Jim", "Half-Giant", "Rogue");
 		c.levelUp("Rogue", 19);
 		c.calcSkillTotals();
-
-		
 		c.printCharacter();
 
 	}
@@ -717,7 +715,7 @@ class characterClass {
 	int skillPointsPerLevel; // the number of skill points a member of this class gains at each level, not counting their int bonus
 	int numOfLevels; //for now I'll keep this commented out and default to 20, but if prestige classes are going to be involved i'll have to deal with it
 	ArrayList<ArrayList<String>> special; // an array list of array lists to store the class's special features
-
+	ArrayList<String>[] spellList;
 
 	characterClass(String name) {
 		className = name;
@@ -817,6 +815,9 @@ class characterClass {
 			special.get(17).add("Mass Suggestion");
 			special.get(19).add("Inspire Courage +4");
 			// HAVE TO DO SPELLS
+			ArrayList<String> spellsLv0 = new ArrayList<String>(Arrays.asList("Dancing Lights", "Daze", "Detect Magic", "Flare", "Ghost Sound", "Know Direction", "Light", "Lullaby", "Mage Hand", "Mending", "Open/Close", "Prestidigitation", "Read Magic", "Resistance", "Summon Instrument"));
+			ArrayList<String> spellsLv1 = new ArrayList<String>(Arrays.asList("Alarm", "Animate Rope", "Cause Fear", "Charm Person", "Comprehend Languages", "Lesser Confusion", "Cure Light Wounds", "Detect Secret Doors", "Disguise Self", "Erase", "Expeditious Retreat", "Feather Fall", "Grease", "Hideous Laughter", "Hypnotism", "Identify", "Magic Mouth", "Magic Aura", "Obscure Object", "Remove Fear", "Silent Image", "Sleep", "Summon Monster I", "Undetectable Alignment", "Unseen Servant", "Ventriloquism"));
+
 		}
 		else if (clas.equals("Cleric")) {
 			hitDie = 8;
