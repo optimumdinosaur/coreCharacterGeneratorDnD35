@@ -10,7 +10,7 @@ class Menu {
 
 	public void display() {
 		System.out.println("--D&D v3.5 Character Manager--");
-		System.out.println("-------Main Menu-------");
+		System.out.println("-----------Main Menu----------");
 		System.out.println(
 			"Select an option: \n" +
 			"	1) Build\n" +
@@ -44,7 +44,7 @@ class Menu {
 
 	public void buildMenu() {
 		bmenu: while(true) {
-			System.out.println("--Build Menu--");
+			System.out.println("---Build Menu---");
 			System.out.println("What's your character's name?");
 			String inName = input.nextLine();
 			System.out.println("Great name! Now your character's race?");
@@ -72,20 +72,63 @@ class Menu {
 
 	public void characterMenu(tbcm.DDCharacter ddc) {
 		while(true) {
-			System.out.println("---Character Menu---");
+			System.out.println("-----Character Menu-----");
 			System.out.println("Enter a command, or 'help' for a list of commands: ");
 			String inStr = input.nextLine();
-			switch (inStr) {
-				case "print":
-					ddc.printCharacter();
-				case "levelup":
-					ddc.levelUp(ddc.getClassName(), 1);
-
+			System.out.println("Input String: " + inStr);
+			if (inStr.equals("print"))
+				ddc.printCharacter();
+			else if (inStr.equals("printskill")) {
+				System.out.print("Print out which skill? ");
+				inStr = input.nextLine();
+				System.out.println(ddc.getSkill(inStr));
 			}
+			else if (inStr.startsWith("printskill")) {
+				String skill = inStr.substring(inStr.indexOf(' ')+1);
+				System.out.println("skill read as: " + skill);
+				System.out.println(ddc.getSkill(skill));
+			}
+			else if (inStr.equals("levelup")) {
+				System.out.print("Level up in which class? ");
+				inStr = input.nextLine();
+				ddc.levelUp(inStr, 1);
+			}
+			else if (inStr.startsWith("levelup")) {
+				String clas = inStr.substring(inStr.indexOf(' ')+1);
+				System.out.println("clas read as: "+ clas);
+				ddc.levelUp(clas, 1);
+			}
+			else if (inStr.equals("help"))
+				System.out.println("Usable commands: exit, help, levelup, print, printskill, reassignstats");
+			else if (inStr.equals("reassignstats"))
+				this.reassignCharStats(ddc);
+			else if (inStr.equals("exit"))
+				this.exit();
+			else
+				System.out.println("Unrecognized command\n" +
+					"Usable commands: exit, help, levelup, print, printskill, reassignstats");
 		}
 	}
 
 
+
+	private void reassignCharStats(tbcm.DDCharacter ddc) {
+		System.out.println("Enter your character's new ability scores");
+		int[] newStats = new int[] {0, 0, 0, 0, 0, 0};
+		System.out.print("Strength: ");
+		newStats[0] = input.nextInt();
+		System.out.print("Dexterity: ");
+		newStats[1] = input.nextInt();
+		System.out.print("Constitution: ");
+		newStats[2] = input.nextInt();
+		System.out.print("Intelligence: ");
+		newStats[3] = input.nextInt();
+		System.out.print("Wisdom: ");
+		newStats[4] = input.nextInt();
+		System.out.print("Charisma: ");
+		newStats[5] = input.nextInt();
+		ddc.setAbilityScores(newStats);
+	}
 
 	private void exit() {
 		System.out.println("Exiting...");

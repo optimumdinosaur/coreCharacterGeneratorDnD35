@@ -203,6 +203,14 @@ class DDCharacter { // D&D Character
 		getRacialTraits();
 		getClassFeatures(clas, 1);
 		classes.put(clas, 1);
+		calcSkillTotals();
+	}
+
+	public void setAbilityScores(int[] newScores) {
+		this.abilityScores = newScores;
+		for (int i=0; i < 6; i++)
+			this.abiMods[i] = this.calcMod(this.abilityScores[i]);
+		System.out.println("Ability scores reassigned.");
 	}
 
 	// Function to add levels to a new or already existing class
@@ -352,14 +360,39 @@ class DDCharacter { // D&D Character
    		abilityScores[i] += race.abiScoreAdjustments[i];
    		abiMods[i] = calcMod(abilityScores[i]);
    	}
+   	System.out.println("Ability scores adjusted.");
+   	System.out.println("Adding special racial abilities...");
    	// Special abilities
    	for(int i=0; i<race.special.size(); i++) {
    		specialList.add(race.special.get(i));
    	}
+   	System.out.println("Special racial abilities added.");
+   	System.out.println("Adjusting skills...");
    	// Skills
    	for (String key : race.skillAdjust.keySet()) {
-   		skills.get(key).put("Misc", race.skillAdjust.get(key));
+   		System.out.println("Adjusting skill: " + key);
+   		if (skills.containsKey(key))
+   			skills.get(key).put("Misc", race.skillAdjust.get(key));
+   		else { // we'll have to put it there
+   			skills.put(key, new HashMap<String, Integer>());
+   			skills.get(key).put("Misc", race.skillAdjust.get(key));
+   			skills.get(key).put("Ranks", 0);
+   			skills.get(key).put("Total", 0);
+   			// now we have to look at what the skill is and figure out whta it's ability score modifier is going to be
+   			// the only skills that wouldn't already be in the skills map are special Crafts, Performs, etc. 
+   			if (key.startsWith("Craft"))
+   				skills.get(key).put("AbiMod", 3);
+   			else if (key.startsWith("Perform"))
+   				skills.get(key).put("AbiMod", 5);
+   			else if (key.startsWith("Profession"))
+   				skills.get(key).put("AbiMod", 4);
+   			else {
+   				System.out.println("Not sure what this skill is. Assuming it's int based");
+   				skills.get(key).put("AbiMod", 3);
+   			}
+   		}
    	}
+   	System.out.println("Skills adjusted.");
 
    	fortSave.put("Misc", (fortSave.get("Misc")+race.saveAdjust[0]));
    	refSave.put("Misc", (refSave.get("Misc")+race.saveAdjust[0]));
@@ -525,8 +558,11 @@ class DDCharacter { // D&D Character
 	public String getClassName() {
 		Set<characterClass> classSet = classes.keySet();
 		characterClass clas = classSet.iterator().next();
-
 		return clas.className;
+	}
+
+	public HashMap<String, Integer> getSkill(String skillName) {
+		return skills.get(skillName);
 	}
 
 
