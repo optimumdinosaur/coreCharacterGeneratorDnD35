@@ -56,7 +56,7 @@ class Menu {
 				// the race object will be created with the character so let's just accept that the race we got is good and move on
 				System.out.println("And your character's first class?");
 				String inClass = input.nextLine();
-				String[] supportedClasses = new String[] {"Barbarian", "Bard", "Cleric", "Druid", "Fighter", "Monk", "Paladin", "Ranger", "Rogue", "Sorcerer", "Wizard"};
+				String[] supportedClasses = new String[] {"Barbarian", "Bard", "Cleric", "Druid", "Fighter", "Monk", "Paladin", "Psion", "Psychic Warrior", "Ranger", "Rogue", "Sorcerer", "Soulknife", "Wilder", "Wizard"};
 				if (Arrays.asList(supportedClasses).contains(inClass)) {
 					// now we can create the character
 					System.out.println("Creating character...");

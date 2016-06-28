@@ -174,12 +174,19 @@ class DDCharacter { // D&D Character
 		HashMap<String, Integer> useRope = new HashMap<String, Integer>();
 		skills.put("Use Rope", useRope);
 
+		HashMap<String, Integer> autohypnosis = new HashMap<String, Integer>();
+		HashMap<String, Integer> knowledgePsionics = new HashMap<String, Integer>();
+
+		skills.put("Autohypnosis", autohypnosis);
+		skills.put("Knowledge(Psionics)", knowledgePsionics);
+		skills.put("Psicraft", new HashMap<String, Integer>());
+
 		// these lists are for setting up the appropriate ability score modifier to each skill
 		String[] strSkills = {"Climb", "Jump", "Swim"};
 		String[] dexSkills = {"Balance", "Escape Artist", "Hide", "Move Silently", "Open Lock", "Ride", "Sleight of Hand", "Tumble", "Use Rope"};
 		String[] conSkills = {"Concentration"};
-		String[] intSkills = {"Appraise", "Craft", "Decipher Script", "Disable Device", "Forgery", "Knowledge(Arcana)", "Knowledge(Architecture & Engineering)", "Knowledge(Dungeoneering)", "Knowledge(Geography)", "Knowledge(History)", "Knowledge(Local)", "Knowledge(Nature)", "Knowledge(Nobility & Royalty)", "Knowledge(Religion)", "Knowledge(The Planes)", "Search", "Spellcraft"};
-		String[] wisSkills = {"Heal", "Listen", "Profession", "Sense Motive", "Spot", "Survival"};
+		String[] intSkills = {"Appraise", "Craft", "Decipher Script", "Disable Device", "Forgery", "Knowledge(Arcana)", "Knowledge(Architecture & Engineering)", "Knowledge(Dungeoneering)", "Knowledge(Geography)", "Knowledge(History)", "Knowledge(Local)", "Knowledge(Nature)", "Knowledge(Nobility & Royalty)", "Knowledge(Religion)", "Knowledge(The Planes)", "Knowledge(Psionics)", "Search", "Spellcraft", "Psicraft"};
+		String[] wisSkills = {"Autohypnosis", "Heal", "Listen", "Profession", "Sense Motive", "Spot", "Survival"};
 		String[] chaSkills = {"Bluff", "Diplomacy", "Disguise", "Gather Information", "Handle Animal", "Intimidate", "Perform", "Use Magic Device"};
 		String[][] skillsByMod = {strSkills, dexSkills, conSkills, intSkills, wisSkills, chaSkills}; // with this we can use nested loops to do all the ability scores
 		for (int i=0; i < 6; i++) { // for each ability score
@@ -260,8 +267,7 @@ class DDCharacter { // D&D Character
 	   			specialList.add(newFeatures.get(j));
 	   		}
 
-	   		hitPoints = hitPoints + r.nextInt(clas.hitDie) + abiMods[2] + 1;
-	   		System.out.println("hitPoints increasesd to " + hitPoints);
+	   		
 
 	   		if ((currentLevel+1) == 1) {
 	   			System.out.println("1st level of a class.");
@@ -309,8 +315,13 @@ class DDCharacter { // D&D Character
 	   			sppl++; // if human, get one more skill point per level
 	   		if (sppl < 1)
 	   			sppl = 1; // everybody gets at least one skill point per level
-	   		if (classes.get(clas) == 0 && classes.size() == 1)
+	   		if (classes.get(clas) == 0 && classes.size() == 1) {
 	   			sppl = sppl * 4; // characters get quadruple hit points on their first ever level
+	   			hitPoints = hitPoints + clas.hitDie + abiMods[2]; // full hp rolls at level 1
+	   		}
+	   		else
+	   			hitPoints = hitPoints + r.nextInt(clas.hitDie) + abiMods[2] + 1;
+	   		System.out.println("hitPoints increasesd to " + hitPoints);
 
 	   		System.out.println("Skill points this level: " + sppl);
 	
@@ -328,6 +339,9 @@ class DDCharacter { // D&D Character
 	   		String[] cSkill = classSkills.toArray(new String[classSkills.size()]); // put all the classSkills into a String[] so accessing them randomly is much easier
 	   		for (int j=0; j < sppl; j++) { // for the remaining skill points
 	   			String skillToRankUp = cSkill[r.nextInt(cSkill.length)];
+	   			System.out.println("Adding ranks to skill: " + skillToRankUp);
+	   			System.out.println("Current statistics of " + skillToRankUp);
+	   			System.out.println(skills.get(skillToRankUp));
 	   			skills.get(skillToRankUp).put("Ranks", (skills.get(skillToRankUp).get("Ranks")+1));
 	   		}
 	   		System.out.println("*************************");
@@ -519,6 +533,22 @@ class DDCharacter { // D&D Character
 			abilityScores[1] = rolls[1];
 			abilityScores[3] = rolls[0];
 		}
+		else if (cName.equals("Psion")) {
+			abilityScores[3] = rolls[5];
+			abilityScores[4] = rolls[4];
+			abilityScores[1] = rolls[3];
+			abilityScores[2] = rolls[2];
+			abilityScores[5] = rolls[1];
+			abilityScores[0] = rolls[0];
+		}
+		else if (cName.equals("Psychic Warrior")) {
+			abilityScores[0] = rolls[5];
+			abilityScores[4] = rolls[4];
+			abilityScores[2] = rolls[3];
+			abilityScores[1] = rolls[2];
+			abilityScores[3] = rolls[1];
+			abilityScores[5] = rolls[0];
+		}
 		else if (cName.equals("Ranger")) {
 			abilityScores[0] = rolls[5];
 			abilityScores[1] = rolls[4];
@@ -542,6 +572,22 @@ class DDCharacter { // D&D Character
 			abilityScores[3] = rolls[2];
 			abilityScores[4] = rolls[1];
 			abilityScores[0] = rolls[0];
+		}
+		else if (cName.equals("Soulknife")) {
+			abilityScores[1] = rolls[5];
+			abilityScores[0] = rolls[4];
+			abilityScores[4] = rolls[3];
+			abilityScores[2] = rolls[2];
+			abilityScores[3] = rolls[1];
+			abilityScores[5] = rolls[0];
+		}
+		else if (cName.equals("Wilder")) {
+			abilityScores[5] = rolls[5];
+			abilityScores[1] = rolls[4];
+			abilityScores[2] = rolls[3];
+			abilityScores[3] = rolls[2];
+			abilityScores[0] = rolls[1];
+			abilityScores[4] = rolls[0];
 		}
 		else if (cName.equals("Wizard")) {
 			abilityScores[3] = rolls[5];
@@ -764,6 +810,7 @@ class characterClass {
 	int numOfLevels; //for now I'll keep this commented out and default to 20, but if prestige classes are going to be involved i'll have to deal with it
 	ArrayList<ArrayList<String>> special; // an array list of array lists to store the class's special features
 	ArrayList<String>[] spellList;
+	Random rand;
 
 	characterClass(String name) {
 		className = name;
@@ -774,6 +821,7 @@ class characterClass {
 		prioritySkills = new ArrayList<String>();
 		skillAdjust = new HashMap<String, Integer>();
 		setSpecial(className);
+		rand = new Random();
 		System.out.println("Character Class Created: " + className);
 	}
 
@@ -794,6 +842,7 @@ class characterClass {
 			special.add(new ArrayList<String>());
 		// and now all the special lists for each level are empty
 		setSpecial(className);
+		rand = new Random();
 	}
 
 	/* public void setSpecial(String clas)
@@ -843,8 +892,8 @@ class characterClass {
 			goodWill = true;
 			classSkills = new ArrayList<String>(Arrays.asList("Appraise", "Balance", "Bluff", "Climb", "Concentration", "Craft", "Decipher Script", "Diplomacy", "Disguise", "Escape Artist", "Gather Information", "Hide", "Jump", "Knowledge(Arcana)", "Knowledge(Architecture & Engineering)", "Knowledge(Dungeoneering)", "Knowledge(Geography)", "Knowledge(History)", "Knowledge(Local)", "Knowledge(Nature)", "Knowledge(Nobility & Royalty)", "Knowledge(Religion)", "Knowledge(The Planes)", "Listen", "Move Silently", "Perform", "Profession", "Sense Motive", "Sleight of Hand", "Spellcraft", "Swim", "Tumble", "Use Magic Device"));
 			String[] performChoices = {"Act", "Comedy", "Dance", "Keyboard", "Oratory", "Percussion", "Strings", "Wind", "Sing"};
-			Random r = new Random();
-			int randomIndex = r.nextInt(performChoices.length);
+
+			int randomIndex = rand.nextInt(performChoices.length);
 			String priorityPerform = "Perform(" + performChoices[randomIndex]+")";
 			prioritySkills.add(priorityPerform);
 			skillPointsPerLevel = 6;
@@ -1028,6 +1077,40 @@ class characterClass {
 			special.get(17).add("Remove Disease 5/week");
 			special.get(19).add("Smite Evil 5/day");
 		}
+		else if (clas.equals("Psion")) {
+			hitDie = 4;
+			baseAttackBonus = 0.5f;
+			goodFort = false;
+			goodRef = false;
+			goodWill = true;
+			classSkills = new ArrayList<String>(Arrays.asList("Concentration", "Craft", "Knowledge(Arcana)", "Knowledge(Architecture & Engineering)", "Knowledge(Dungeoneering)", "Knowledge(Geography)", "Knowledge(History)", "Knowledge(Local)", "Knowledge(Nature)", "Knowledge(Nobility & Royalty)", "Knowledge(Religion)", "Knowledge(The Planes)", "Profession", "Psicraft"));
+			skillPointsPerLevel = 2;
+			String[] discChoices = new String[] {"Clairsentience", "Metacreativiy", "Psychokinesis", "Psychometabolism", "Psychoportation", "Telepathy"};
+			String discChoice = discChoices[rand.nextInt(6)];
+			special.get(0).add("Discipline: "+discChoice);
+			special.get(0).add("Bonus Psion Feat");
+			special.get(4).add("Bonus Psion Feat");
+			special.get(9).add("Bonus Psion Feat");
+			special.get(14).add("Bonus Psion Feat");
+			special.get(19).add("Bonus Psion Feat");
+		}
+		else if (clas.equals("Psychic Warrior")) {
+			hitDie = 8;
+			baseAttackBonus = 0.75f;
+			goodFort = true;
+			goodRef = false;
+			goodWill = false;
+			classSkills = new ArrayList<String>(Arrays.asList("Autohypnosis", "Climb", "Concentration", "Craft", "Jump", "Knowledge(Psionics)", "Profession", "Ride", "Search", "Swim"));
+			skillPointsPerLevel = 2;
+			special.get(0).add("Bonus Psychic Warrior Feat");
+			special.get(1).add("Bonus Psychic Warrior Feat");
+			special.get(4).add("Bonus Psychic Warrior Feat");
+			special.get(7).add("Bonus Psychic Warrior Feat");
+			special.get(10).add("Bonus Psychic Warrior Feat");
+			special.get(13).add("Bonus Psychic Warrior Feat");
+			special.get(16).add("Bonus Psychic Warrior Feat");
+			special.get(19).add("Bonus Psychic Warrior Feat");
+		}
 		else if (clas.equals("Ranger")) {
 			hitDie = 8;
 			baseAttackBonus = 1.0f;
@@ -1075,23 +1158,22 @@ class characterClass {
 			special.get(8).add("Sneak Attack +5d6");
 			special.get(8).add("Trap Sense +3");
 			ArrayList<String> specialAbilities = new ArrayList<String>(Arrays.asList("Crippling Strike", "Defensive Roll", "Improved Evasion", "Opportunist", "Skill Mastery", "Slippery Mind"));
-			Random r = new Random();
-			int randomIndex = r.nextInt(specialAbilities.size());
-			special.get(9).add(specialAbilities.get(randomIndex));
+
+			//special.get(9).add(specialAbilities.get(rand.nextInt(specialAbilities.size())));
 			special.get(10).add("Sneak Attack +6d6");
 			special.get(11).add("Trap Sense +4");
 			special.get(12).add("Sneak Attack +7d6");
-			randomIndex = r.nextInt(specialAbilities.size());
-			special.get(12).add(specialAbilities.get(randomIndex));
+
+			//special.get(12).add(specialAbilities.get(rand.nextInt(specialAbilities.size())));
 			special.get(14).add("Sneak Attack +8d6");
 			special.get(14).add("Trap Sense +5");
-			randomIndex = r.nextInt(specialAbilities.size());
-			special.get(15).add(specialAbilities.get(randomIndex));
+
+			//special.get(15).add(specialAbilities.get(rand.nextInt(specialAbilities.size())));
 			special.get(16).add("Sneak Attack +9d6");
 			special.get(17).add("Trap Sense +6");
 			special.get(18).add("Sneak Attack +10d6");
-			randomIndex = r.nextInt(specialAbilities.size());
-			special.get(18).add(specialAbilities.get(randomIndex));
+			
+			//special.get(18).add(specialAbilities.get(rand.nextInt(specialAbilities.size())));
 		}
 		else if (clas.equals("Sorcerer")) {
 			hitDie = 4;
@@ -1102,6 +1184,58 @@ class characterClass {
 			classSkills = new ArrayList<String>(Arrays.asList("Bluff", "Concentration", "Craft", "Knowledge(Arcana)", "Profession", "Spellcraft"));
 			skillPointsPerLevel = 2;
 			special.get(0).add("Summon Familiar");
+		}
+		else if (clas.equals("Soulknife)")) {
+			hitDie = 10;
+			baseAttackBonus = 0.75f;
+			goodFort = false;
+			goodRef = true;
+			goodWill = true;
+			classSkills = new ArrayList<String>(Arrays.asList("Autohypnosis", "Climb", "Concentration", "Craft", "Hide", "Jump", "Knowledge(Psionics)", "Listen", "Move Silently", "Profession", "Tumble"));
+			skillPointsPerLevel = 4;
+			special.get(0).addAll(Arrays.asList("Mind Blade", "Weapon Focus(Mind Blade)", "Wild Talent"));
+			special.get(1).add("Throw Mind Blade");
+			special.get(2).add("Psychic Strike +1d8");
+			special.get(3).add("+1 Mind Blade");
+			special.get(4).addAll(Arrays.asList("Free Draw", "Shape Mind Blade"));
+			special.get(5).addAll(Arrays.asList("Mind Blade Enhancement +1", "Speed of Thought"));
+			special.get(6).add("Psychic Strike +2d8");
+			special.get(7).add("+2 Mind Blade");
+			special.get(8).addAll(Arrays.asList("Bladewind", "Greater Weapon Focus"));
+			special.get(9).add("Mind Blade Enhancement +2");
+			special.get(10).add("Psychic Strike +3d8");
+			special.get(11).add("+3 Mind Blade");
+			special.get(12).add("Knife to the Soul");
+			special.get(13).add("Mind Blade Enhancement +3");
+			special.get(14).add("Psychic Strike +4d8");
+			special.get(15).add("+4 Mind Blade");
+			special.get(16).add("Multiple Throw");
+			special.get(17).add("Mind Blade Enhancement +4");
+			special.get(18).add("Psychic Strike +5d8");
+			special.get(19).add("+5 Mind Blade");
+		}
+		else if (clas.equals("Wilder")) {
+			hitDie = 6;
+			baseAttackBonus = 0.75f;
+			goodFort = false;
+			goodRef = false;
+			goodWill = true;
+			classSkills = new ArrayList<String>(Arrays.asList("Autohypnosis", "Balance", "Bluff", "Cimb", "Concentration", "Craft", "Escape Artist", "Intimidate", "Jump", "Knowledge(Psionics)", "Listen", "Profession", "Psicraft", "Sense Motive", "Spot", "Swim", "Tumble"));
+			skillPointsPerLevel = 4;
+			special.get(0).addAll(Arrays.asList("Wild Surge +1", "Psychic Enervation"));
+			special.get(1).add("Elude Touch");
+			special.get(2).add("Wild Surge +2");
+			special.get(3).add("Surging Euphoria +1");
+			special.get(4).add("Volatile Mind (1 PP)");
+			special.get(6).add("Wild Surge +3");
+			special.get(8).add("Volatile Mind (2 PP)");
+			special.get(10).add("Wild Surge +4");
+			special.get(11).add("Surging Euphoria +2");
+			special.get(12).add("Volatile Mind (3 PP)");
+			special.get(14).add("Wild Surge +5");
+			special.get(16).add("Volatile Mind (4 PP)");
+			special.get(18).add("Wild Surge +6");
+			special.get(19).add("Surging Euphoria +3");
 		}
 		else if (clas.equals("Wizard")) {
 			hitDie = 4;
@@ -1121,9 +1255,8 @@ class characterClass {
 		}
 	}
 
-	public static String getRandom(String[] array) {
-		int r = new Random().nextInt(array.length);
-		return array[r];
+	public String getRandom(String[] array) {
+		return array[rand.nextInt(array.length)];
 	}
 
 	public void printClass() {
