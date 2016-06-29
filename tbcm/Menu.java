@@ -7,6 +7,8 @@ import java.util.Arrays;
 class Menu {
 
 	private Scanner input = new Scanner(System.in);
+	private String[] supportedRaces = new String[] {"DROMITE", "DUERGAR", "DWARF", "ELAN", "ELF", "GNOME", "HALF-ELF", "HALF-GIANT", "HALF-ORC", "HALFLING", "HUMAN", "MAENAD", "XEPH"}; 
+	private String[] supportedClasses = new String[] {"BARBARIAN", "BARD", "CLERIC", "DRUID", "FIGHTER", "MONK", "PALADIN", "PSION", "PSYCHIC WARRIOR", "RANGER", "ROGUE", "SORCERER", "SOULKNIFE", "WILDER", "WIZARD"};
 
 	public void display() {
 		System.out.println("--D&D v3.5 Character Manager--");
@@ -48,15 +50,13 @@ class Menu {
 			System.out.println("What's your character's name?");
 			String inName = input.nextLine();
 			System.out.println("Great name! Now your character's race?");
-			String inRace = input.nextLine();
+			String inRace = input.nextLine().toUpperCase();
 			// here i just want to check if the race is one we have saved, let's just accept those for now
 			// we can becomre more tolerant later, like the good ol' us of a
-			String[] supportedRaces = new String[] {"Dromite", "Duergar", "Dwarf", "Elan", "Elf", "Gnome", "Half-Elf", "Half-Giant", "Half-Orc", "Halfling", "Human", "Maenad", "Xeph"};
 			if (Arrays.asList(supportedRaces).contains(inRace)) {
 				// the race object will be created with the character so let's just accept that the race we got is good and move on
 				System.out.println("And your character's first class?");
-				String inClass = input.nextLine();
-				String[] supportedClasses = new String[] {"Barbarian", "Bard", "Cleric", "Druid", "Fighter", "Monk", "Paladin", "Psion", "Psychic Warrior", "Ranger", "Rogue", "Sorcerer", "Soulknife", "Wilder", "Wizard"};
+				String inClass = input.nextLine().toUpperCase();
 				if (Arrays.asList(supportedClasses).contains(inClass)) {
 					// now we can create the character
 					System.out.println("Creating character...");
@@ -74,39 +74,49 @@ class Menu {
 		while(true) {
 			System.out.println("-----Character Menu-----");
 			System.out.println("Enter a command, or 'help' for a list of commands: ");
-			String inStr = input.nextLine();
+			String inStr = input.nextLine().toUpperCase();
 			System.out.println("Input String: " + inStr);
-			if (inStr.equals("print"))
+			if (inStr.equals("PRINT"))
 				ddc.printCharacter();
-			else if (inStr.equals("printskill")) {
+			else if (inStr.equals("PRINTSKILL")) {
 				System.out.print("Print out which skill? ");
-				inStr = input.nextLine();
+				inStr = input.nextLine().toUpperCase();
 				System.out.println(ddc.getSkill(inStr));
 			}
-			else if (inStr.startsWith("printskill")) {
+			else if (inStr.startsWith("PRINTSKILL")) {
 				String skill = inStr.substring(inStr.indexOf(' ')+1);
 				System.out.println("skill read as: " + skill);
 				System.out.println(ddc.getSkill(skill));
 			}
-			else if (inStr.equals("levelup")) {
+			else if (inStr.equals("ADDPRIORITYSKILL")) {
+				System.out.println("Prioritize which skill?");
+				inStr = input.nextLine().toUpperCase();
+				ddc.addPrioritySkill(inStr);
+			}
+			else if (inStr.startsWith("ADDPRIORITYSKILL")) {
+				String skill = inStr.substring(inStr.indexOf(' ')+1);
+				System.out.format("Prioritizing %s...\n", skill);
+				ddc.addPrioritySkill(skill);
+			}
+			else if (inStr.equals("LEVELUP")) {
 				System.out.print("Level up in which class? ");
-				inStr = input.nextLine();
+				inStr = input.nextLine().toUpperCase();
 				ddc.levelUp(inStr, 1);
 			}
-			else if (inStr.startsWith("levelup")) {
+			else if (inStr.startsWith("LEVELUP")) {
 				String clas = inStr.substring(inStr.indexOf(' ')+1);
 				System.out.println("clas read as: "+ clas);
 				ddc.levelUp(clas, 1);
 			}
-			else if (inStr.equals("help"))
-				System.out.println("Usable commands: exit, help, levelup, print, printskill, reassignstats");
-			else if (inStr.equals("reassignstats"))
+			else if (inStr.equals("HELP"))
+				System.out.println("Usable commands: addpriorityskill, exit, help, levelup, print, printskill, reassignstats");
+			else if (inStr.equals("REASSIGNSTATS"))
 				this.reassignCharStats(ddc);
-			else if (inStr.equals("exit"))
+			else if (inStr.equals("EXIT"))
 				this.exit();
 			else
 				System.out.println("Unrecognized command\n" +
-					"Usable commands: exit, help, levelup, print, printskill, reassignstats");
+					"Usable commands: addpriorityskill, exit, help, levelup, print, printskill, reassignstats");
 		}
 	}
 
