@@ -1257,6 +1257,60 @@ class CharacterClass {
 			special.get(14).add("Bonus Wizard Feat");
 			special.get(19).add("Bonus Wizard Feat");
 		}
+		else if (clas.equals("ADEPT")) {
+			hitDie = 6;
+			baseAttackBonus = 0.5f;
+			goodFort = false;
+			goodRef = false;
+			goodWill = true;
+			classSkills = new ArrayList<String>(Arrays.asList("CONCENTRATION", "CRAFT", "HANDLE ANIMAL", "HEAL", "KNOWLEDGE(ARCANA)", "KNOWLEDGE(ARCHITECTURE & ENGINEERING)", "KNOWLEDGE(DUNGEONEERING)", "KNOWLEDGE(GEOGRAPHY)", "KNOWLEDGE(HISTORY)", "KNOWLEDGE(LOCAL)", "KNOWLEDGE(NATURE)", "KNOWLEDGE(NOBILITY & ROYALTY)", "KNOWLEDGE(RELIGION)", "KNOWLEDGE(THE PLANES)", "PROFESSION", "SPELLCRAFT", "SURVIVAL"));
+			skillPointsPerLevel = 2;
+			special.get(1).add("Summon Familiar");
+		}
+		else if (clas.equals("ARISTOCRAT")) {
+			hitDie = 8;
+			baseAttackBonus = 0.75f;
+			goodFort = false;
+			goodRef = false;
+			goodWill = true;
+			classSkills = new ArrayList<String>(Arrays.asList("APPRAISE", "BLUFF", "DIPLOMACY", "DISGUISE", "FORGERY", "GATHER INFORMATION", "HANDLE ANIMAL", "INTIMIDATE", "KNOWLEDGE(ARCANA)", "KNOWLEDGE(ARCHITECTURE & ENGINEERING)", "KNOWLEDGE(DUNGEONEERING)", "KNOWLEDGE(GEOGRAPHY)", "KNOWLEDGE(HISTORY)", "KNOWLEDGE(LOCAL)", "KNOWLEDGE(NATURE)", "KNOWLEDGE(NOBILITY & ROYALTY)", "KNOWLEDGE(RELIGION)", "KNOWLEDGE(THE PLANES)", "LISTEN", "PERFORM", "RIDE", "SENSE MOTIVE", "SPOT", "SWIM" "SURVIVAL"));
+			skillPointsPerLevel = 4;
+		}
+		else if (clas.equals("COMMONER")) {
+			hitDie = 4;
+			baseAttackBonus = 0.5f;
+			goodFort = false;
+			goodRef = false;
+			goodWill = false;
+			classSkills = new ArrayList<String>(Arrays.asList("CLIMB", "CRAFT", "HANDLE ANIMAL", "JUMP", "LISTEN", "PROFESSION", "RIDE", "SPOT", "SWIM", "USE ROPE"));
+			skillPointsPerLevel = 2;
+		}
+		else if (clas.equals("EXPERT")) {
+			hitDie = 6;
+			baseAttackBonus = 0.75f;
+			goodFort = false;
+			goodRef = false;
+			goodWill = false;
+			// have to choose 10 skills out of all of them. at random, i guess. so first i'll need an array with each of them. 
+			String[] allTheSkills = new String[] {"APPRAISE", "AUTOHYPNOSIS", "BALANCE", "BLUFF", "CLIMB", "CONCENTRATION", "CRAFT", "DECIPHER SCRIPT", "DIPLOMACY", "DISABLE DEVICE", "DISGUISE", "ESCAPE ARTIST", "FORGERY", "GATHER INFORMATION", "HANDLE ANIMAL", "HEAL", "HIDE", "INTIMIDATE", "KNOWLEDGE(ARCANA)", "KNOWLEDGE(ARCHITECTURE & ENGINEERING)", "KNOWLEDGE(DUNGEONEERING)", "KNOWLEDGE(GEOGRAPHY)", "KNOWLEDGE(HISTORY)", "KNOWLEDGE(LOCAL)", "KNOWLEDGE(NATURE)", "KNOWLEDGE(NOBILITY & ROYALTY)", "KNOWLEDGE(RELIGION)", "KNOWLEDGE(THE PLANES)", "KNOWLEDGE(PSIONICS)" "LISTEN", "MOVE SILENTLY", "OPEN LOCK", "PERFORM", "PROFESSION", "PSICRAFT", "RIDE", "SEARCH", "SENSE MOTIVE", "SLEIGHT OF HAND", "SPELLCRAFT", "SPOT", "SURVIVAL", "SWIM", "TUMBLE", "USE MAGIC DEVICE", "USE PSIONIC DEVICE", "USE ROPE"};
+			classSkills = new ArrayList<String>();
+			while (classSkills.size() < 10) { // and as long as we have fewer than 10 elements we will keep searching
+				String skillToAdd = allTheSkills[rand.nextInt(allTheSkills.length)];
+				if (!classSkills.contains(skillToAdd)) { // check to make sure the skill is not already in the array list
+					classSkills.add(skillToAdd)
+				}
+			}
+			skillPointsPerLevel = 6;
+		}
+		else if (clas.equals("WARRIOR")) {
+			hitDie = 8;
+			baseAttackBonus = 1.0f;
+			goodFort = true;
+			goodRef = false;
+			goodWill = false;
+			classSkills = new ArrayList<String>(Arrays.asList("CLIMB", "HANDLE ANIMAL", "INTIMIDATE", "JUMP", "RIDE", "SWIM"));
+			skillPointsPerLevel = 2;
+		}
 	}
 
 	public String getRandom(String[] array) {
