@@ -52,6 +52,13 @@ class DDCharacter { // D&D Character
 
 	private Set<String> specialList; // the character's special abilities, class features, racial traits, etc.
 
+	private String[][] spellList; // the class's full spell list, organized by spell level; spellList[1] is a String[] containing all the class's 1st level spells
+	private int[] spellsPerDay; // the character's spells per day for this class, organized by spell level; spellsPerDay[1] contains the character's number of 1st level spells per day
+	private int[][] spellsPerDayProgression; // the class's progression of spells per day, organized by level and then by spell level so spellsPerDayProgression[0][1] contains the class's number of first level spells per day at first level
+	private ArrayList<ArrayList<String>> spellsAvailable; // a list of lists containing spells that are currently castable by the character. 
+	private int[] spellsKnown; // the character's number of spells known
+	private int[][] spellsKnownProgression; // the class's progression of spells known, organized by level
+
 	/* Basic constructor
 		Creates a level 1 character of the given race and class
 		Stats are rolled using the rollStats() method, 4d6 drop lowest
