@@ -1,8 +1,6 @@
 package tbcm; // text based character manager
 
-
-import java.util.Scanner;
-import java.util.Arrays;
+import java.util.*;
 
 class Menu {
 
@@ -59,12 +57,46 @@ class Menu {
 				String inClass = input.nextLine().toUpperCase();
 				if (Arrays.asList(supportedClasses).contains(inClass)) {
 					// now we can create the character
+					System.out.println("Creating class...");
+					tbcm.CharacterClass clas = new tbcm.CharacterClass(inClass);
 					System.out.println("Creating character...");
-					tbcm.DDCharacter c = new tbcm.DDCharacter(inName, inRace, inClass);
+					tbcm.DDCharacter c = new tbcm.DDCharacter(inName, inRace, clas);
 					System.out.println("Characer successfully created!");
 					this.characterMenu(c);
 					break;
 				}
+				else { // the given character class is not recognized
+					System.out.println("Unrecognized character class. Input new character class? (Y/N)");
+					String inStr = input.nextLine().toUpperCase();
+					if (inStr.equals("Y") || inStr.equals("YES")) {
+						System.out.print("Class's Hit die? (just the integer)");
+						int inHD = input.nextInt();
+						System.out.print("Base attack bonus? (0.5, 0.75, or 1.0)");
+						float inBAB = input.nextFloat();
+						System.out.print("Good Fortitude save? (true/false)" );
+						boolean inFort = input.nextBoolean();
+						System.out.print("How about Reflex save? ");
+						boolean inRef = input.nextBoolean();
+						System.out.print("Will save? ");
+						boolean inWill = input.nextBoolean();
+						System.out.println("What are the class's class skills? Separate them with commas, please.");
+						String csLine; 
+						csLine = input.nextLine(); // class skill line
+						String[] csLineVector = csLine.split(",");
+						ArrayList<String> cs = new ArrayList<String>(Arrays.asList(csLineVector));
+						System.out.print("And how many skill points each level? ");
+						int inSPPL = input.nextInt();
+						tbcm.CharacterClass clas = new tbcm.CharacterClass(inClass, inHD, inBAB, inFort, inRef, inWill, cs, inSPPL);
+						System.out.println("CharacterClass successfully created!");
+						System.out.println("Creating character...");
+						tbcm.DDCharacter c = new tbcm.DDCharacter(inName, inRace, clas);
+						this.characterMenu(c);
+						break;
+					}
+				}
+			}
+			else {
+				System.out.println("Unrecognized race.");
 			}
 		}
 	}

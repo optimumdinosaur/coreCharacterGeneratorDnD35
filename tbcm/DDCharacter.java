@@ -1,6 +1,5 @@
 package tbcm;
 
-
 /*************************************************
 DDCharacter.java
 Designed to generate, build, and manage 
@@ -52,22 +51,16 @@ class DDCharacter { // D&D Character
 
 	private Set<String> specialList; // the character's special abilities, class features, racial traits, etc.
 
-	private String[][] spellList; // the class's full spell list, organized by spell level; spellList[1] is a String[] containing all the class's 1st level spells
-	private int[] spellsPerDay; // the character's spells per day for this class, organized by spell level; spellsPerDay[1] contains the character's number of 1st level spells per day
-	private int[][] spellsPerDayProgression; // the class's progression of spells per day, organized by level and then by spell level so spellsPerDayProgression[0][1] contains the class's number of first level spells per day at first level
-	private ArrayList<ArrayList<String>> spellsAvailable; // a list of lists containing spells that are currently castable by the character. 
-	private int[] spellsKnown; // the character's number of spells known
-	private int[][] spellsKnownProgression; // the class's progression of spells known, organized by level
 
 	/* Basic constructor
 		Creates a level 1 character of the given race and class
 		Stats are rolled using the rollStats() method, 4d6 drop lowest
 	*/
-	DDCharacter(String newName, String newRace, String newClass) {
+	DDCharacter(String newName, String newRace, CharacterClass clas) {
 		name = newName;
 		race = new PlayerRace(newRace);
 
-		CharacterClass clas = new CharacterClass(newClass);
+		//CharacterClass clas = new CharacterClass(newClass);
 		classes.put(clas, 0);
 
 		hitPoints = 0;
@@ -261,8 +254,6 @@ class DDCharacter { // D&D Character
 	   		else
 	   			hitPoints = hitPoints + r.nextInt(clas.hitDie) + abiMods[2] + 1;
 	   		System.out.println("hitPoints increasesd to " + hitPoints);
-
-	   		
 	   		if ((currentLevel+1) == 1) { // if this is the character's first level in this class
 	   			System.out.println("**1st level of a class.**");
 	   			classSkills.addAll(clas.classSkills); 
@@ -648,7 +639,7 @@ class DDCharacter { // D&D Character
 	}
 
 	public static void main(String[] args) {
-		DDCharacter c = new DDCharacter("Jim", "Half-Giant", "ROGUE");
+		DDCharacter c = new DDCharacter("Jim", "Half-Giant", new CharacterClass("ROGUE"));
 		c.levelUp("ROGUE", 19);
 		c.calcSkillTotals();
 		c.printCharacter();
@@ -820,9 +811,20 @@ class CharacterClass {
 	int skillPointsPerLevel; // the number of skill points a member of this class gains at each level, not counting their int bonus
 	int numOfLevels; //for now I'll keep this commented out and default to 20, but if prestige classes are going to be involved i'll have to deal with it
 	ArrayList<ArrayList<String>> special; // an array list of array lists to store the class's special features
-	ArrayList<String>[] spellList;
-	Random rand;
+	Random rand = new Random();
 
+
+	String[][] spellList;
+	int[][] spellsPerDayProgression;
+	int[][] spellsKnownProgression;
+
+	ArrayList<Integer> spellsPerDay;
+	ArrayList<String> spellsAvailable;
+
+	ArrayList<String> tags = new ArrayList<String>(); // a list of tags to indicate subsystems that the class uses; eg a Wizard will have the "Spellcaster" and "Prepared" tags, a Psion will have the "Psionic" tag
+
+
+	// Default constructor
 	CharacterClass(String name) {
 		className = name;
 		numOfLevels = 20;
@@ -832,11 +834,13 @@ class CharacterClass {
 		prioritySkills = new ArrayList<String>();
 		skillAdjust = new HashMap<String, Integer>();
 		setSpecial(className);
-		rand = new Random();
 		System.out.println("Character Class Created: " + className);
 	}
 
+
+	// Constructor for a user input class
 	CharacterClass(String name, int hd, float bab, boolean fort, boolean ref, boolean will, ArrayList<String> cskills, int sppl) {
+		System.out.println("Creating character class...");
 		className = name;
 		hitDie = hd;
 		baseAttackBonus = bab;
@@ -853,7 +857,6 @@ class CharacterClass {
 			special.add(new ArrayList<String>());
 		// and now all the special lists for each level are empty
 		setSpecial(className);
-		rand = new Random();
 	}
 
 	/* public void setSpecial(String clas)
@@ -922,14 +925,15 @@ class CharacterClass {
 			special.get(14).add("Inspire Heroics");
 			special.get(17).add("Mass Suggestion");
 			special.get(19).add("Inspire Courage +4");
-			// HAVE TO DO SPELLS
-			// ArrayList<String> spellsLv0 = new ArrayList<String>(Arrays.asList("Dancing Lights", "Daze", "Detect Magic", "Flare", "Ghost Sound", "Know Direction", "Light", "Lullaby", "Mage Hand", "Mending", "Open/Close", "Prestidigitation", "Read Magic", "Resistance", "Summon Instrument"));
-			// ArrayList<String> spellsLv1 = new ArrayList<String>(Arrays.asList("Alarm", "Animate Rope", "Cause Fear", "Charm Person", "Comprehend Languages", "Lesser Confusion", "Cure Light Wounds", "Detect Secret Doors", "DISGUISE Self", "Erase", "Expeditious Retreat", "Feather Fall", "Grease", "Hideous Laughter", "Hypnotism", "Identify", "Magic Mouth", "Magic Aura", "Obscure Object", "Remove Fear", "Silent Image", "Sleep", "Summon Monster I", "Undetectable Alignment", "Unseen Servant", "Ventriloquism"));
-			// ArrayList<String> spellsLv2 = new ArrayList<String>(Arrays.asList("Alter Self", "Animal Messenger", "Animal Trance" "Blindness/Deafness", "Blur", "Calm Emotions", "Cat's Grace", "Cure Moderate Wounds", "Darkness", "Daze Monster", "Delay Poison", "Detect Thoughts", "Eagle's Splendor", "Enthrall", "Fox's Cunning", "Glitterdust", "Heroism", "Hold Person", "Hypnotic Pattern", "Invisibility", "Locate Object", "Minor Image", "Mirror Image", "Misdirection", "Pyrotechnics", "Rage", "Scare", "Shatter", "Silence", "Sound Burst", "Suggestion", "Summon Monster II", "Summon Swarm", "Tongues", "Whispering Wind"));
-			// ArrayList<String> spellsLv3 = new ArrayList<String>(Arrays.asList("Blink", "Charm Monster", "Clairaudience/Clairvoyance", "Confusion", "Crushing Despair", "Cure Serious Wounds", "Daylight", "Deep Slumber", "Dispel Magic", "Displacement", "Fear", "Gaseous Form", "Lesser Geas", "Glibness", "Good Hope", "Haste", "Illusory Script", "Invisibility Sphere", "Major Image", "Phantom Steed", "Remove Curse", "Scrying", "Sculpt Sound", "Secret Page", "See Invisibility", "Sepia Snake Sigil", "Slow", "Speak with Animals", "Tiny Hut"));
-			// ArrayList<String> spellsLv4 = new ArrayList<String>(Arrays.asList("Break Enchantment", "Cure Critical Wounds", "Detect Scrying", "Dimension Door", "Dominate Person", "Freedom of Movement", "Hallucinatory Terrain", "Hold Monster", "Greater Invisibility", "Legend Lore", "Locate Creature", "Modify Memory", "Neutralize Poison", "Rainbow Pattern", "Repel Vermin", "Secure Shelter", "Shadow Conjuration", "Shout", "Speak with Plants", "Summon Monster IV", "Zone of Silence"));
-			// ArrayList<String> spellsLv5 = new ArrayList<String>(Arrays.asList("Mass Cure Light Wounds", "Greater Dispel Magic", "Dream", "False Vision", "Greater Heroism", "Mind Fog", "Mirage ARCANA", "Mislead", "Nightmare", "Persistent Image", "Seeming", "Shadow Evocation", "Shadow Walk", "Song of Discord", "Mass Suggestion", "Summon Monster V"));
-			// ArrayList<String> spellsLv6 = new ArrayList<String>(Arrays.asList("Analyze Dweomer", "Animate Objects", "Mass Cat's Grace", "Mass Charm Monster", "Mass Cure Moderate Wounds", "Mass Eagle's Splendor", "Eyebite", "Find the Path" "Mass Fox's Cunning", "Geas/Quest", "Heroes' Feast", "Irresistable Dance", "Permanent Image", "Programmed Image", "Project Image", "Greater Scrying", "Greater Shout", "Summong Monster VI", "Sympathetic Vibration", "Veil"));
+			// String[] spellsLv0 = {"Dancing Lights", "Daze", "Detect Magic", "Flare", "Ghost Sound", "Know Direction", "Light", "Lullaby", "Mage Hand", "Mending", "Open/Close", "Prestidigitation", "Read Magic", "Resistance", "Summon Instrument"};
+			// String[] spellsLv1 = {"Alarm", "Animate Rope", "Cause Fear", "Charm Person", "Comprehend Languages", "Lesser Confusion", "Cure Light Wounds", "Detect Secret Doors", "DISGUISE Self", "Erase", "Expeditious Retreat", "Feather Fall", "Grease", "Hideous Laughter", "Hypnotism", "Identify", "Magic Mouth", "Magic Aura", "Obscure Object", "Remove Fear", "Silent Image", "Sleep", "Summon Monster I", "Undetectable Alignment", "Unseen Servant", "Ventriloquism"};
+			// String[] spellsLv2 = {"Alter Self", "Animal Messenger", "Animal Trance" "Blindness/Deafness", "Blur", "Calm Emotions", "Cat's Grace", "Cure Moderate Wounds", "Darkness", "Daze Monster", "Delay Poison", "Detect Thoughts", "Eagle's Splendor", "Enthrall", "Fox's Cunning", "Glitterdust", "Heroism", "Hold Person", "Hypnotic Pattern", "Invisibility", "Locate Object", "Minor Image", "Mirror Image", "Misdirection", "Pyrotechnics", "Rage", "Scare", "Shatter", "Silence", "Sound Burst", "Suggestion", "Summon Monster II", "Summon Swarm", "Tongues", "Whispering Wind"};
+			// String[] spellsLv3 = {"Blink", "Charm Monster", "Clairaudience/Clairvoyance", "Confusion", "Crushing Despair", "Cure Serious Wounds", "Daylight", "Deep Slumber", "Dispel Magic", "Displacement", "Fear", "Gaseous Form", "Lesser Geas", "Glibness", "Good Hope", "Haste", "Illusory Script", "Invisibility Sphere", "Major Image", "Phantom Steed", "Remove Curse", "Scrying", "Sculpt Sound", "Secret Page", "See Invisibility", "Sepia Snake Sigil", "Slow", "Speak with Animals", "Tiny Hut"};
+			// String[] spellsLv4 = {"Break Enchantment", "Cure Critical Wounds", "Detect Scrying", "Dimension Door", "Dominate Person", "Freedom of Movement", "Hallucinatory Terrain", "Hold Monster", "Greater Invisibility", "Legend Lore", "Locate Creature", "Modify Memory", "Neutralize Poison", "Rainbow Pattern", "Repel Vermin", "Secure Shelter", "Shadow Conjuration", "Shout", "Speak with Plants", "Summon Monster IV", "Zone of Silence"};
+			// String[] spellsLv5 = {"Mass Cure Light Wounds", "Greater Dispel Magic", "Dream", "False Vision", "Greater Heroism", "Mind Fog", "Mirage ARCANA", "Mislead", "Nightmare", "Persistent Image", "Seeming", "Shadow Evocation", "Shadow Walk", "Song of Discord", "Mass Suggestion", "Summon Monster V"};
+			// String[] spellsLv6 = {"Analyze Dweomer", "Animate Objects", "Mass Cat's Grace", "Mass Charm Monster", "Mass Cure Moderate Wounds", "Mass Eagle's Splendor", "Eyebite", "Find the Path" "Mass Fox's Cunning", "Geas/Quest", "Heroes' Feast", "Irresistable Dance", "Permanent Image", "Programmed Image", "Project Image", "Greater Scrying", "Greater Shout", "Summong Monster VI", "Sympathetic Vibration", "Veil"};
+
+
 		
 		}
 		else if (clas.equals("CLERIC")) {
@@ -1096,8 +1100,16 @@ class CharacterClass {
 			goodWill = true;
 			classSkills = new ArrayList<String>(Arrays.asList("CONCENTRATION", "CRAFT", "KNOWLEDGE(ARCANA)", "KNOWLEDGE(ARCHITECTURE & ENGINEERING)", "KNOWLEDGE(DUNGEONEERING)", "KNOWLEDGE(GEOGRAPHY)", "KNOWLEDGE(HISTORY)", "KNOWLEDGE(LOCAL)", "KNOWLEDGE(NATURE)", "KNOWLEDGE(NOBILITY & ROYALTY)", "KNOWLEDGE(RELIGION)", "KNOWLEDGE(THE PLANES)", "PROFESSION", "PSICRAFT"));
 			skillPointsPerLevel = 2;
+			System.out.println("Initializing discChoices...");
 			String[] discChoices = new String[] {"Clairsentience", "Metacreativiy", "Psychokinesis", "Psychometabolism", "Psychoportation", "Telepathy"};
-			String discChoice = discChoices[rand.nextInt(6)];
+			System.out.println("discChoices initialized! : " + discChoices);
+			System.out.println("Choosing discipline...");
+			int randomIndex = rand.nextInt(6);
+			System.out.println("Random index chosen: " + randomIndex);
+
+			String discChoice = discChoices[randomIndex];
+			System.out.println("Discipline chosen: " + discChoice);
+
 			special.get(0).add("Discipline: "+discChoice);
 			special.get(0).add("Bonus Psion Feat");
 			special.get(4).add("Bonus Psion Feat");
@@ -1317,6 +1329,9 @@ class CharacterClass {
 			goodWill = false;
 			classSkills = new ArrayList<String>(Arrays.asList("CLIMB", "HANDLE ANIMAL", "INTIMIDATE", "JUMP", "RIDE", "SWIM"));
 			skillPointsPerLevel = 2;
+		}
+		else {
+			classSkills = new ArrayList<String>(Arrays.asList("CRAFT", "PROFESSION"));
 		}
 	}
 
