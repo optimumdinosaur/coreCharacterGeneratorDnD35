@@ -134,6 +134,7 @@ class DDCharacter { // D&D Character
 		skills.put("AUTOHYPNOSIS", new HashMap<String, Integer>());
 		skills.put("KNOWLEDGE(PSIONICS)", new HashMap<String, Integer>());
 		skills.put("PSICRAFT", new HashMap<String, Integer>());
+		skills.put("USE PSIONIC DEVICE", new HashMap<String, Integer>());
 
 		// these lists are for setting up the appropriate ability score modifier to each skill
 		String[] strSkills = {"CLIMB", "JUMP", "SWIM"};
@@ -141,7 +142,7 @@ class DDCharacter { // D&D Character
 		String[] conSkills = {"CONCENTRATION"};
 		String[] intSkills = {"APPRAISE", "CRAFT", "DECIPHER SCRIPT", "DISABLE DEVICE", "FORGERY", "KNOWLEDGE(ARCANA)", "KNOWLEDGE(ARCHITECTURE & ENGINEERING)", "KNOWLEDGE(DUNGEONEERING)", "KNOWLEDGE(GEOGRAPHY)", "KNOWLEDGE(HISTORY)", "KNOWLEDGE(LOCAL)", "KNOWLEDGE(NATURE)", "KNOWLEDGE(NOBILITY & ROYALTY)", "KNOWLEDGE(RELIGION)", "KNOWLEDGE(THE PLANES)", "KNOWLEDGE(PSIONICS)", "SEARCH", "SPELLCRAFT", "PSICRAFT"};
 		String[] wisSkills = {"AUTOHYPNOSIS", "HEAL", "LISTEN", "PROFESSION", "SENSE MOTIVE", "SPOT", "SURVIVAL"};
-		String[] chaSkills = {"BLUFF", "DIPLOMACY", "DISGUISE", "GATHER INFORMATION", "HANDLE ANIMAL", "INTIMIDATE", "PERFORM", "USE MAGIC DEVICE"};
+		String[] chaSkills = {"BLUFF", "DIPLOMACY", "DISGUISE", "GATHER INFORMATION", "HANDLE ANIMAL", "INTIMIDATE", "PERFORM", "USE MAGIC DEVICE", "USE PSIONIC DEVICE"};
 		String[][] skillsByMod = {strSkills, dexSkills, conSkills, intSkills, wisSkills, chaSkills}; // with this we can use nested loops to do all the ability scores
 		for (int i=0; i < 6; i++) { // for each ability score
 			for (int j=0; j < skillsByMod[i].length; j++) { // for each skill in the String[]
@@ -593,6 +594,14 @@ class DDCharacter { // D&D Character
 			abilityScores[5] = rolls[1];
 			abilityScores[0] = rolls[0];
 		}
+		else {
+			abilityScores[0] = rolls[0];
+			abilityScores[1] = rolls[1];
+			abilityScores[2] = rolls[2];
+			abilityScores[3] = rolls[3];
+			abilityScores[4] = rolls[4];
+			abilityScores[5] = rolls[5];
+		}
 
 	}
 
@@ -839,7 +848,7 @@ class CharacterClass {
 
 
 	// Constructor for a user input class
-	CharacterClass(String name, int hd, float bab, boolean fort, boolean ref, boolean will, ArrayList<String> cskills, int sppl) {
+	CharacterClass(String name, int hd, float bab, boolean fort, boolean ref, boolean will, ArrayList<String> cskills, ArrayList<String> pSkills, int sppl) {
 		System.out.println("Creating character class...");
 		className = name;
 		hitDie = hd;
@@ -848,6 +857,7 @@ class CharacterClass {
 		goodRef = ref;
 		goodWill = will;
 		classSkills = cskills;
+		prioritySkills = pSkills;
 		skillPointsPerLevel = sppl;
 		numOfLevels = 20;
 		// i figure i should initialize all the levels and stuff to be empty, that way I can just add stuff in
@@ -1329,9 +1339,6 @@ class CharacterClass {
 			goodWill = false;
 			classSkills = new ArrayList<String>(Arrays.asList("CLIMB", "HANDLE ANIMAL", "INTIMIDATE", "JUMP", "RIDE", "SWIM"));
 			skillPointsPerLevel = 2;
-		}
-		else {
-			classSkills = new ArrayList<String>(Arrays.asList("CRAFT", "PROFESSION"));
 		}
 	}
 

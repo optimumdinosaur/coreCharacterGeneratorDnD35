@@ -6,7 +6,7 @@ class Menu {
 
 	private Scanner input = new Scanner(System.in);
 	private String[] supportedRaces = new String[] {"DROMITE", "DUERGAR", "DWARF", "ELAN", "ELF", "GNOME", "HALF-ELF", "HALF-GIANT", "HALF-ORC", "HALFLING", "HUMAN", "MAENAD", "XEPH"}; 
-	private String[] supportedClasses = new String[] {"BARBARIAN", "BARD", "CLERIC", "DRUID", "FIGHTER", "MONK", "PALADIN", "PSION", "PSYCHIC WARRIOR", "RANGER", "ROGUE", "SORCERER", "SOULKNIFE", "WILDER", "WIZARD"};
+	private String[] supportedClasses = new String[] {"BARBARIAN", "BARD", "CLERIC", "DRUID", "FIGHTER", "MONK", "PALADIN", "PSION", "PSYCHIC WARRIOR", "RANGER", "ROGUE", "SORCERER", "SOULKNIFE", "WILDER", "WIZARD", "ADEPT", "ARISTOCRAT", "COMMONER", "EXPERT", "WARRIOR"};
 
 	public void display() {
 		System.out.println("--D&D v3.5 Character Manager--");
@@ -80,13 +80,20 @@ class Menu {
 						System.out.print("Will save? ");
 						boolean inWill = input.nextBoolean();
 						System.out.println("What are the class's class skills? Separate them with commas, please.");
-						String csLine; 
-						csLine = input.nextLine(); // class skill line
+						String csLine = input.nextLine();
+						//System.out.println("First initialization of csLine: " + csLine);
+						csLine = input.nextLine().toUpperCase(); // class skill line
+						System.out.println("Second setting of csLine: " + csLine);
 						String[] csLineVector = csLine.split(",");
 						ArrayList<String> cs = new ArrayList<String>(Arrays.asList(csLineVector));
+						System.out.println("Any priority skills?");
+						csLine = input.nextLine().toUpperCase();
+						System.out.println("pSkills read as: " + csLine);
+						csLineVector = csLine.split(",");
+						ArrayList<String> ps = new ArrayList<String>(Arrays.asList(csLineVector));
 						System.out.print("And how many skill points each level? ");
 						int inSPPL = input.nextInt();
-						tbcm.CharacterClass clas = new tbcm.CharacterClass(inClass, inHD, inBAB, inFort, inRef, inWill, cs, inSPPL);
+						tbcm.CharacterClass clas = new tbcm.CharacterClass(inClass, inHD, inBAB, inFort, inRef, inWill, cs, ps, inSPPL);
 						System.out.println("CharacterClass successfully created!");
 						System.out.println("Creating character...");
 						tbcm.DDCharacter c = new tbcm.DDCharacter(inName, inRace, clas);
