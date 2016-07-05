@@ -45,9 +45,9 @@ class DDCharacter { // D&D Character
 	// skills is the master hashmap for all the character's skills
 	// the skill name serves as a key, and returns a value that is another hashmap
 	// this inner hashmap is structured similarly to the ones for saves
-	private HashMap<String, HashMap<String, Integer>> skills;
-	private Set<String> classSkills; // a set containing the class skills of all the classes of the character
-	private Set<String> prioritySkills; // a set containing priority skills for the character
+	HashMap<String, HashMap<String, Integer>> skills; 
+	Set<String> classSkills; // a set containing the class skills of all the classes of the character
+	Set<String> prioritySkills; // a set containing priority skills for the character
 
 	private Set<String> specialList; // the character's special abilities, class features, racial traits, etc.
 
@@ -168,26 +168,135 @@ class DDCharacter { // D&D Character
 		calcSkillTotals();
 	}
 
-	public void addPrioritySkill(String skillName) {
-		prioritySkills.add(skillName);
+	/* Constructor that does not require a CharacterClass
+		Useful for creating a character with an unknown class
+		Has to later to be set up with the setupFirstClass() method */
+	DDCharacter(String newName, String newRace) {
+		name = newName;
+		race = new PlayerRace(newRace);
 
-		skills.put(skillName, new HashMap<String, Integer>());
-		skills.get(skillName).put("Ranks", 0);
-		skills.get(skillName).put("Misc", 0);
-		if (skillName.startsWith("CRAFT") || skillName.startsWith("KNOWLEDGE"))
-			skills.get(skillName).put("AbiMod", 3); // both craft and knowledge are based on Intelligence
-		else if (skillName.startsWith("PERFORM"))
-			skills.get(skillName).put("AbiMod", 5);
-		else if (skillName.startsWith("PROFESSION"))
-			skills.get(skillName).put("AbiMod", 4);
-		else {
-			System.out.println("Not sure what this skill. Gonna assume it's Intelligence based.");
-			skills.get(skillName).put("AbiMod", 3);
+		hitPoints = 0;
+		abiMods = new int[] {0, 0, 0, 0, 0, 0};
+		abilityScores = new int[] {10, 10, 10, 10, 10, 10};
+
+		fortSave = new HashMap<String,Integer>();
+		fortSave.put("Total", 0);
+		fortSave.put("Base", 0);
+		fortSave.put("Misc", 0);
+		refSave = new HashMap<String,Integer>();
+		refSave.put("Total", 0);
+		refSave.put("Base", 0);
+		refSave.put("Misc", 0);
+		willSave = new HashMap<String,Integer>();
+		willSave.put("Total", 0);
+		willSave.put("Base", 0);
+		willSave.put("Misc", 0);
+
+		baseAttackBonus = 0;
+
+		r = new Random(); // Random object I'll need later
+
+		// time to initialize the skills hashmap for the character		
+		skills = new HashMap<String, HashMap<String, Integer>>();
+		// and a HashMap for each of the skills, then place it in the character's skills HashMap
+		skills.put("APPRAISE", new HashMap<String, Integer>());
+		skills.put("BALANCE", new HashMap<String, Integer>());
+		skills.put("BLUFF", new HashMap<String, Integer>());
+		skills.put("CLIMB", new HashMap<String, Integer>());
+		skills.put("CONCENTRATION", new HashMap<String, Integer>());
+		skills.put("CRAFT", new HashMap<String, Integer>());
+		skills.put("DECIPHER SCRIPT", new HashMap<String, Integer>());
+		skills.put("DIPLOMACY", new HashMap<String, Integer>());
+		skills.put("DISABLE DEVICE", new HashMap<String, Integer>());
+		skills.put("DISGUISE", new HashMap<String, Integer>());
+		skills.put("ESCAPE ARTIST", new HashMap<String, Integer>());
+		skills.put("FORGERY", new HashMap<String, Integer>());
+		skills.put("GATHER INFORMATION", new HashMap<String, Integer>());
+		skills.put("HANDLE ANIMAL", new HashMap<String, Integer>());
+		skills.put("HEAL", new HashMap<String, Integer>());
+		skills.put("HIDE", new HashMap<String, Integer>());
+		skills.put("INTIMIDATE", new HashMap<String, Integer>());
+		skills.put("JUMP", new HashMap<String, Integer>());
+		skills.put("KNOWLEDGE(ARCANA)", new HashMap<String, Integer>());
+		skills.put("KNOWLEDGE(ARCHITECTURE & ENGINEERING)", new HashMap<String, Integer>());
+		skills.put("KNOWLEDGE(DUNGEONEERING)", new HashMap<String, Integer>());
+		skills.put("KNOWLEDGE(GEOGRAPHY)", new HashMap<String, Integer>());
+		skills.put("KNOWLEDGE(HISTORY)", new HashMap<String, Integer>());
+		skills.put("KNOWLEDGE(LOCAL)", new HashMap<String, Integer>());
+		skills.put("KNOWLEDGE(NATURE)", new HashMap<String, Integer>());
+		skills.put("KNOWLEDGE(NOBILITY & ROYALTY)", new HashMap<String, Integer>());
+		skills.put("KNOWLEDGE(RELIGION)", new HashMap<String, Integer>());
+		skills.put("KNOWLEDGE(THE PLANES)", new HashMap<String, Integer>());
+		skills.put("LISTEN", new HashMap<String, Integer>());
+		skills.put("MOVE SILENTLY", new HashMap<String, Integer>());
+		skills.put("OPEN LOCK", new HashMap<String, Integer>());
+		skills.put("PERFORM", new HashMap<String, Integer>());
+		skills.put("PROFESSION", new HashMap<String, Integer>());
+		skills.put("RIDE", new HashMap<String, Integer>());
+		skills.put("SEARCH", new HashMap<String, Integer>());
+		skills.put("SENSE MOTIVE", new HashMap<String, Integer>());
+		skills.put("SLEIGHT OF HAND", new HashMap<String, Integer>());
+		skills.put("SPELLCRAFT", new HashMap<String, Integer>());
+		skills.put("SPOT", new HashMap<String, Integer>());
+		skills.put("SURVIVAL", new HashMap<String, Integer>());
+		skills.put("SWIM", new HashMap<String, Integer>());
+		skills.put("TUMBLE", new HashMap<String, Integer>());
+		skills.put("USE MAGIC DEVICE", new HashMap<String, Integer>());
+		skills.put("USE ROPE", new HashMap<String, Integer>());
+		skills.put("AUTOHYPNOSIS", new HashMap<String, Integer>());
+		skills.put("KNOWLEDGE(PSIONICS)", new HashMap<String, Integer>());
+		skills.put("PSICRAFT", new HashMap<String, Integer>());
+		skills.put("USE PSIONIC DEVICE", new HashMap<String, Integer>());
+		// these lists are for setting up the appropriate ability score modifier to each skill
+		String[] strSkills = {"CLIMB", "JUMP", "SWIM"};
+		String[] dexSkills = {"BALANCE", "ESCAPE ARTIST", "HIDE", "MOVE SILENTLY", "OPEN LOCK", "RIDE", "SLEIGHT OF HAND", "TUMBLE", "USE ROPE"};
+		String[] conSkills = {"CONCENTRATION"};
+		String[] intSkills = {"APPRAISE", "CRAFT", "DECIPHER SCRIPT", "DISABLE DEVICE", "FORGERY", "KNOWLEDGE(ARCANA)", "KNOWLEDGE(ARCHITECTURE & ENGINEERING)", "KNOWLEDGE(DUNGEONEERING)", "KNOWLEDGE(GEOGRAPHY)", "KNOWLEDGE(HISTORY)", "KNOWLEDGE(LOCAL)", "KNOWLEDGE(NATURE)", "KNOWLEDGE(NOBILITY & ROYALTY)", "KNOWLEDGE(RELIGION)", "KNOWLEDGE(THE PLANES)", "KNOWLEDGE(PSIONICS)", "SEARCH", "SPELLCRAFT", "PSICRAFT"};
+		String[] wisSkills = {"AUTOHYPNOSIS", "HEAL", "LISTEN", "PROFESSION", "SENSE MOTIVE", "SPOT", "SURVIVAL"};
+		String[] chaSkills = {"BLUFF", "DIPLOMACY", "DISGUISE", "GATHER INFORMATION", "HANDLE ANIMAL", "INTIMIDATE", "PERFORM", "USE MAGIC DEVICE", "USE PSIONIC DEVICE"};
+		String[][] skillsByMod = {strSkills, dexSkills, conSkills, intSkills, wisSkills, chaSkills}; // with this we can use nested loops to do all the ability scores
+		for (int i=0; i < 6; i++) { // for each ability score
+			for (int j=0; j < skillsByMod[i].length; j++) { // for each skill in the String[]
+				skills.get(skillsByMod[i][j]).put("AbiMod", i);
+			}
+			skills.get(skillsByMod[i]);
 		}
-		skills.get(skillName).put("Total", 0);
+		// next i need to initialize Ranks, Misc, and Total all to 0 for each skill. 
+		for (String skl : skills.keySet()) {
+			HashMap<String, Integer> sklMap = skills.get(skl);
+			sklMap.put("Total", 0);
+			sklMap.put("Ranks", 0);
+			sklMap.put("Misc", 0);
+
+		}
+		classSkills = new HashSet<String>(); // both this and prioritySkills are actually set up in getClassFeatures()
+		prioritySkills = new HashSet<String>();
+		specialList = new HashSet<String>();
+		getRacialTraits();
+	}
+
+	/* setupFirstClass
+		Method for DDCharacters that have been created with the constructor that does not require a CharacterClass
+		This method completes the process of setting up the character */
+	public void setupFirstClass(CharacterClass newClass) {
+		classes.put(newClass, 0);
+		assignRolls(rollStats());
+		getClassFeatures(newClass, 1);
+		classes.put(newClass, 1);
 		calcSkillTotals();
 	}
 
+
+	/* addSpecial
+		method to add a new special feature to the character */
+	public void addSpecial(String abilityName) {
+		specialList.add(abilityName);
+		System.out.println("Special ability added: " + abilityName);
+	}
+
+
+	/* setAbilityScores
+		method to reset the character's ability scores to the first 6 values in any given int[] */
 	public void setAbilityScores(int[] newScores) {
 		this.abilityScores = newScores;
 		for (int i=0; i < 6; i++)
@@ -221,8 +330,9 @@ class DDCharacter { // D&D Character
 		calcSkillTotals();
 	}
 
-	/* Function to add get class features from the given class
-	   according to the number of given levels in the class*/
+	/* getClassFeatures
+		Function to add get class features from the given class
+	    according to the number of given levels in the class*/
    private void getClassFeatures(CharacterClass clas, int levels) {
 	   	System.out.format("Getting class features for %s...\n", clas.className);
 	   	System.out.println("Current level: " + classes.get(clas));
@@ -416,11 +526,12 @@ class DDCharacter { // D&D Character
    			HashMap<String, Integer> sklMap = skills.get(skl);
    			sklMap.put("Total", (sklMap.get("Ranks") + sklMap.get("Misc") + abiMods[sklMap.get("AbiMod")]));
    		}
-
-
    		baseAttackBonus = 0; // make sure it's 0
    		for (CharacterClass clas : classes.keySet()) {
    			baseAttackBonus += (clas.baseAttackBonus * classes.get(clas));
+   		}
+   		for (int i=0; i < 6; i++) {
+   			abiMods[i] = calcMod(abilityScores[i]);
    		}
    }
 
@@ -840,6 +951,7 @@ class CharacterClass {
 		special = new ArrayList<ArrayList<String>>(numOfLevels);
 		for (int i=0; i<numOfLevels; i++)
 			special.add(new ArrayList<String>());
+		classSkills = new ArrayList<String>();
 		prioritySkills = new ArrayList<String>();
 		skillAdjust = new HashMap<String, Integer>();
 		setSpecial(className);
@@ -869,7 +981,22 @@ class CharacterClass {
 		setSpecial(className);
 	}
 
-	/* public void setSpecial(String clas)
+
+	// Method to set up the base features of a class after it has been constructed
+	public void setChassis(int hd, float bab, boolean fort, boolean ref, boolean will, ArrayList<String> cskills, ArrayList<String> pSkills, int sppl) {
+		System.out.println("Setting up " + className + "'s chassis...");
+		hitDie = hd;
+		baseAttackBonus = bab;
+		goodFort = fort;
+		goodRef = ref;
+		goodWill = will;
+		classSkills = cskills;
+		prioritySkills = pSkills;
+		skillPointsPerLevel = sppl;
+	}
+
+
+	/* private void setSpecial(String clas)
 	Function to set up the CharacterClass object's ArrayList of 
 	special features. 
 	Also sets up the chassis of the class */

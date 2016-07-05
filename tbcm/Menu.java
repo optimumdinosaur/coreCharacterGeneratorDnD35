@@ -69,6 +69,11 @@ class Menu {
 					System.out.println("Unrecognized character class. Input new character class? (Y/N)");
 					String inStr = input.nextLine().toUpperCase();
 					if (inStr.equals("Y") || inStr.equals("YES")) {
+						System.out.println("Creating character class...");
+
+						System.out.println("Creating DDCharacter...");
+						tbcm.DDCharacter c = new tbcm.DDCharacter(inName, inRace);
+						System.out.println("DDCharacter object created!");
 						System.out.print("Class's Hit die? (just the integer)");
 						int inHD = input.nextInt();
 						System.out.print("Base attack bonus? (0.5, 0.75, or 1.0)");
@@ -85,18 +90,55 @@ class Menu {
 						csLine = input.nextLine().toUpperCase(); // class skill line
 						System.out.println("Second setting of csLine: " + csLine);
 						String[] csLineVector = csLine.split(",");
+
+						for(int i=0; i < csLineVector.length; i++) { // for each skill
+							csLineVector[i].trim(); // trim off any whitespace
+							if(c.skills.get(csLineVector[i]) == null) { // if the character's skillmap does not include this skill
+								c.skills.put(csLineVector[i], new HashMap<String, Integer>()); // set it up with its own hashmap
+								c.skills.get(csLineVector[i]).put("Total", 0);
+								c.skills.get(csLineVector[i]).put("Ranks", 0);
+								c.skills.get(csLineVector[i]).put("Misc", 0);
+								if (csLineVector[i].startsWith("CRAFT") || csLineVector[i].startsWith("KNOWLEDGE")) {
+									System.out.println("New intelligence based skill: " + csLineVector[i]);
+									c.skills.get(csLineVector[i]).put("AbiMod", 3);
+								}
+								else if (csLineVector[i].startsWith("PERFORM")) {
+									System.out.println("New Perform skill: " + csLineVector[i]);
+									c.skills.get(csLineVector[i]).put("AbiMod", 5);
+								}
+								else if (csLineVector[i].startsWith("PROFESSION")) {
+									System.out.println("New Profession skill: " + csLineVector[i]);
+									c.skills.get(csLineVector[i]).put("AbiMod", 4);
+								}
+								else {
+									System.out.println("Unrecognized skill: " + csLineVector[i]);
+									System.out.print("Which ability score is this based on?\n" +
+										"Use the corresponding integer to indicate which one.\n" +
+										"0-Str, 1-Dex, 2-Con, 3-Int, 4-Wis, 5-Cha :: ");
+									int whichAbi = input.nextInt();
+									c.skills.get(csLineVector[i]).put("AbiMod", whichAbi);
+								}
+							}
+						}
+						System.out.println("Class skills added!");
+						input.nextLine();
 						ArrayList<String> cs = new ArrayList<String>(Arrays.asList(csLineVector));
 						System.out.println("Any priority skills?");
 						csLine = input.nextLine().toUpperCase();
 						System.out.println("pSkills read as: " + csLine);
 						csLineVector = csLine.split(",");
 						ArrayList<String> ps = new ArrayList<String>(Arrays.asList(csLineVector));
+						for (String item : ps)
+							addPrioritySkill(c, item);
 						System.out.print("And how many skill points each level? ");
 						int inSPPL = input.nextInt();
+						System.out.println("Creating CharacterClass...");
 						tbcm.CharacterClass clas = new tbcm.CharacterClass(inClass, inHD, inBAB, inFort, inRef, inWill, cs, ps, inSPPL);
-						System.out.println("CharacterClass successfully created!");
-						System.out.println("Creating character...");
-						tbcm.DDCharacter c = new tbcm.DDCharacter(inName, inRace, clas);
+						System.out.println("CharacterClass created!");
+						System.out.println("Setting up first class for DDCharacter...");
+						c.setupFirstClass(clas);
+						System.out.println("First class setup successful!");
+						System.out.println("Character created!");
 						this.characterMenu(c);
 						break;
 					}
@@ -130,12 +172,12 @@ class Menu {
 			else if (inStr.equals("ADDPRIORITYSKILL")) {
 				System.out.println("Prioritize which skill?");
 				inStr = input.nextLine().toUpperCase();
-				ddc.addPrioritySkill(inStr);
+				addPrioritySkill(ddc, inStr);
 			}
 			else if (inStr.startsWith("ADDPRIORITYSKILL")) {
 				String skill = inStr.substring(inStr.indexOf(' ')+1);
 				System.out.format("Prioritizing %s...\n", skill);
-				ddc.addPrioritySkill(skill);
+				addPrioritySkill(ddc, skill);
 			}
 			else if (inStr.equals("LEVELUP")) {
 				System.out.print("Level up in which class? ");
@@ -147,18 +189,55 @@ class Menu {
 				System.out.println("clas read as: "+ clas);
 				ddc.levelUp(clas, 1);
 			}
+			else if (inStr.equals("ADDSPECIAL")) {
+				System.out.print("Add special ability: ");
+				inStr = input.nextLine().toUpperCase();
+				ddc.addSpecial(inStr);
+			}
+			else if (inStr.startsWith("ADDSPECIAL")) {
+				String inSpecial = inStr.substring(inStr.indexOf(' ')+1);
+				System.out.println("inSpecial read as: " + inSpecial);
+				ddc.addSpecial(inSpecial);
+			}
 			else if (inStr.equals("HELP"))
-				System.out.println("Usable commands: addpriorityskill, exit, help, levelup, print, printskill, reassignstats");
+				System.out.println("Usable commands: addpriorityskill, addspecial, exit, help, levelup, print, printskill, reassignstats");
 			else if (inStr.equals("REASSIGNSTATS"))
 				this.reassignCharStats(ddc);
 			else if (inStr.equals("EXIT"))
 				this.exit();
 			else
 				System.out.println("Unrecognized command\n" +
-					"Usable commands: addpriorityskill, exit, help, levelup, print, printskill, reassignstats");
+					"Usable commands: addpriorityskill, addspecial, exit, help, levelup, print, printskill, reassignstats");
 		}
 	}
 
+
+	private void addPrioritySkill(tbcm.DDCharacter ddc, String pSkill) {
+		if (ddc.skills.get(pSkill) == null) {
+			ddc.skills.put(pSkill, new HashMap<String, Integer>());
+			ddc.skills.get(pSkill).put("Total", 0);
+			ddc.skills.get(pSkill).put("Ranks", 0);
+			ddc.skills.get(pSkill).put("Misc", 0);
+			if (pSkill.startsWith("CRAFT") || pSkill.startsWith("KNOWLEDGE")) {
+				ddc.skills.get(pSkill).put("AbiMod", 3);
+			}
+			else if (pSkill.startsWith("PERFORM")) {
+				ddc.skills.get(pSkill).put("AbiMod", 5);
+			}
+			else if (pSkill.startsWith("PROFESSION")) {
+				ddc.skills.get(pSkill).put("AbiMod", 4);
+			}
+			else {
+				System.out.println("Unrecognized skill: " + pSkill);
+				System.out.print("Which ability score is this based on?\n" +
+					"Use the corresponding integer to indicate which one.\n" +
+					"0-Str, 1-Dex, 2-Con, 3-Int, 4-Wis, 5-Cha :: ");
+				int whichAbi = input.nextInt();
+				ddc.skills.get(pSkill).put("AbiMod", whichAbi);
+			}
+		}
+		ddc.prioritySkills.add(pSkill);
+	}
 
 
 	private void reassignCharStats(tbcm.DDCharacter ddc) {
