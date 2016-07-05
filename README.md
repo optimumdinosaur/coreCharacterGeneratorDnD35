@@ -1,5 +1,5 @@
 # coreCharacterGeneratorDnD35
-Java program to procedurally generate D&amp;D v3.5 characters using OGL content
+Java program to procedurally generate and build D&amp;D v3.5 characters using OGL content
 
 Text based menu allows user to create a character from level 1 and then level them up, acquire new skills, and retrieve important information. 
 
