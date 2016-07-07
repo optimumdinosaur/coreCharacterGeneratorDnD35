@@ -310,8 +310,7 @@ class DDCharacter { // D&D Character
 	public void levelUp(String cName, int levels) {
 		// first we check if the given class is already in classes
 		boolean nnew = true; // whether or not the class represented by cName is a new one or not
-		Set<CharacterClass> cSet = classes.keySet();
-		Iterator<CharacterClass> cIterator = cSet.iterator();
+		Iterator<CharacterClass> cIterator = classes.keySet().iterator();
 		while (cIterator.hasNext()) { // check each class the character has
 			CharacterClass currClass = cIterator.next();
 			if (currClass.className.equals(cName)) { // if we find a match
