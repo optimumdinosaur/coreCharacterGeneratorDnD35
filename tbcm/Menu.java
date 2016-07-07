@@ -182,12 +182,12 @@ class Menu {
 			else if (inStr.equals("LEVELUP")) {
 				System.out.print("Level up in which class? ");
 				inStr = input.nextLine().toUpperCase();
-				ddc.levelUp(inStr, 1);
+				this.levelUp(ddc, inStr);
 			}
 			else if (inStr.startsWith("LEVELUP")) {
 				String clas = inStr.substring(inStr.indexOf(' ')+1);
 				System.out.println("clas read as: "+ clas);
-				ddc.levelUp(clas, 1);
+				this.levelUp(ddc, clas);
 			}
 			else if (inStr.equals("ADDSPECIAL")) {
 				System.out.print("Add special ability: ");
@@ -209,6 +209,108 @@ class Menu {
 				System.out.println("Unrecognized command\n" +
 					"Usable commands: addpriorityskill, addspecial, exit, help, levelup, print, printskill, reassignstats");
 		}
+	}
+
+
+	/* levelUp
+		Method to level up a DDCharacter in the given class
+		Checks the class to see if it is supported and if not, asks the user to create it
+	*/
+	private void levelUp(tbcm.DDCharacter ddc, String className) {
+		if (!(Arrays.asList(supportedClasses).contains(className))) { // the class is not one of the Core OGL classes
+			boolean nnew = true;
+			Iterator<CharacterClass> cIterator = ddc.classes.keySet().iterator();
+			while(cIterator.hasNext()) {
+				CharacterClass currClass = cIterator.next();
+				if (currClass.className.equals(className)) { // we've found a match in here though wat do; getClassFeatures still advances the class's chassis features
+					ddc.getClassFeatures(currClass, 1);
+					ddc.classes.put(currClass, ddc.classes.get(currClass) + 1);
+					nnew = false;
+					ddc.calcSkillTotals();
+					return;
+				}
+			}
+			if (nnew) {
+				tbcm.CharacterClass newClass = this.buildCharacterClass(ddc, className);
+				ddc.classes.put(newClass, 0);
+				ddc.getClassFeatures(newClass, 1);
+				ddc.classes.put(newClass, 1);
+				ddc.calcSkillTotals();
+				return;
+			}
+		}
+	}	
+
+
+	/* buildCharacterClass
+		method to create a new CharacterClass object for a DDCharacter 
+		does not add the CharacterClass to the DDCharacter's classes HashMap
+		takes user input to define the class's base characteristics and 
+		sets the DDCharacter up for any new things the class may have
+	*/
+	private tbcm.CharacterClass buildCharacterClass(tbcm.DDCharacter c, String className) {
+		System.out.println("Implementing new base class: " + className);
+		System.out.print("Class's Hit die? (just the integer)");
+		int inHD = input.nextInt();
+		System.out.print("Base attack bonus? (0.5, 0.75, or 1.0)");
+		float inBAB = input.nextFloat();
+		System.out.print("Good Fortitude save? (true/false)" );
+		boolean inFort = input.nextBoolean();
+		System.out.print("How about Reflex save? ");
+		boolean inRef = input.nextBoolean();
+		System.out.print("Will save? ");
+		boolean inWill = input.nextBoolean();
+		System.out.println("What are the class's class skills? Separate them with commas, please.");
+		String csLine = input.nextLine();
+		//System.out.println("First initialization of csLine: " + csLine);
+		csLine = input.nextLine().toUpperCase(); // class skill line
+		System.out.println("Second setting of csLine: " + csLine);
+		String[] csLineVector = csLine.split(",");
+		for(int i=0; i < csLineVector.length; i++) { // for each skill
+			csLineVector[i].trim(); // trim off any whitespace
+			if(c.skills.get(csLineVector[i]) == null) { // if the character's skillmap does not include this skill
+				c.skills.put(csLineVector[i], new HashMap<String, Integer>()); // set it up with its own hashmap
+				c.skills.get(csLineVector[i]).put("Total", 0);
+				c.skills.get(csLineVector[i]).put("Ranks", 0);
+				c.skills.get(csLineVector[i]).put("Misc", 0);
+				if (csLineVector[i].startsWith("CRAFT") || csLineVector[i].startsWith("KNOWLEDGE")) {
+					System.out.println("New intelligence based skill: " + csLineVector[i]);
+					c.skills.get(csLineVector[i]).put("AbiMod", 3);
+				}
+				else if (csLineVector[i].startsWith("PERFORM")) {
+					System.out.println("New Perform skill: " + csLineVector[i]);
+					c.skills.get(csLineVector[i]).put("AbiMod", 5);
+				}
+				else if (csLineVector[i].startsWith("PROFESSION")) {
+					System.out.println("New Profession skill: " + csLineVector[i]);
+					c.skills.get(csLineVector[i]).put("AbiMod", 4);
+				}
+				else {
+					System.out.println("Unrecognized skill: " + csLineVector[i]);
+					System.out.print("Which ability score is this based on?\n" +
+						"Use the corresponding integer to indicate which one.\n" +
+						"0-Str, 1-Dex, 2-Con, 3-Int, 4-Wis, 5-Cha :: ");
+					int whichAbi = input.nextInt();
+					c.skills.get(csLineVector[i]).put("AbiMod", whichAbi);
+				}
+			}
+		}
+		System.out.println("Class skills added!");
+		input.nextLine();
+		ArrayList<String> cs = new ArrayList<String>(Arrays.asList(csLineVector));
+		System.out.println("Any priority skills?");
+		csLine = input.nextLine().toUpperCase();
+		System.out.println("pSkills read as: " + csLine);
+		csLineVector = csLine.split(",");
+		ArrayList<String> ps = new ArrayList<String>(Arrays.asList(csLineVector));
+		for (String item : ps)
+			addPrioritySkill(c, item);
+		System.out.print("And how many skill points each level? ");
+		int inSPPL = input.nextInt();
+		System.out.println("Creating CharacterClass...");
+		tbcm.CharacterClass clas = new tbcm.CharacterClass(className, inHD, inBAB, inFort, inRef, inWill, cs, ps, inSPPL);
+		System.out.println("CharacterClass created!");
+		return clas;
 	}
 
 

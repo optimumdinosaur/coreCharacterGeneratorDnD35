@@ -19,38 +19,28 @@ class DDCharacter { // D&D Character
 	
 	private String name; // character's name
 	private PlayerRace race; // character's race
-
 	// hashmap with characterClasses as the keys, and the character's number of levels in that class as the value
 	HashMap<CharacterClass,Integer> classes = new HashMap<CharacterClass,Integer>(); 
-	
 	private int hitPoints;
-
 	private int size; // medium = 0, small = -1, large = +1, huge = +2, etc.
-
 	// these int[] store info for the ability scores in order:
 	// 0-Strength, 1-Dexterity, 2-Constitution, 3-Intelligence, 4-Wisdom, 5-Charisma
 	private int[] abilityScores;
 	private int[] abiMods;
-
 	// each part of the total save bonus is stored separately
 	// keys include: "Total", "Base", "Misc"
 	private HashMap<String,Integer> fortSave;
 	private HashMap<String,Integer> refSave;
 	private HashMap<String,Integer> willSave;
-
 	private int baseAttackBonus;
-
 	private Random r;
-
 	// skills is the master hashmap for all the character's skills
 	// the skill name serves as a key, and returns a value that is another hashmap
 	// this inner hashmap is structured similarly to the ones for saves
 	HashMap<String, HashMap<String, Integer>> skills; 
 	Set<String> classSkills; // a set containing the class skills of all the classes of the character
 	Set<String> prioritySkills; // a set containing priority skills for the character
-
 	private Set<String> specialList; // the character's special abilities, class features, racial traits, etc.
-
 
 	/* Basic constructor
 		Creates a level 1 character of the given race and class
@@ -317,13 +307,13 @@ class DDCharacter { // D&D Character
 				getClassFeatures(currClass, levels); // do the thing
 				classes.put(currClass, classes.get(currClass) + levels);
 				nnew = false; // this class is not new
-				return; // we're done here
+				break; // we're done with this while loop
 			}
 		}
 		if (nnew) { // if it is a new class
 			CharacterClass newClass = new CharacterClass(cName); // create the CharacterClass
 			classes.put(newClass, 0); // put it into classes at level 0 so getClassFeatures() works properly
-			getClassFeatures(newClass, levels); // will the class's features from level 1 to levels
+			getClassFeatures(newClass, levels); // get the character the classFeatures from 1 to levels
 			classes.put(newClass, levels); // update classes with the actual level. 
 		}
 		calcSkillTotals();
@@ -332,7 +322,7 @@ class DDCharacter { // D&D Character
 	/* getClassFeatures
 		Function to add get class features from the given class
 	    according to the number of given levels in the class*/
-   private void getClassFeatures(CharacterClass clas, int levels) {
+   public void getClassFeatures(CharacterClass clas, int levels) {
 	   	System.out.format("Getting class features for %s...\n", clas.className);
 	   	System.out.println("Current level: " + classes.get(clas));
 	   	System.out.format("Leveling up %1$d times, getting to Level %2$d.\n", levels, classes.get(clas)+levels);
@@ -520,7 +510,7 @@ class DDCharacter { // D&D Character
    	// and do languages
    }
 
-   private void calcSkillTotals() {
+   public void calcSkillTotals() {
    		for (String skl : skills.keySet()) {
    			HashMap<String, Integer> sklMap = skills.get(skl);
    			sklMap.put("Total", (sklMap.get("Ranks") + sklMap.get("Misc") + abiMods[sklMap.get("AbiMod")]));
