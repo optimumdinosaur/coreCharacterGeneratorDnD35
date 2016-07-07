@@ -50,7 +50,6 @@ class DDCharacter { // D&D Character
 		name = newName;
 		race = new PlayerRace(newRace);
 
-		//CharacterClass clas = new CharacterClass(newClass);
 		classes.put(clas, 0);
 
 		hitPoints = 0;
@@ -85,7 +84,7 @@ class DDCharacter { // D&D Character
 	}
 
 	/* Constructor that does not require a CharacterClass
-		Useful for creating a character with an unknown class
+		Useful for creating a character with an unknown class because building a CharacterClass with Menu requires a DDCharacter
 		Has to later to be set up with the setupFirstClass() method */
 	DDCharacter(String newName, String newRace) {
 		name = newName;
@@ -340,7 +339,7 @@ class DDCharacter { // D&D Character
 	   			System.out.println("Adjust priority skill " + pSkill +"...");
 	   			System.out.println(skills.get(pSkill));
 	   			System.out.println("Current maxRank: " + maxRank);
-	   			while (skills.get(pSkill).get("Ranks") < maxRank) {
+	   			while (skills.get(pSkill).get("Ranks") < maxRank && sppl > 0) {
 	   				sppl--; // decrement sppl, increment Ranks for pSkill
 	   				skills.get(pSkill).put("Ranks", (skills.get(pSkill).get("Ranks")+1));
 	   				System.out.println(pSkill + " : " + skills.get(pSkill).get("Ranks"));

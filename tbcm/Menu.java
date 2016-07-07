@@ -275,6 +275,9 @@ class Menu {
 				return;
 			}
 		}
+		else {
+			ddc.levelUp(className, 1);
+		}
 	}	
 
 
