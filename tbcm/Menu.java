@@ -1,4 +1,14 @@
 package tbcm; // text based character manager
+/*************************************************
+Menu.java
+Java program to create and manage a text based menu that allows
+the user to generate or build a 3.5 D&D character. 
+Author: John M. Phillips
+
+Content from the game is taken from d20srd.org
+This content is Open Game Content, and is licensed for public use under the terms of the Open Game License v1.0a.
+'d20 System' is a trademark of Wizards of the Coast Inc. and is used according to the terms of the d20 System License Version 6.0 (which can be found at wizards.com/d20)
+*******************************************/
 
 import java.util.*;
 
@@ -8,6 +18,14 @@ class Menu {
 	private String[] supportedRaces = new String[] {"DROMITE", "DUERGAR", "DWARF", "ELAN", "ELF", "GNOME", "HALF-ELF", "HALF-GIANT", "HALF-ORC", "HALFLING", "HUMAN", "MAENAD", "XEPH"}; 
 	private String[] supportedClasses = new String[] {"BARBARIAN", "BARD", "CLERIC", "DRUID", "FIGHTER", "MONK", "PALADIN", "PSION", "PSYCHIC WARRIOR", "RANGER", "ROGUE", "SORCERER", "SOULKNIFE", "WILDER", "WIZARD", "ADEPT", "ARISTOCRAT", "COMMONER", "EXPERT", "WARRIOR"};
 
+	private Random rand = new Random();
+
+	private int currHP; // int for storing a character's current number of hit points
+
+
+	/* display()
+		the base method containing the home menu
+	*/
 	public void display() {
 		System.out.println("--D&D v3.5 Character Manager--");
 		System.out.println("-----------Main Menu----------");
@@ -41,7 +59,10 @@ class Menu {
 		}
 	}
 
-
+	/* buildMenu()
+		the build menu allows the user to create a character from 
+		level 1 using either core classes and races, or ones based on user input
+	*/
 	public void buildMenu() {
 		bmenu: while(true) {
 			System.out.println("---Build Menu---");
@@ -150,8 +171,11 @@ class Menu {
 		}
 	}
 
-
+	/* characterMenu(tbcm.DDCharacter ddc)
+		menu to manage a DDCharacter object
+	*/
 	public void characterMenu(tbcm.DDCharacter ddc) {
+		currHP = ddc.hitPoints;
 		while(true) {
 			System.out.println("-----Character Menu-----");
 			System.out.println("Enter a command, or 'help' for a list of commands: ");
@@ -159,6 +183,16 @@ class Menu {
 			System.out.println("Input String: " + inStr);
 			if (inStr.equals("PRINT"))
 				ddc.printCharacter();
+			else if (inStr.equals("ADJUSTHP")) {
+				System.out.print("Adjust hit points by how much: ");
+				int hpDelta = input.nextInt();
+				this.adjustHitPoints(ddc, hpDelta);
+			}
+			else if (inStr.startsWith("ADJUSTHP")) {
+				int hpDelta = Integer.parseInt(inStr.substring(inStr.indexOf(' ')+1));
+				System.out.println("hpDelta read as: " + hpDelta);
+				this.adjustHitPoints(ddc, hpDelta);
+			}
 			else if (inStr.equals("PRINTSKILL")) {
 				System.out.print("Print out which skill? ");
 				inStr = input.nextLine().toUpperCase();
@@ -200,14 +234,14 @@ class Menu {
 				ddc.addSpecial(inSpecial);
 			}
 			else if (inStr.equals("HELP"))
-				System.out.println("Usable commands: addpriorityskill, addspecial, exit, help, levelup, print, printskill, reassignstats");
+				System.out.println("Usable commands: addpriorityskill, addspecial, adjusthp, exit, help, levelup, print, printskill, reassignstats");
 			else if (inStr.equals("REASSIGNSTATS"))
 				this.reassignCharStats(ddc);
 			else if (inStr.equals("EXIT"))
 				this.exit();
 			else
 				System.out.println("Unrecognized command\n" +
-					"Usable commands: addpriorityskill, addspecial, exit, help, levelup, print, printskill, reassignstats");
+					"Usable commands: addpriorityskill, addspecial, adjusthp, exit, help, levelup, print, printskill, reassignstats");
 		}
 	}
 
@@ -379,6 +413,18 @@ class Menu {
 		}
 		ddc.prioritySkills.add(pSkill);
 	}
+
+
+	private void adjustHitPoints(tbcm.DDCharacter ddc, int hpDelta) {
+		currHP += hpDelta;
+		if (currHP > ddc.hitPoints)
+			currHP = ddc.hitPoints;
+		else if (currHP < -10)
+			currHP = -10;
+		System.out.println("Hit Points adjusted by: " + hpDelta);
+		System.out.println("HP :: { "+currHP+" / "+ddc.hitPoints+" }");
+	}
+
 
 
 	private void reassignCharStats(tbcm.DDCharacter ddc) {

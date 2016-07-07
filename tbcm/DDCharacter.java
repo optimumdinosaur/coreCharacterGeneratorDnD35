@@ -21,7 +21,7 @@ class DDCharacter { // D&D Character
 	private PlayerRace race; // character's race
 	// hashmap with characterClasses as the keys, and the character's number of levels in that class as the value
 	HashMap<CharacterClass,Integer> classes = new HashMap<CharacterClass,Integer>(); 
-	private int hitPoints;
+	int hitPoints;
 	private int size; // medium = 0, small = -1, large = +1, huge = +2, etc.
 	// these int[] store info for the ability scores in order:
 	// 0-Strength, 1-Dexterity, 2-Constitution, 3-Intelligence, 4-Wisdom, 5-Charisma
@@ -347,7 +347,6 @@ class DDCharacter { // D&D Character
 	   			}
 	   		}
 
-
 	   		for (int j=0; j < sppl; j++) { // for the remaining skill points
 	   			String skillToRankUp = cSkill.get(r.nextInt(cSkill.size()));
 	   			System.out.println("Current statistics of " + skillToRankUp);
@@ -380,11 +379,7 @@ class DDCharacter { // D&D Character
 	   	for (int i : willSave.values())
 	   		willTotal += i;
 	   	willSave.put("Total", willTotal);
-   	
-
-
    		// still to be done: spells
-
 
 	   	calcSkillTotals();
    	} // END PRIVATE VOID GETCLASSFEATURES
