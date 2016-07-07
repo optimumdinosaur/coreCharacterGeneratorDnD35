@@ -27,7 +27,7 @@ class Menu {
 				this.buildMenu();
 				break;
 			case 2:
-				System.out.println("Under construction");
+				this.generateMenu();
 				break;
 			case 3:
 				System.out.println("Under construction");
@@ -209,6 +209,42 @@ class Menu {
 				System.out.println("Unrecognized command\n" +
 					"Usable commands: addpriorityskill, addspecial, exit, help, levelup, print, printskill, reassignstats");
 		}
+	}
+
+
+	/* generateMenu
+	*/
+	private void generateMenu() {
+		System.out.println("So you wanna generate a character?\n" + 
+			"Few questions first. No pressure. If you don't want to answer just leave it blank.\n" +
+			"What race do you want this character to be? (Core and XPH only please)");
+		String inRace = input.nextLine().toUpperCase();
+		System.out.println("Race read as: " + inRace +"\n"+
+			"What class?:  ");
+		String inClass = input.nextLine().toUpperCase();
+		System.out.println("Class read as: " + inClass);
+		System.out.println("Creating CharacterClass...");
+		tbcm.CharacterClass clas = new tbcm.CharacterClass(inClass);
+		System.out.println("CharacterClass created!");
+		System.out.print("Which level should the character be? (1-20):  ");
+		int inLevel = input.nextInt();
+		System.out.println("Level read as: " + inLevel);
+		System.out.println("Generating character...");
+
+		tbcm.DDCharacter newCharacter = this.generateCharacter(inRace, clas, inLevel);
+		this.characterMenu(newCharacter);
+	}
+
+
+
+	/* generateCharacter
+		Method to generate a DDCharacter given minimum input
+	*/
+	private tbcm.DDCharacter generateCharacter(String inRace, tbcm.CharacterClass inClass, int inLevel) {
+		tbcm.DDCharacter newCharacter = new tbcm.DDCharacter("NAME", inRace, inClass);
+		if (inLevel > 1)
+			newCharacter.levelUp(inClass.className, inLevel - 1);
+		return newCharacter;
 	}
 
 
