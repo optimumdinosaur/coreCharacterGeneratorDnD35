@@ -258,12 +258,6 @@ class DDCharacter { // D&D Character
 	   	System.out.println("Current level: " + classes.get(clas));
 	   	System.out.format("Leveling up %1$d times, getting to Level %2$d.\n", levels, classes.get(clas)+levels);
 
-	   	if(clas.spellList != null) {
-			System.out.println("**#@@ SPELLCASTER FOUND @@#**");
-	   		if(clas.spellsKnownProgression != null)
-	   			System.out.println("***$$SPONTANEOUS CATSTER HERE $$***");
-	   	}
-
 	   	int sumOfLevels = 0; // the number of levels the character has in classes that are not clas
 	   	for (int lv : classes.values()) // this value is needed for calculating maximum skill rank
 	   		sumOfLevels += lv;
@@ -291,6 +285,8 @@ class DDCharacter { // D&D Character
 	   		else
 	   			hitPoints = hitPoints + r.nextInt(clas.hitDie) + abiMods[2] + 1;
 	   		System.out.println("hitPoints increasesd to " + hitPoints);
+	   		
+
 	   		if ((currentLevel+1) == 1) { // if this is the character's first level in this class
 	   			System.out.println("**1st level of a class.**");
 	   			classSkills.addAll(clas.classSkills); 
@@ -308,6 +304,20 @@ class DDCharacter { // D&D Character
 	   					}
 	   				}
 	   			}
+
+	   			if (clas.spellsPerDayProgression != null) {
+	   				System.out.println("FOUND FIRST LEVEL OF A SPELLCASTING CLASS");
+	   				System.out.println("Initializing clas.spellsPerDay...");
+	   				System.out.println("clas.spellsPerDayProgression[0][0] : " + clas.spellsPerDayProgression[0][0]);
+	   				clas.spellsPerDay = new ArrayList<Integer>();
+	   				for(int j=0; j < clas.spellsPerDayProgression[0].length; j++) {
+	   					System.out.println("About to set clas.spellPerDay equal to clas.spellsPerDayProgression[0]["+j+"]...");
+	   					System.out.println("Value equal to : " + clas.spellsPerDayProgression[0][j]);
+	   					clas.spellsPerDay.add(j, clas.spellsPerDayProgression[0][j]);
+	   					System.out.println("Spells per day Level " + j + " set to : " + clas.spellsPerDay.get(j));
+	   				}	   			
+	   			}
+
 	   			if (clas.goodFort)
 	   				fortSave.put("plusTwo", 2);
 	   			if (clas.goodRef)
@@ -386,6 +396,20 @@ class DDCharacter { // D&D Character
 	   		willTotal += i;
 	   	willSave.put("Total", willTotal);
    		// still to be done: spells
+
+   	   	if(clas.spellList != null) {
+			System.out.println("**#@@ SPELLCASTER FOUND @@#**");
+
+
+
+	   		if(clas.spellsKnownProgression != null)
+	   			System.out.println("***$$SPONTANEOUS CATSTER HERE $$***");
+	   		else 
+	   			System.out.println("*** PPPREPARED CASTER OVER HERE ***");
+	   	}
+
+
+
 
 	   	calcSkillTotals();
    	} // END PRIVATE VOID GETCLASSFEATURES
@@ -670,6 +694,16 @@ class DDCharacter { // D&D Character
 		System.out.println("Ref " + refSave);
 		System.out.println("Will " + willSave);
 
+		for (CharacterClass item : classes.keySet()) {
+			if (item.spellList != null) {
+				System.out.println("Spells per day for " + item.className);
+				for (int i=0; i < item.spellsPerDay.size(); i++) {
+					System.out.println("Lvl " + i + " :: " + item.spellsPerDay.get(i) + "/day");
+				}
+			}
+		}
+
+
 		System.out.println("Special: " + specialList);
 		System.out.println("Class Skills: " +classSkills);
 		System.out.println("Priority Skills: " + prioritySkills);
@@ -862,9 +896,6 @@ class CharacterClass {
 	ArrayList<Integer> spellsPerDay; // the character's number of spells per day of each level for this CharacterClass
 	ArrayList<String> spellsAvailable; // the character's spells known or spells prepared for this class
 
-	ArrayList<String> tags = new ArrayList<String>(); // a list of tags to indicate subsystems that the class uses; eg a Wizard will have the "Spellcaster" and "Prepared" tags, a Psion will have the "Psionic" tag
-
-
 	// Default constructor
 	CharacterClass(String name) {
 		className = name;
@@ -1006,17 +1037,17 @@ class CharacterClass {
 			prioritySkills.add("KNOWLEDGE(RELIGION)");
 			skillPointsPerLevel = 2;
 			special.get(0).add("Turn or Rebuke Undead");
-			// ArrayList<String> spellsLv0 = new ArrayList<String>(Arrays.asList("Create Water", "Cure Minor Wounds", "Detect Magic", "Detect Poison", "Guidance", "Inflict Minor Wounds", "Light", "Mending", "Purify Food and Drink", "Read Magic", "Resistance", "Virtue"));
-			// ArrayList<String> spellsLv1 = new ArrayList<String>(Arrays.asList("Bane", "Bless", "Bless Water", "Cause Fear", "Command", "Comprehend Languages", "Cure Light Wounds", "Curse Water", "Deathwatch", "Detect Chaos/Evil/Good/Law", "Detect Undead", "Divine Favor", "Doom", "Endure Elements", "Entropic Shield", "HIDE from Undead", "Inflict Light Wounds", "Magic Stone", "Magic Weapon", "Obscuring Mist", "Protection from Chaos/Evil/Good/Law", "Remove Fear", "Sanctuary", "Shield of Faith", "Summon Monster I"));
-			// ArrayList<String> spellsLv2 = new ArrayList<String>(Arrays.asList("Aid", "Align Weapon", "Augury", "Bear's Endurance", "Bull's Strength", "Calm Emotions", "Consecrate", "Cure Moderate Wounds", "Darkness", "Death Knell", "Delay Poison", "Desecrate", "Eagle's Splendor", "Enthrall", "Find Traps", "Gentle Repose", "Hold Person", "Inflict Moderate Wounds", "Make Whole", "Owl's Wisdom", "Remove Paralysis", "Resist Energy", "Lesser Restoration", "Shatter", "Shield Other", "Silence", "Sound Burst", "Spiritual Weapon", "Status", "Summon Monster II", "Undetectable Alignment", "Zone of Truth"));
-			// ArrayList<String> spellsLv3 = new ArrayList<String>(Arrays.asList("Animate Dead", "Bestow Curse", "Blindness/Deafness", "Contagion", "Continual Flame", "Create Food and Water", "Cure Serious Wounds", "Daylight", "Deeper Darkness", "Dispel Magic", "Glyph of Warding", "Helping Hand", "Inflict Serious Wounds", "Invisibility Purge", "Locate Object", "Magic Circle Against Chaos/Evil/Good/Law", "Magic Vestment", "Meld into Stone", "Obscure Object", "Prayer", "Protection from Energy", "Remove Blindness/Deafness", "Remove Curse", "Remove Disease", "Searing Light", "Speak with Dead", "Stone Shape", "Summon Monster III", "Water Breathing", "Water Walk", "Wind Wall"));
-			// ArrayList<String> spellsLv4 = new ArrayList<String>(Arrays.asList("Air Walk", "Control Water", "Cure Critical Wounds", "Death Ward", "Dimensional Anchor", "Discern Lies", "Dismissal", "Divination", "Divine Power", "Freedom of Movement", "Giant Vermin", "Imbue with Spell Ability", "Inflict Critical Wounds", "Greater Magic Weapon", "Neutralize Poison", "Lesser Planar Ally", "Poison", "Repel Vermin", "Restoration", "Sending", "Spell Immunity", "Summon Monster IV", "Tongues"));
-			// ArrayList<String> spellsLv5 = new ArrayList<String>(Arrays.asList("Atonement", "Break Enchantment", "Greater Command", "Commune", "Mass Cure Light Wounds", "Dispel Chaos/Evil/Good/Law", "Disrupting Weapon", "Flame Strike", "Hallow", "Mass Inflict Light Wounds", "Insect Plague", "Mark of Justice", "Plane Shift", "Raise Dead", "Righteous Might", "Scrying", "Slay Living", "Spell Resistance", "Summon Monster V", "Symbol of Pain", "Symbol of Sleep", "True Seeing", "Unhallow", "Wall of Stone"));
-			// ArrayList<String> spellsLv6 = new ArrayList<String>(Arrays.asList("Animate Objects", "Antilife Shell", "Banishment", "Mass Bear's Endurance", "Blade Barrier", "Mass Bull's Strength", "Create Undead", "Mass Cure Moderate Wounds", "Greater Dispel Magic", "Mass Eagle's Splendor", "Find the Path", "Forbiddance", "Geas/Quest", "Greater Glyph of Warding", "Harm", "HEAL", "Heroes' Feast", "Mass Inflict Moderate Wounds", "Mass Owl's Wisdom", "Planar Ally", "Summon Monster VI", "Symbol of Fear", "Symbol of Persuasion", "Undeath to Death", "Wind Walk", "Word of Recall"));
-			// ArrayList<String> spellsLV7 = new ArrayList<String>(Arrays.asList("Blasphemy", "Control Weather", "Mass Cure Serious Wounds", "Destruction", "Dictum", "Ethereal Jaunt", "Holy Word", "Mass Inflict Serious Wounds", "Refuge", "Regenerate", "Repulsion", "Greater Restoration", "Resurrection", "Greater Scrying", "Summon Monster VII", "Symbol of Stunning", "Symbol of Weaknes", "Word of Chaos"));
-			// ArrayList<String> spellsLv8 = new ArrayList<String>(Arrays.asList("Antimagic Field", "Cloak of Chaos", "Create Greater Undead", "Mass Cure Critical Wounds", "Dimensional Lock", "Discern Location", "Earthquake", "Fire Storm", "Holy Aura", "Mass Inflict Critical Wounds", "Greater Planar Ally", "Shield of Law", "Greater Spell Immunity", "Summon Monster VIII", "Symbol of Death", "Symbol of Insanity", "Unholy Aura"));
-			// ArrayList<String> spellsLv9 = new ArrayList<String>(Arrays.asList("Astral Projection", "Energy Drain", "Etherealness", "Gate", "Mass HEAL", "Implosion", "Miracle", "Soul Bind", "Storm of Vengeance", "Summon Monster IX", "True Resurrection"));
-
+			String[] spellsLv0 = new String[] {"Create Water", "Cure Minor Wounds", "Detect Magic", "Detect Poison", "Guidance", "Inflict Minor Wounds", "Light", "Mending", "Purify Food and Drink", "Read Magic", "Resistance", "Virtue"};
+			String[] spellsLv1 = new String[] {"Bane", "Bless", "Bless Water", "Cause Fear", "Command", "Comprehend Languages", "Cure Light Wounds", "Curse Water", "Deathwatch", "Detect Chaos/Evil/Good/Law", "Detect Undead", "Divine Favor", "Doom", "Endure Elements", "Entropic Shield", "HIDE from Undead", "Inflict Light Wounds", "Magic Stone", "Magic Weapon", "Obscuring Mist", "Protection from Chaos/Evil/Good/Law", "Remove Fear", "Sanctuary", "Shield of Faith", "Summon Monster I"};
+			String[] spellsLv2 = new String[] {"Aid", "Align Weapon", "Augury", "Bear's Endurance", "Bull's Strength", "Calm Emotions", "Consecrate", "Cure Moderate Wounds", "Darkness", "Death Knell", "Delay Poison", "Desecrate", "Eagle's Splendor", "Enthrall", "Find Traps", "Gentle Repose", "Hold Person", "Inflict Moderate Wounds", "Make Whole", "Owl's Wisdom", "Remove Paralysis", "Resist Energy", "Lesser Restoration", "Shatter", "Shield Other", "Silence", "Sound Burst", "Spiritual Weapon", "Status", "Summon Monster II", "Undetectable Alignment", "Zone of Truth"};
+			String[] spellsLv3 = new String[] {"Animate Dead", "Bestow Curse", "Blindness/Deafness", "Contagion", "Continual Flame", "Create Food and Water", "Cure Serious Wounds", "Daylight", "Deeper Darkness", "Dispel Magic", "Glyph of Warding", "Helping Hand", "Inflict Serious Wounds", "Invisibility Purge", "Locate Object", "Magic Circle Against Chaos/Evil/Good/Law", "Magic Vestment", "Meld into Stone", "Obscure Object", "Prayer", "Protection from Energy", "Remove Blindness/Deafness", "Remove Curse", "Remove Disease", "Searing Light", "Speak with Dead", "Stone Shape", "Summon Monster III", "Water Breathing", "Water Walk", "Wind Wall"};
+			String[] spellsLv4 = new String[] {"Air Walk", "Control Water", "Cure Critical Wounds", "Death Ward", "Dimensional Anchor", "Discern Lies", "Dismissal", "Divination", "Divine Power", "Freedom of Movement", "Giant Vermin", "Imbue with Spell Ability", "Inflict Critical Wounds", "Greater Magic Weapon", "Neutralize Poison", "Lesser Planar Ally", "Poison", "Repel Vermin", "Restoration", "Sending", "Spell Immunity", "Summon Monster IV", "Tongues"};
+			String[] spellsLv5 = new String[] {"Atonement", "Break Enchantment", "Greater Command", "Commune", "Mass Cure Light Wounds", "Dispel Chaos/Evil/Good/Law", "Disrupting Weapon", "Flame Strike", "Hallow", "Mass Inflict Light Wounds", "Insect Plague", "Mark of Justice", "Plane Shift", "Raise Dead", "Righteous Might", "Scrying", "Slay Living", "Spell Resistance", "Summon Monster V", "Symbol of Pain", "Symbol of Sleep", "True Seeing", "Unhallow", "Wall of Stone"};
+			String[] spellsLv6 = new String[] {"Animate Objects", "Antilife Shell", "Banishment", "Mass Bear's Endurance", "Blade Barrier", "Mass Bull's Strength", "Create Undead", "Mass Cure Moderate Wounds", "Greater Dispel Magic", "Mass Eagle's Splendor", "Find the Path", "Forbiddance", "Geas/Quest", "Greater Glyph of Warding", "Harm", "HEAL", "Heroes' Feast", "Mass Inflict Moderate Wounds", "Mass Owl's Wisdom", "Planar Ally", "Summon Monster VI", "Symbol of Fear", "Symbol of Persuasion", "Undeath to Death", "Wind Walk", "Word of Recall"};
+			String[] spellsLv7 = new String[] {"Blasphemy", "Control Weather", "Mass Cure Serious Wounds", "Destruction", "Dictum", "Ethereal Jaunt", "Holy Word", "Mass Inflict Serious Wounds", "Refuge", "Regenerate", "Repulsion", "Greater Restoration", "Resurrection", "Greater Scrying", "Summon Monster VII", "Symbol of Stunning", "Symbol of Weaknes", "Word of Chaos"};
+			String[] spellsLv8 = new String[] {"Antimagic Field", "Cloak of Chaos", "Create Greater Undead", "Mass Cure Critical Wounds", "Dimensional Lock", "Discern Location", "Earthquake", "Fire Storm", "Holy Aura", "Mass Inflict Critical Wounds", "Greater Planar Ally", "Shield of Law", "Greater Spell Immunity", "Summon Monster VIII", "Symbol of Death", "Symbol of Insanity", "Unholy Aura"};
+			String[] spellsLv9 = new String[] {"Astral Projection", "Energy Drain", "Etherealness", "Gate", "Mass HEAL", "Implosion", "Miracle", "Soul Bind", "Storm of Vengeance", "Summon Monster IX", "True Resurrection"};
+			spellList = new String[][] {spellsLv0, spellsLv1, spellsLv2, spellsLv3, spellsLv4, spellsLv5, spellsLv6, spellsLv7, spellsLv8, spellsLv9};
 
 
 		}
