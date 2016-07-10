@@ -258,6 +258,12 @@ class DDCharacter { // D&D Character
 	   	System.out.println("Current level: " + classes.get(clas));
 	   	System.out.format("Leveling up %1$d times, getting to Level %2$d.\n", levels, classes.get(clas)+levels);
 
+	   	if(clas.spellList != null) {
+			System.out.println("**#@@ SPELLCASTER FOUND @@#**");
+	   		if(clas.spellsKnownProgression != null)
+	   			System.out.println("***$$SPONTANEOUS CATSTER HERE $$***");
+	   	}
+
 	   	int sumOfLevels = 0; // the number of levels the character has in classes that are not clas
 	   	for (int lv : classes.values()) // this value is needed for calculating maximum skill rank
 	   		sumOfLevels += lv;
@@ -848,13 +854,13 @@ class CharacterClass {
 	ArrayList<ArrayList<String>> special; // an array list of array lists to store the class's special features
 	Random rand = new Random();
 
-
+	// spellList, spellsPerDayProgression, and spellsKnownProgression are all Arrays that store raw data about the class itself, not the character
 	String[][] spellList;
 	int[][] spellsPerDayProgression;
 	int[][] spellsKnownProgression;
 
-	ArrayList<Integer> spellsPerDay;
-	ArrayList<String> spellsAvailable;
+	ArrayList<Integer> spellsPerDay; // the character's number of spells per day of each level for this CharacterClass
+	ArrayList<String> spellsAvailable; // the character's spells known or spells prepared for this class
 
 	ArrayList<String> tags = new ArrayList<String>(); // a list of tags to indicate subsystems that the class uses; eg a Wizard will have the "Spellcaster" and "Prepared" tags, a Psion will have the "Psionic" tag
 
@@ -977,15 +983,17 @@ class CharacterClass {
 			special.get(14).add("Inspire Heroics");
 			special.get(17).add("Mass Suggestion");
 			special.get(19).add("Inspire Courage +4");
-			// String[] spellsLv0 = {"Dancing Lights", "Daze", "Detect Magic", "Flare", "Ghost Sound", "Know Direction", "Light", "Lullaby", "Mage Hand", "Mending", "Open/Close", "Prestidigitation", "Read Magic", "Resistance", "Summon Instrument"};
-			// String[] spellsLv1 = {"Alarm", "Animate Rope", "Cause Fear", "Charm Person", "Comprehend Languages", "Lesser Confusion", "Cure Light Wounds", "Detect Secret Doors", "DISGUISE Self", "Erase", "Expeditious Retreat", "Feather Fall", "Grease", "Hideous Laughter", "Hypnotism", "Identify", "Magic Mouth", "Magic Aura", "Obscure Object", "Remove Fear", "Silent Image", "Sleep", "Summon Monster I", "Undetectable Alignment", "Unseen Servant", "Ventriloquism"};
-			// String[] spellsLv2 = {"Alter Self", "Animal Messenger", "Animal Trance" "Blindness/Deafness", "Blur", "Calm Emotions", "Cat's Grace", "Cure Moderate Wounds", "Darkness", "Daze Monster", "Delay Poison", "Detect Thoughts", "Eagle's Splendor", "Enthrall", "Fox's Cunning", "Glitterdust", "Heroism", "Hold Person", "Hypnotic Pattern", "Invisibility", "Locate Object", "Minor Image", "Mirror Image", "Misdirection", "Pyrotechnics", "Rage", "Scare", "Shatter", "Silence", "Sound Burst", "Suggestion", "Summon Monster II", "Summon Swarm", "Tongues", "Whispering Wind"};
-			// String[] spellsLv3 = {"Blink", "Charm Monster", "Clairaudience/Clairvoyance", "Confusion", "Crushing Despair", "Cure Serious Wounds", "Daylight", "Deep Slumber", "Dispel Magic", "Displacement", "Fear", "Gaseous Form", "Lesser Geas", "Glibness", "Good Hope", "Haste", "Illusory Script", "Invisibility Sphere", "Major Image", "Phantom Steed", "Remove Curse", "Scrying", "Sculpt Sound", "Secret Page", "See Invisibility", "Sepia Snake Sigil", "Slow", "Speak with Animals", "Tiny Hut"};
-			// String[] spellsLv4 = {"Break Enchantment", "Cure Critical Wounds", "Detect Scrying", "Dimension Door", "Dominate Person", "Freedom of Movement", "Hallucinatory Terrain", "Hold Monster", "Greater Invisibility", "Legend Lore", "Locate Creature", "Modify Memory", "Neutralize Poison", "Rainbow Pattern", "Repel Vermin", "Secure Shelter", "Shadow Conjuration", "Shout", "Speak with Plants", "Summon Monster IV", "Zone of Silence"};
-			// String[] spellsLv5 = {"Mass Cure Light Wounds", "Greater Dispel Magic", "Dream", "False Vision", "Greater Heroism", "Mind Fog", "Mirage ARCANA", "Mislead", "Nightmare", "Persistent Image", "Seeming", "Shadow Evocation", "Shadow Walk", "Song of Discord", "Mass Suggestion", "Summon Monster V"};
-			// String[] spellsLv6 = {"Analyze Dweomer", "Animate Objects", "Mass Cat's Grace", "Mass Charm Monster", "Mass Cure Moderate Wounds", "Mass Eagle's Splendor", "Eyebite", "Find the Path" "Mass Fox's Cunning", "Geas/Quest", "Heroes' Feast", "Irresistable Dance", "Permanent Image", "Programmed Image", "Project Image", "Greater Scrying", "Greater Shout", "Summong Monster VI", "Sympathetic Vibration", "Veil"};
+			String[] spellsLv0 = new String[] {"Dancing Lights", "Daze", "Detect Magic", "Flare", "Ghost Sound", "Know Direction", "Light", "Lullaby", "Mage Hand", "Mending", "Open/Close", "Prestidigitation", "Read Magic", "Resistance", "Summon Instrument"};
+			String[] spellsLv1 = new String[] {"Alarm", "Animate Rope", "Cause Fear", "Charm Person", "Comprehend Languages", "Lesser Confusion", "Cure Light Wounds", "Detect Secret Doors", "DISGUISE Self", "Erase", "Expeditious Retreat", "Feather Fall", "Grease", "Hideous Laughter", "Hypnotism", "Identify", "Magic Mouth", "Magic Aura", "Obscure Object", "Remove Fear", "Silent Image", "Sleep", "Summon Monster I", "Undetectable Alignment", "Unseen Servant", "Ventriloquism"};
+			String[] spellsLv2 = new String[] {"Alter Self", "Animal Messenger", "Animal Trance", "Blindness/Deafness", "Blur", "Calm Emotions", "Cat's Grace", "Cure Moderate Wounds", "Darkness", "Daze Monster", "Delay Poison", "Detect Thoughts", "Eagle's Splendor", "Enthrall", "Fox's Cunning", "Glitterdust", "Heroism", "Hold Person", "Hypnotic Pattern", "Invisibility", "Locate Object", "Minor Image", "Mirror Image", "Misdirection", "Pyrotechnics", "Rage", "Scare", "Shatter", "Silence", "Sound Burst", "Suggestion", "Summon Monster II", "Summon Swarm", "Tongues", "Whispering Wind"};
+			String[] spellsLv3 = new String[] {"Blink", "Charm Monster", "Clairaudience/Clairvoyance", "Confusion", "Crushing Despair", "Cure Serious Wounds", "Daylight", "Deep Slumber", "Dispel Magic", "Displacement", "Fear", "Gaseous Form", "Lesser Geas", "Glibness", "Good Hope", "Haste", "Illusory Script", "Invisibility Sphere", "Major Image", "Phantom Steed", "Remove Curse", "Scrying", "Sculpt Sound", "Secret Page", "See Invisibility", "Sepia Snake Sigil", "Slow", "Speak with Animals", "Tiny Hut"};
+			String[] spellsLv4 = new String[] {"Break Enchantment", "Cure Critical Wounds", "Detect Scrying", "Dimension Door", "Dominate Person", "Freedom of Movement", "Hallucinatory Terrain", "Hold Monster", "Greater Invisibility", "Legend Lore", "Locate Creature", "Modify Memory", "Neutralize Poison", "Rainbow Pattern", "Repel Vermin", "Secure Shelter", "Shadow Conjuration", "Shout", "Speak with Plants", "Summon Monster IV", "Zone of Silence"};
+			String[] spellsLv5 = new String[] {"Mass Cure Light Wounds", "Greater Dispel Magic", "Dream", "False Vision", "Greater Heroism", "Mind Fog", "Mirage ARCANA", "Mislead", "Nightmare", "Persistent Image", "Seeming", "Shadow Evocation", "Shadow Walk", "Song of Discord", "Mass Suggestion", "Summon Monster V"};
+			String[] spellsLv6 = new String[] {"Analyze Dweomer", "Animate Objects", "Mass Cat's Grace", "Mass Charm Monster", "Mass Cure Moderate Wounds", "Mass Eagle's Splendor", "Eyebite", "Find the Path", "Mass Fox's Cunning", "Geas/Quest", "Heroes' Feast", "Irresistable Dance", "Permanent Image", "Programmed Image", "Project Image", "Greater Scrying", "Greater Shout", "Summon Monster VI", "Sympathetic Vibration", "Veil"};
+			spellList = new String[][] {spellsLv0, spellsLv1, spellsLv2, spellsLv3, spellsLv4, spellsLv5, spellsLv6};
 
-
+			spellsPerDayProgression = new int[][] {{2}, {3, 0}, {3, 1}, {3, 2, 0}, {3, 3, 1}, {3, 3, 2}, {3, 3, 2, 0}, {3, 3, 3, 1}, {3, 3, 3, 2}, {3, 3, 3, 2, 0}, {3, 3, 3, 3, 1}, {3, 3, 3, 3, 2}, {3, 3, 3, 3, 2, 0}, {4, 3, 3, 3, 3, 1}, {4, 4, 3, 3, 3, 2}, {4, 4, 4, 3, 3, 2, 0}, {4, 4, 4, 4, 3, 3, 1}, {4, 4, 4, 4, 4, 3, 2}, {4, 4, 4, 4, 4, 4, 3}, {4, 4, 4, 4, 4, 4, 4}};
+			spellsKnownProgression = new int[][] {{4}, {5, 2}, {6, 3}, {6, 3, 2}, {6, 4, 3}, {6, 4, 3}, {6, 4, 4, 2}, {6, 4, 4, 3}, {6, 4, 4, 3}, {6, 4, 4, 4, 2}, {6, 4, 4, 4, 3}, {6, 4, 4, 4, 3}, {6, 4, 4, 4, 4, 2}, {6, 4, 4, 4, 4, 3}, {6, 4, 4, 4, 4, 3}, {6, 5, 4, 4, 4, 4, 2}, {6, 5, 5, 4, 4, 4, 3}, {6, 5, 5, 5, 4, 4, 3}, {6, 5, 5, 5, 5, 4, 4}, {6, 5, 5, 5, 5, 5, 4}};
 		
 		}
 		else if (clas.equals("CLERIC")) {
@@ -1008,7 +1016,9 @@ class CharacterClass {
 			// ArrayList<String> spellsLV7 = new ArrayList<String>(Arrays.asList("Blasphemy", "Control Weather", "Mass Cure Serious Wounds", "Destruction", "Dictum", "Ethereal Jaunt", "Holy Word", "Mass Inflict Serious Wounds", "Refuge", "Regenerate", "Repulsion", "Greater Restoration", "Resurrection", "Greater Scrying", "Summon Monster VII", "Symbol of Stunning", "Symbol of Weaknes", "Word of Chaos"));
 			// ArrayList<String> spellsLv8 = new ArrayList<String>(Arrays.asList("Antimagic Field", "Cloak of Chaos", "Create Greater Undead", "Mass Cure Critical Wounds", "Dimensional Lock", "Discern Location", "Earthquake", "Fire Storm", "Holy Aura", "Mass Inflict Critical Wounds", "Greater Planar Ally", "Shield of Law", "Greater Spell Immunity", "Summon Monster VIII", "Symbol of Death", "Symbol of Insanity", "Unholy Aura"));
 			// ArrayList<String> spellsLv9 = new ArrayList<String>(Arrays.asList("Astral Projection", "Energy Drain", "Etherealness", "Gate", "Mass HEAL", "Implosion", "Miracle", "Soul Bind", "Storm of Vengeance", "Summon Monster IX", "True Resurrection"));
-		
+
+
+
 		}
 		else if (clas.equals("DRUID")) {
 			hitDie = 8;
