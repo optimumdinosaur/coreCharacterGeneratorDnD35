@@ -399,7 +399,18 @@ class DDCharacter { // D&D Character
 
    	   	if(clas.spellList != null) {
 			System.out.println("**#@@ SPELLCASTER FOUND @@#**");
-
+			// here i need to update clas.spellsPerDay with the values from clas.spellsPerDayProgression[classes.get(clas)+levels]
+			// the newLevel is classes.get(clas)+levels
+			int newLevel = classes.get(clas)+levels-1;
+			int[] newSPD = clas.spellsPerDayProgression[newLevel];
+			System.out.println("Updating clas.spellsPerDay...");
+			System.out.println("newSPD: " + newSPD);
+			clas.spellsPerDay.clear();
+			for(int i =0; i < newSPD.length; i++) {
+				System.out.println("Adding element #"+i+" to clas.spellsPerDay: " + newSPD[i] + "...");
+				clas.spellsPerDay.add(i, newSPD[i]);
+				System.out.println("New value of clas.spellsPerDay["+i+"] : " + clas.spellsPerDay.get(i));
+			}
 
 
 	   		if(clas.spellsKnownProgression != null)
@@ -1046,9 +1057,10 @@ class CharacterClass {
 			String[] spellsLv6 = new String[] {"Animate Objects", "Antilife Shell", "Banishment", "Mass Bear's Endurance", "Blade Barrier", "Mass Bull's Strength", "Create Undead", "Mass Cure Moderate Wounds", "Greater Dispel Magic", "Mass Eagle's Splendor", "Find the Path", "Forbiddance", "Geas/Quest", "Greater Glyph of Warding", "Harm", "HEAL", "Heroes' Feast", "Mass Inflict Moderate Wounds", "Mass Owl's Wisdom", "Planar Ally", "Summon Monster VI", "Symbol of Fear", "Symbol of Persuasion", "Undeath to Death", "Wind Walk", "Word of Recall"};
 			String[] spellsLv7 = new String[] {"Blasphemy", "Control Weather", "Mass Cure Serious Wounds", "Destruction", "Dictum", "Ethereal Jaunt", "Holy Word", "Mass Inflict Serious Wounds", "Refuge", "Regenerate", "Repulsion", "Greater Restoration", "Resurrection", "Greater Scrying", "Summon Monster VII", "Symbol of Stunning", "Symbol of Weaknes", "Word of Chaos"};
 			String[] spellsLv8 = new String[] {"Antimagic Field", "Cloak of Chaos", "Create Greater Undead", "Mass Cure Critical Wounds", "Dimensional Lock", "Discern Location", "Earthquake", "Fire Storm", "Holy Aura", "Mass Inflict Critical Wounds", "Greater Planar Ally", "Shield of Law", "Greater Spell Immunity", "Summon Monster VIII", "Symbol of Death", "Symbol of Insanity", "Unholy Aura"};
-			String[] spellsLv9 = new String[] {"Astral Projection", "Energy Drain", "Etherealness", "Gate", "Mass HEAL", "Implosion", "Miracle", "Soul Bind", "Storm of Vengeance", "Summon Monster IX", "True Resurrection"};
+			String[] spellsLv9 = new String[] {"Astral Projection", "Energy Drain", "Etherealness", "Gate", "Mass Heal", "Implosion", "Miracle", "Soul Bind", "Storm of Vengeance", "Summon Monster IX", "True Resurrection"};
 			spellList = new String[][] {spellsLv0, spellsLv1, spellsLv2, spellsLv3, spellsLv4, spellsLv5, spellsLv6, spellsLv7, spellsLv8, spellsLv9};
 
+			spellsPerDayProgression = new int[][] {{3, 2}, {4, 3}, {4, 3, 2}, {5, 4, 3}, {5, 4, 3, 2}, {5, 4, 4, 3}, {6, 5, 4, 3, 2}, {6, 5, 4, 4, 3}, {6, 5, 5, 4, 3, 2}, {6, 5, 5, 4, 4, 3}, {6, 6, 5, 5, 4, 3, 2}, {6, 6, 5, 5, 4, 4, 3}, {6, 6, 6, 5, 5, 4, 3, 2}, {6, 6, 6, 5, 5, 4, 4, 3}, {6, 6, 6, 6, 5, 5, 4, 3, 2}, {6, 6, 6, 6, 5, 5, 4, 4, 3}, {6, 6, 6, } };
 
 		}
 		else if (clas.equals("DRUID")) {
