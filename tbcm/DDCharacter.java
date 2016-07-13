@@ -315,7 +315,11 @@ class DDCharacter { // D&D Character
 	   					System.out.println("Value equal to : " + clas.spellsPerDayProgression[0][j]);
 	   					clas.spellsPerDay.add(j, clas.spellsPerDayProgression[0][j]);
 	   					System.out.println("Spells per day Level " + j + " set to : " + clas.spellsPerDay.get(j));
-	   				}	   			
+	   				}
+	   				if (clas.spellsKnownProgression != null) {
+	   					System.out.println("Initializing spellsKnown...");
+	   					clas.spellsKnown = new ArrayList<HashSet<String>>();
+	   				}   			
 	   			}
 
 	   			if (clas.goodFort)
@@ -325,6 +329,8 @@ class DDCharacter { // D&D Character
 	   			if (clas.goodWill)
 	   				willSave.put("plusTwo", 2);
 	   		}
+
+
 	   		if (((currentLevel+1) % 2) == 0) { // if the level is even, when a goodSave progression increments
 	   			if (clas.goodFort) 
 	   				fortSave.put("Base", fortSave.get("Base")+1);
@@ -379,6 +385,7 @@ class DDCharacter { // D&D Character
 
 	   		
 	   		System.out.println("*************************");
+
 	   	} // end for (i=0; i < levels; i++)
 	   	// here i will calculate the character's total save bonus
 	   	int fortTotal = (fortSave.get("Total") * -1) + abiMods[2]; // initialize it to this so when we add them all together, the preexisting total does not throw it off
@@ -407,24 +414,31 @@ class DDCharacter { // D&D Character
 			System.out.println("Updating clas.spellsPerDay...");
 			System.out.println("newSPD: " + newSPD);
 			clas.spellsPerDay.clear();
-			for(int i =0; i < newSPD.length; i++) {
-				System.out.println("Adding element #"+i+" to clas.spellsPerDay: " + newSPD[i] + "...");
-				
-
+			for(int i =0; i < newSPD.length; i++) { // for each spell level
+				System.out.println("Updating spell level "+i+" in clas.spellsPerDay: " + newSPD[i] + "...");
 				int bonusSpells = ((i == 0) ? 0 : ((int)Math.ceil((abiMods[clas.bonusSpellsAbi] - i + 1) / 4.0)));
-
 				System.out.println("bonusSpells: " + bonusSpells);
 				clas.spellsPerDay.add(i, newSPD[i] + bonusSpells);
-
-
 				System.out.println("New value of clas.spellsPerDay["+i+"] : " + clas.spellsPerDay.get(i));
+
+				if (clas.spellsKnownProgression != null) { // if spontaneous caster
+
+					while (clas.spellsKnown.size() < clas.spellsKnownProgression[newLevel].length) {
+						clas.spellsKnown.add(new HashSet<String>());
+					}
+
+					// have to compare the spellsKnownProgression[newLevel] with that of the old level, or rather with the length of the character's spells known
+					while (clas.spellsKnownProgression[newLevel][i] > clas.spellsKnown.get(i).size()) {
+						// learn a spell
+						int randSpellIndex = r.nextInt(clas.spellList[i].length);
+						String newSpell = clas.spellList[i][randSpellIndex];
+						System.out.println("Learning spell #" + randSpellIndex + " : " + newSpell + "...");
+						if (!(clas.spellsKnown.get(i).contains(newSpell))) {
+							clas.spellsKnown.get(i).add(newSpell);
+						}
+					}
+				}
 			}
-
-
-	   		if(clas.spellsKnownProgression != null)
-	   			System.out.println("***$$SPONTANEOUS CATSTER HERE $$***");
-	   		else 
-	   			System.out.println("*** PPPREPARED CASTER OVER HERE ***");
 	   	}
 
 
@@ -729,6 +743,15 @@ class DDCharacter { // D&D Character
 				for (int i=0; i < item.spellsPerDay.size(); i++) {
 					System.out.println("Lvl " + i + " :: " + item.spellsPerDay.get(i) + "/day");
 				}
+				if (item.spellsKnown != null) {
+					System.out.println(item.className + " Spells Known: ");
+					for (int i=0; i < item.spellsKnown.size(); i++) {
+						System.out.println("Level " + i + " Spells:");
+						for (String spell : item.spellsKnown.get(i)) {
+							System.out.println(spell + '('+i+')');
+						}
+					}
+				}
 			}
 		}
 
@@ -926,7 +949,8 @@ class CharacterClass {
 	int[][] spellsKnownProgression;
 
 	ArrayList<Integer> spellsPerDay; // the character's number of spells per day of each level for this CharacterClass
-	ArrayList<String> spellsAvailable; // the character's spells known or spells prepared for this class
+	ArrayList<HashSet<String>> spellsKnown; // the character's spells known sorted by spell level, only used if the class is a spontaneous caster
+
 
 	// Default constructor
 	CharacterClass(String name) {
