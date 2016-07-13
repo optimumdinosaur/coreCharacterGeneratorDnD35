@@ -395,8 +395,9 @@ class DDCharacter { // D&D Character
 	   	for (int i : willSave.values())
 	   		willTotal += i;
 	   	willSave.put("Total", willTotal);
-   		// still to be done: spells
+   		
 
+   		// still to be done: spells
    	   	if(clas.spellList != null) {
 			System.out.println("**#@@ SPELLCASTER FOUND @@#**");
 			// here i need to update clas.spellsPerDay with the values from clas.spellsPerDayProgression[classes.get(clas)+levels]
@@ -408,7 +409,14 @@ class DDCharacter { // D&D Character
 			clas.spellsPerDay.clear();
 			for(int i =0; i < newSPD.length; i++) {
 				System.out.println("Adding element #"+i+" to clas.spellsPerDay: " + newSPD[i] + "...");
-				clas.spellsPerDay.add(i, newSPD[i]);
+				
+
+				int bonusSpells = ((i == 0) ? 0 : ((int)Math.ceil((abiMods[clas.bonusSpellsAbi] - i + 1) / 4.0)));
+
+				System.out.println("bonusSpells: " + bonusSpells);
+				clas.spellsPerDay.add(i, newSPD[i] + bonusSpells);
+
+
 				System.out.println("New value of clas.spellsPerDay["+i+"] : " + clas.spellsPerDay.get(i));
 			}
 
@@ -477,17 +485,27 @@ class DDCharacter { // D&D Character
    	// and do languages
    }
 
+
+   /* calcSkillTotals
+   		method called whenever we need to do final checks on the character
+   		actually does a number of things in addition to calculating skill totals
+   		also calculates the character's total base attack bonus
+   		and checks that the character's ability modifiers are up to date
+   */
    public void calcSkillTotals() {
+   		for (int i=0; i < 6; i++) {
+   			abiMods[i] = calcMod(abilityScores[i]);
+   		}
+
    		for (String skl : skills.keySet()) {
    			HashMap<String, Integer> sklMap = skills.get(skl);
    			sklMap.put("Total", (sklMap.get("Ranks") + sklMap.get("Misc") + abiMods[sklMap.get("AbiMod")]));
    		}
-   		baseAttackBonus = 0; // make sure it's 0
+
+   		baseAttackBonus = 0; // reset this back to 0
    		for (CharacterClass clas : classes.keySet()) {
    			baseAttackBonus += (clas.baseAttackBonus * classes.get(clas));
-   		}
-   		for (int i=0; i < 6; i++) {
-   			abiMods[i] = calcMod(abilityScores[i]);
+
    		}
    }
 
@@ -899,6 +917,9 @@ class CharacterClass {
 	ArrayList<ArrayList<String>> special; // an array list of array lists to store the class's special features
 	Random rand = new Random();
 
+
+	// things for spellcasters
+	int bonusSpellsAbi; // an integer from 0 - 5 indicating which ability score gives this class bonus spells per day
 	// spellList, spellsPerDayProgression, and spellsKnownProgression are all Arrays that store raw data about the class itself, not the character
 	String[][] spellList;
 	int[][] spellsPerDayProgression;
@@ -1025,6 +1046,7 @@ class CharacterClass {
 			special.get(14).add("Inspire Heroics");
 			special.get(17).add("Mass Suggestion");
 			special.get(19).add("Inspire Courage +4");
+
 			String[] spellsLv0 = new String[] {"Dancing Lights", "Daze", "Detect Magic", "Flare", "Ghost Sound", "Know Direction", "Light", "Lullaby", "Mage Hand", "Mending", "Open/Close", "Prestidigitation", "Read Magic", "Resistance", "Summon Instrument"};
 			String[] spellsLv1 = new String[] {"Alarm", "Animate Rope", "Cause Fear", "Charm Person", "Comprehend Languages", "Lesser Confusion", "Cure Light Wounds", "Detect Secret Doors", "DISGUISE Self", "Erase", "Expeditious Retreat", "Feather Fall", "Grease", "Hideous Laughter", "Hypnotism", "Identify", "Magic Mouth", "Magic Aura", "Obscure Object", "Remove Fear", "Silent Image", "Sleep", "Summon Monster I", "Undetectable Alignment", "Unseen Servant", "Ventriloquism"};
 			String[] spellsLv2 = new String[] {"Alter Self", "Animal Messenger", "Animal Trance", "Blindness/Deafness", "Blur", "Calm Emotions", "Cat's Grace", "Cure Moderate Wounds", "Darkness", "Daze Monster", "Delay Poison", "Detect Thoughts", "Eagle's Splendor", "Enthrall", "Fox's Cunning", "Glitterdust", "Heroism", "Hold Person", "Hypnotic Pattern", "Invisibility", "Locate Object", "Minor Image", "Mirror Image", "Misdirection", "Pyrotechnics", "Rage", "Scare", "Shatter", "Silence", "Sound Burst", "Suggestion", "Summon Monster II", "Summon Swarm", "Tongues", "Whispering Wind"};
@@ -1033,6 +1055,8 @@ class CharacterClass {
 			String[] spellsLv5 = new String[] {"Mass Cure Light Wounds", "Greater Dispel Magic", "Dream", "False Vision", "Greater Heroism", "Mind Fog", "Mirage ARCANA", "Mislead", "Nightmare", "Persistent Image", "Seeming", "Shadow Evocation", "Shadow Walk", "Song of Discord", "Mass Suggestion", "Summon Monster V"};
 			String[] spellsLv6 = new String[] {"Analyze Dweomer", "Animate Objects", "Mass Cat's Grace", "Mass Charm Monster", "Mass Cure Moderate Wounds", "Mass Eagle's Splendor", "Eyebite", "Find the Path", "Mass Fox's Cunning", "Geas/Quest", "Heroes' Feast", "Irresistable Dance", "Permanent Image", "Programmed Image", "Project Image", "Greater Scrying", "Greater Shout", "Summon Monster VI", "Sympathetic Vibration", "Veil"};
 			spellList = new String[][] {spellsLv0, spellsLv1, spellsLv2, spellsLv3, spellsLv4, spellsLv5, spellsLv6};
+
+			bonusSpellsAbi = 5; // Charisma
 
 			spellsPerDayProgression = new int[][] {{2}, {3, 0}, {3, 1}, {3, 2, 0}, {3, 3, 1}, {3, 3, 2}, {3, 3, 2, 0}, {3, 3, 3, 1}, {3, 3, 3, 2}, {3, 3, 3, 2, 0}, {3, 3, 3, 3, 1}, {3, 3, 3, 3, 2}, {3, 3, 3, 3, 2, 0}, {4, 3, 3, 3, 3, 1}, {4, 4, 3, 3, 3, 2}, {4, 4, 4, 3, 3, 2, 0}, {4, 4, 4, 4, 3, 3, 1}, {4, 4, 4, 4, 4, 3, 2}, {4, 4, 4, 4, 4, 4, 3}, {4, 4, 4, 4, 4, 4, 4}};
 			spellsKnownProgression = new int[][] {{4}, {5, 2}, {6, 3}, {6, 3, 2}, {6, 4, 3}, {6, 4, 3}, {6, 4, 4, 2}, {6, 4, 4, 3}, {6, 4, 4, 3}, {6, 4, 4, 4, 2}, {6, 4, 4, 4, 3}, {6, 4, 4, 4, 3}, {6, 4, 4, 4, 4, 2}, {6, 4, 4, 4, 4, 3}, {6, 4, 4, 4, 4, 3}, {6, 5, 4, 4, 4, 4, 2}, {6, 5, 5, 4, 4, 4, 3}, {6, 5, 5, 5, 4, 4, 3}, {6, 5, 5, 5, 5, 4, 4}, {6, 5, 5, 5, 5, 5, 4}};
@@ -1060,6 +1084,9 @@ class CharacterClass {
 			String[] spellsLv9 = new String[] {"Astral Projection", "Energy Drain", "Etherealness", "Gate", "Mass Heal", "Implosion", "Miracle", "Soul Bind", "Storm of Vengeance", "Summon Monster IX", "True Resurrection"};
 			spellList = new String[][] {spellsLv0, spellsLv1, spellsLv2, spellsLv3, spellsLv4, spellsLv5, spellsLv6, spellsLv7, spellsLv8, spellsLv9};
 
+			bonusSpellsAbi = 4; // Wisdom
+
+			// the cleric's spells per day progression already includes the bonus domain spell of each level
 			spellsPerDayProgression = new int[][] {{3, 2}, {4, 3}, {4, 3, 2}, {5, 4, 3}, {5, 4, 3, 2}, {5, 4, 4, 3}, {6, 5, 4, 3, 2}, {6, 5, 4, 4, 3}, {6, 5, 5, 4, 3, 2}, {6, 5, 5, 4, 4, 3}, {6, 6, 5, 5, 4, 3, 2}, {6, 6, 5, 5, 4, 4, 3}, {6, 6, 6, 5, 5, 4, 3, 2}, {6, 6, 6, 5, 5, 4, 4, 3}, {6, 6, 6, 6, 5, 5, 4, 3, 2}, {6, 6, 6, 6, 5, 5, 4, 4, 3}, {6, 6, 6, } };
 
 		}
