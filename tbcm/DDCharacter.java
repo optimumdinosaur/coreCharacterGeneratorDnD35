@@ -33,7 +33,7 @@ class DDCharacter { // D&D Character
 	private HashMap<String,Integer> refSave;
 	private HashMap<String,Integer> willSave;
 	private int baseAttackBonus;
-	private Random r;
+	private static Random r = new Random();
 	// skills is the master hashmap for all the character's skills
 	// the skill name serves as a key, and returns a value that is another hashmap
 	// this inner hashmap is structured similarly to the ones for saves
@@ -47,6 +47,7 @@ class DDCharacter { // D&D Character
 		Stats are rolled using the rollStats() method, 4d6 drop lowest
 	*/
 	DDCharacter(String newName, String newRace, CharacterClass clas) {
+		
 		name = newName;
 		race = new PlayerRace(newRace);
 
@@ -70,8 +71,6 @@ class DDCharacter { // D&D Character
 		willSave.put("Misc", 0);
 
 		baseAttackBonus = 0;
-
-		r = new Random(); // Random object I'll need later
 
 		setupCoreSkills();
 		classSkills = new HashSet<String>(); // both this and prioritySkills are actually set up in getClassFeatures()
@@ -108,8 +107,6 @@ class DDCharacter { // D&D Character
 		willSave.put("Misc", 0);
 
 		baseAttackBonus = 0;
-
-		r = new Random(); // Random object I'll need later
 
 		setupCoreSkills();
 		classSkills = new HashSet<String>(); // both this and prioritySkills are actually set up in getClassFeatures()
@@ -268,10 +265,25 @@ class DDCharacter { // D&D Character
 	   		System.out.format("**Going from level %1$d to %2$d...\n", currentLevel, currentLevel + 1);
 	   		ArrayList<String> newFeatures = clas.special.get(currentLevel);
 	   		System.out.println("newFeatures of Lv" + (currentLevel+1) + ": " + newFeatures);
-	   		for(int j=0; j < newFeatures.size(); j++) {
-	   			specialList.add(newFeatures.get(j));
+	   		for (int k=0; k < newFeatures.size(); k++) { // look at newFeatures for abilities that increase numerically and replace a lower level version (like Rage 2/day replacing Rage 1/day)
+	   			String newFeature = newFeatures.get(k);
+	   			if(newFeature.matches(".*\\d+.*")) { // if newFeature contains a digit
+	   				// here i need to remove the old version, so first i'll get the substring containing the name of hte ability
+	   				int digIndex = 0;
+	   				for (int j=0; j < newFeature.length(); j++) {
+	   					if (Character.isDigit(newFeature.charAt(j))) {
+	   						digIndex = j;
+	   						}
+	   				}
+	   				String abiName = newFeature.substring(0, digIndex);
+	   				for(String s : specialList) {
+	   					if (s.startsWith(abiName)) {
+	   						specialList.remove(s);
+	   					}
+	   				}
+	   			}
 	   		}
-
+	   		specialList.addAll(newFeatures);
 	   		int sppl = clas.skillPointsPerLevel + abiMods[3]; // skill points per level
 	   		if (race.raceName.equals("HUMAN")) 
 	   			sppl++; // if human, get one more skill point per level
@@ -319,7 +331,11 @@ class DDCharacter { // D&D Character
 	   				if (clas.spellsKnownProgression != null) {
 	   					System.out.println("Initializing spellsKnown...");
 	   					clas.spellsKnown = new ArrayList<HashSet<String>>();
-	   				}   			
+	   				}
+	   				else {
+	   					System.out.println("Initializing spellsPrepared...");
+	   					clas.spellsPrepared = new ArrayList<HashSet<String>>();
+	   				}
 	   			}
 
 	   			if (clas.goodFort)
@@ -422,11 +438,9 @@ class DDCharacter { // D&D Character
 				System.out.println("New value of clas.spellsPerDay["+i+"] : " + clas.spellsPerDay.get(i));
 
 				if (clas.spellsKnownProgression != null) { // if spontaneous caster
-
-					while (clas.spellsKnown.size() < clas.spellsKnownProgression[newLevel].length) {
+					while (clas.spellsKnown.size() < clas.spellsKnownProgression[newLevel].length) { // this loop makes sure that the character has a hashset for each spell level
 						clas.spellsKnown.add(new HashSet<String>());
 					}
-
 					// have to compare the spellsKnownProgression[newLevel] with that of the old level, or rather with the length of the character's spells known
 					while (clas.spellsKnownProgression[newLevel][i] > clas.spellsKnown.get(i).size()) {
 						// learn a spell
@@ -438,11 +452,22 @@ class DDCharacter { // D&D Character
 						}
 					}
 				}
+				else { // prepared caster
+					while (clas.spellsPrepared.size() < clas.spellsPerDay.size()) {
+						clas.spellsPrepared.add(new HashSet<String>());
+					}
+					System.out.println("Preparing spells...");
+					while (clas.spellsPerDay.get(i) > clas.spellsPrepared.get(i).size()) {
+						int randSpellIndex = r.nextInt(clas.spellList[i].length);
+						String newSpell = clas.spellList[i][randSpellIndex];
+						System.out.println("Preparing spell #" + randSpellIndex + " : " + newSpell + "...");
+						if(!(clas.spellsPrepared.get(i).contains(newSpell))) {
+							clas.spellsPrepared.get(i).add(newSpell);
+						}
+					}
+				}
 			}
 	   	}
-
-
-
 
 	   	calcSkillTotals();
    	} // END PRIVATE VOID GETCLASSFEATURES
@@ -540,7 +565,7 @@ class DDCharacter { // D&D Character
 	private static int[] rollStats() {
 		int[] rolls = {0, 0, 0, 0};
 		int[] finalRolls = {0, 0, 0, 0, 0, 0};
-		Random r = new Random();
+
 		for (int i = 0; i<6;i++) {
 			while (finalRolls[i] < 6) {
 				for (int j=0;j<4;j++) {
@@ -571,7 +596,6 @@ class DDCharacter { // D&D Character
 		Arrays.sort(rolls);
 		System.out.format("Sorted rolls: [%1$d, %2$d, %3$d, %4$d, %5$d, %6$d]\n", rolls[0], rolls[1], rolls[2], rolls[3], rolls[4], rolls[5]);
 		// so by default they're sorted in increasing order
-		Random rand = new Random();
 		abilityScores = new int[6];
 		if (cName.equals("BARBARIAN")) { // barbarian prioritizes: Strength, then Con, Dex, Cha, Wis, and finally Int
 			abilityScores[0] = rolls[5];
@@ -694,11 +718,11 @@ class DDCharacter { // D&D Character
 			abilityScores[0] = rolls[0];
 		}
 		else {
-			abilityScores[0] = rolls[0];
-			abilityScores[1] = rolls[1];
-			abilityScores[2] = rolls[2];
-			abilityScores[3] = rolls[3];
-			abilityScores[4] = rolls[4];
+			abilityScores[3] = rolls[0];
+			abilityScores[2] = rolls[1];
+			abilityScores[1] = rolls[2];
+			abilityScores[4] = rolls[3];
+			abilityScores[0] = rolls[4];
 			abilityScores[5] = rolls[5];
 		}
 
@@ -752,6 +776,15 @@ class DDCharacter { // D&D Character
 						}
 					}
 				}
+				if (item.spellsPrepared != null) {
+					System.out.println(item.className + " Spells Prepared: ");
+					for (int i=0; i < item.spellsPrepared.size(); i++) {
+						System.out.println("Level " + i + " Spells:");
+						for(String spell : item.spellsPrepared.get(i)) {
+							System.out.println(spell + '('+i+')');
+						}
+					}
+				}
 			}
 		}
 
@@ -778,7 +811,7 @@ class DDCharacter { // D&D Character
 
 
 /*
-Class to store all the traits of a race or template
+Class to store all the traits of a race
 */
 class PlayerRace {
 
@@ -949,6 +982,7 @@ class CharacterClass {
 	int[][] spellsKnownProgression;
 
 	ArrayList<Integer> spellsPerDay; // the character's number of spells per day of each level for this CharacterClass
+	ArrayList<HashSet<String>> spellsPrepared;
 	ArrayList<HashSet<String>> spellsKnown; // the character's spells known sorted by spell level, only used if the class is a spontaneous caster
 
 
@@ -1051,8 +1085,7 @@ class CharacterClass {
 			goodWill = true;
 			classSkills = new ArrayList<String>(Arrays.asList("APPRAISE", "BALANCE", "BLUFF", "CLIMB", "CONCENTRATION", "CRAFT", "DECIPHER SCRIPT", "DIPLOMACY", "DISGUISE", "ESCAPE ARTIST", "GATHER INFORMATION", "HIDE", "JUMP", "KNOWLEDGE(ARCANA)", "KNOWLEDGE(ARCHITECTURE & ENGINEERING)", "KNOWLEDGE(DUNGEONEERING)", "KNOWLEDGE(GEOGRAPHY)", "KNOWLEDGE(HISTORY)", "KNOWLEDGE(LOCAL)", "KNOWLEDGE(NATURE)", "KNOWLEDGE(NOBILITY & ROYALTY)", "KNOWLEDGE(RELIGION)", "KNOWLEDGE(THE PLANES)", "LISTEN", "MOVE SILENTLY", "PERFORM", "PROFESSION", "SENSE MOTIVE", "SLEIGHT OF HAND", "SPELLCRAFT", "SWIM", "TUMBLE", "USE MAGIC DEVICE"));
 			String[] performChoices = new String[] {"ACT", "DANCE", "DANCE", "KEYBOARD", "ORATORY", "PERCUSSION", "STRINGS", "WIND", "SING"};
-			Random r = new Random();
-			int randomIndex = r.nextInt(performChoices.length);
+			int randomIndex = rand.nextInt(performChoices.length);
 			String priorityPerform = "PERFORM(" + performChoices[randomIndex]+")";
 			prioritySkills.add(priorityPerform);
 			skillPointsPerLevel = 6;
@@ -1084,7 +1117,6 @@ class CharacterClass {
 
 			spellsPerDayProgression = new int[][] {{2}, {3, 0}, {3, 1}, {3, 2, 0}, {3, 3, 1}, {3, 3, 2}, {3, 3, 2, 0}, {3, 3, 3, 1}, {3, 3, 3, 2}, {3, 3, 3, 2, 0}, {3, 3, 3, 3, 1}, {3, 3, 3, 3, 2}, {3, 3, 3, 3, 2, 0}, {4, 3, 3, 3, 3, 1}, {4, 4, 3, 3, 3, 2}, {4, 4, 4, 3, 3, 2, 0}, {4, 4, 4, 4, 3, 3, 1}, {4, 4, 4, 4, 4, 3, 2}, {4, 4, 4, 4, 4, 4, 3}, {4, 4, 4, 4, 4, 4, 4}};
 			spellsKnownProgression = new int[][] {{4}, {5, 2}, {6, 3}, {6, 3, 2}, {6, 4, 3}, {6, 4, 3}, {6, 4, 4, 2}, {6, 4, 4, 3}, {6, 4, 4, 3}, {6, 4, 4, 4, 2}, {6, 4, 4, 4, 3}, {6, 4, 4, 4, 3}, {6, 4, 4, 4, 4, 2}, {6, 4, 4, 4, 4, 3}, {6, 4, 4, 4, 4, 3}, {6, 5, 4, 4, 4, 4, 2}, {6, 5, 5, 4, 4, 4, 3}, {6, 5, 5, 5, 4, 4, 3}, {6, 5, 5, 5, 5, 4, 4}, {6, 5, 5, 5, 5, 5, 4}};
-		
 		}
 		else if (clas.equals("CLERIC")) {
 			hitDie = 8;
