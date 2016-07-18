@@ -279,21 +279,21 @@ class DDCharacter { // D&D Character
 	   		System.out.println("newFeatures of Lv" + (currentLevel+1) + ": " + newFeatures);
 	   		for (int k=0; k < newFeatures.size(); k++) { // look at newFeatures for abilities that increase numerically and replace a lower level version (like Rage 2/day replacing Rage 1/day)
 	   			String newFeature = newFeatures.get(k);
-	   			if(newFeature.matches(".*\\d+.*")) { // if newFeature contains a digit
-	   				// here i need to remove the old version, so first i'll get the substring containing the name of hte ability
-	   				int digIndex = 0;
-	   				for (int j=0; j < newFeature.length(); j++) {
-	   					if (Character.isDigit(newFeature.charAt(j))) {
-	   						digIndex = j;
-	   						}
-	   				}
-	   				String abiName = newFeature.substring(0, digIndex);
-	   				for(String s : specialList) {
-	   					if (s.startsWith(abiName)) {
-	   						specialList.remove(s);
-	   					}
-	   				}
-	   			}
+	   			// if(newFeature.matches(".*\\d+.*")) { // if newFeature contains a digit
+	   			// 	// here i need to remove the old version, so first i'll get the substring containing the name of hte ability
+	   			// 	int digIndex = 0;
+	   			// 	for (int j=0; j < newFeature.length(); j++) {
+	   			// 		if (Character.isDigit(newFeature.charAt(j))) {
+	   			// 			digIndex = j;
+	   			// 			}
+	   			// 	}
+	   			// 	String abiName = newFeature.substring(0, digIndex);
+	   			// 	for(String s : specialList) {
+	   			// 		if (s.startsWith(abiName)) {
+	   			// 			specialList.remove(s);
+	   			// 		}
+	   			// 	}
+	   			// }
 	   		}
 	   		specialList.addAll(newFeatures);
 	   		int sppl = clas.skillPointsPerLevel + abiMods[3]; // skill points per level
@@ -558,12 +558,17 @@ class DDCharacter { // D&D Character
    		// so what's this thing actually look like? it'll have to iterate through the priorityFeatChoices
    		Iterator<Feat> priorityFeatIterator = priorityFeatChoices.iterator();
    		boolean chosen = false;
-   		while(priorityFeatIterator.hasNext() && !chosen) {
+   		while(!chosen) {
+   			int index = r.nextInt(priorityFeatChoices.size());
+   			for(int i=0; i < index; i++)
+   				priorityFeatIterator.next();
    			Feat newFeat = priorityFeatIterator.next();
+   			System.out.println("Looking at feat: " + newFeat.featName + "...");
    			// i need to check each of the possible prerequisite options and also if the feat is also in the character's set of feats
    			if (featList.contains(newFeat))
    				continue;
    			if (newFeat.minAbiScores != null) {
+   				System.out.println("Checking ability score prerequisites...");
    				for (int i=0; i < 6; i++) {
    					if (abilityScores[i] < newFeat.minAbiScores[i])
    						continue;
@@ -574,13 +579,22 @@ class DDCharacter { // D&D Character
    					continue;
    			}
    			if (newFeat.featPrerequisites != null) {
+   				System.out.println("Checking feat prerequisites...");
+   				boolean gotTheFeats = true;
    				for (String fname : Arrays.asList(newFeat.featPrerequisites)) {
-   					if (!(featList.contains(new Feat(fname)))) // if the character doesn't have the required feats
-   						continue;
+   					System.out.println("Character must have " + fname + " to qualify. Checking...");
+   					if (!(featList.contains(new Feat(fname)))) { // if the character doesn't have the required feats
+   						System.out.println("It appears the character does not have " + fname);
+   						gotTheFeats = false;
+   						break; // out of this for loop
+   					}
    				}
+   				if (!gotTheFeats)
+   					continue;
    			}
    			System.out.println("Adding feat " + newFeat.featName + "...");
    			featList.add(newFeat);
+   			priorityFeatChoices.remove(newFeat);
    			chosen = true;
    		}
    }
@@ -1126,8 +1140,7 @@ class CharacterClass {
 			goodWill = false;
 			classSkills = new ArrayList<String>(Arrays.asList("CLIMB", "CRAFT", "HANDLE ANIMAL", "INTIMIDATE", "JUMP", "LISTEN", "RIDE", "SURVIVAL", "SWIM"));
 			skillPointsPerLevel = 4;
-			priorityFeatChoices = new String[] {"Power Attack", "Cleave", "Great Cleave", "Improved Bull Rush", "Improved Overrun", "Improved Sunder", "Blind-Fight", "Athletic", "Combat Reflexes", "Dodge", "Combat Expertise", "Diehard", "Improved Crtical", "Improved Initiative", "Toughness", "Improved Unarmed Strike", "Improved Grapple"};
-
+			priorityFeatChoices = new String[] {"POWER ATTACK", "CLEAVE", "GREAT CLEAVE", "IMPROVED BULL RUSH", "IMPROVED OVERRUN", "IMPROVED SUNDER", "BLIND-FIGHT", "ATHLETIC", "COMBAT REFLEXES", "DODGE", "COMBAT EXPERTISE", "DIEHARD", "IMPROVED CRITICAL", "IMPROVED INITIATIVE", "TOUGHNESS", "IMPROVED UNARMED STRIKE", "IMPROVED GRAPPLE"};
 			special.get(0).add("Fast Movement");
 			special.get(0).add("Illiteracy");
 			special.get(0).add("Rage 1/day");
