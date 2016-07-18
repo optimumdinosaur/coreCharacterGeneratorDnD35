@@ -587,16 +587,23 @@ class DDCharacter { // D&D Character
    			if (newFeat.featPrerequisites != null) {
    				System.out.println("Checking feat prerequisites...");
    				boolean gotTheFeats = true;
-   				for (String fname : Arrays.asList(newFeat.featPrerequisites)) {
-   					System.out.println("Character must have " + fname + " to qualify. Checking...");
-   					if (!(featList.contains(new Feat(fname)))) { // if the character doesn't have the required feats
-   						System.out.println("It appears the character does not have " + fname);
-   						gotTheFeats = false;
-   						break; // out of this for loop
+   				int prereqFeatIndex = 0;
+   				while(gotTheFeats && prereqFeatIndex < newFeat.featPrerequisites.length) {
+   					System.out.println("Character must have " + newFeat.featPrerequisites[prereqFeatIndex]);
+   					boolean gotThisFeat = false;
+   					for(Feat f : featList) {
+   						if (f.featName.equals(newFeat.featPrerequisites[prereqFeatIndex])) {
+   							gotThisFeat = true;
+   							break;
+   						}
    					}
+   					gotTheFeats = gotThisFeat;
+   					prereqFeatIndex++;
    				}
-   				if (!gotTheFeats)
+   				if (!gotTheFeats) {
+   					System.out.println("Looks like the character doesn't have the prerequisite feats :(");
    					continue;
+   				}
    			}
    			System.out.println("Adding feat " + newFeat.featName + "...");
    			featList.add(newFeat);
@@ -1146,7 +1153,8 @@ class CharacterClass {
 			goodWill = false;
 			classSkills = new ArrayList<String>(Arrays.asList("CLIMB", "CRAFT", "HANDLE ANIMAL", "INTIMIDATE", "JUMP", "LISTEN", "RIDE", "SURVIVAL", "SWIM"));
 			skillPointsPerLevel = 4;
-			priorityFeatChoices = new String[] {"POWER ATTACK", "CLEAVE", "GREAT CLEAVE", "IMPROVED BULL RUSH", "IMPROVED OVERRUN", "IMPROVED SUNDER", "BLIND-FIGHT", "ATHLETIC", "COMBAT REFLEXES", "DODGE", "COMBAT EXPERTISE", "DIEHARD", "IMPROVED CRITICAL", "IMPROVED INITIATIVE", "TOUGHNESS", "IMPROVED UNARMED STRIKE", "IMPROVED GRAPPLE"};
+			priorityFeatChoices = new String[] {"POWER ATTACK", "CLEAVE", "GREAT CLEAVE", "IMPROVED BULL RUSH", "IMPROVED OVERRUN", "IMPROVED SUNDER"};
+			//priorityFeatChoices = new String[] {"POWER ATTACK", "CLEAVE", "GREAT CLEAVE", "IMPROVED BULL RUSH", "IMPROVED OVERRUN", "IMPROVED SUNDER", "BLIND-FIGHT", "ATHLETIC", "COMBAT REFLEXES", "DODGE", "COMBAT EXPERTISE", "DIEHARD", "IMPROVED CRITICAL", "IMPROVED INITIATIVE", "TOUGHNESS", "IMPROVED UNARMED STRIKE", "IMPROVED GRAPPLE"};
 			special.get(0).add("Fast Movement");
 			special.get(0).add("Illiteracy");
 			special.get(0).add("Rage 1/day");
