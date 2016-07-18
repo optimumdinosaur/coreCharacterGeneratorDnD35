@@ -42,6 +42,10 @@ class DDCharacter { // D&D Character
 	Set<String> prioritySkills; // a set containing priority skills for the character
 	private Set<String> specialList; // the character's special abilities, class features, racial traits, etc.
 
+	Set<Feat> featList;
+	private Set<Feat> priorityFeatChoices;
+
+
 	/* Basic constructor
 		Creates a level 1 character of the given race and class
 		Stats are rolled using the rollStats() method, 4d6 drop lowest
@@ -76,6 +80,10 @@ class DDCharacter { // D&D Character
 		classSkills = new HashSet<String>(); // both this and prioritySkills are actually set up in getClassFeatures()
 		prioritySkills = new HashSet<String>();
 		specialList = new HashSet<String>();
+
+		featList = new HashSet<Feat>();
+		priorityFeatChoices = new HashSet<Feat>();
+
 		getRacialTraits();
 		getClassFeatures(clas, 1);
 		classes.put(clas, 1);
@@ -112,6 +120,10 @@ class DDCharacter { // D&D Character
 		classSkills = new HashSet<String>(); // both this and prioritySkills are actually set up in getClassFeatures()
 		prioritySkills = new HashSet<String>();
 		specialList = new HashSet<String>();
+
+		featList = new HashSet<Feat>();
+		priorityFeatChoices = new HashSet<Feat>();
+
 		getRacialTraits();
 	}
 
@@ -290,15 +302,6 @@ class DDCharacter { // D&D Character
 	   		if (sppl < 1)
 	   			sppl = 1; // everybody gets at least one skill point per level
 	   		
-			if (classes.get(clas) == 0 && classes.size() == 1) { // if this is the character's very first level
-	   			sppl = sppl * 4; // characters get quadruple hit points on their first ever level
-	   			hitPoints = hitPoints + clas.hitDie + abiMods[2]; // full hp rolls at level 1
-	   		}
-	   		else
-	   			hitPoints = hitPoints + r.nextInt(clas.hitDie) + abiMods[2] + 1;
-	   		System.out.println("hitPoints increasesd to " + hitPoints);
-	   		
-
 	   		if ((currentLevel+1) == 1) { // if this is the character's first level in this class
 	   			System.out.println("**1st level of a class.**");
 	   			classSkills.addAll(clas.classSkills); 
@@ -338,6 +341,10 @@ class DDCharacter { // D&D Character
 	   				}
 	   			}
 
+	   			for (String f : Arrays.asList(clas.priorityFeatChoices)) {
+	   				priorityFeatChoices.add(new Feat(f));
+	   			}
+
 	   			if (clas.goodFort)
 	   				fortSave.put("plusTwo", 2);
 	   			if (clas.goodRef)
@@ -364,6 +371,15 @@ class DDCharacter { // D&D Character
 	   			if (!clas.goodWill)
 	   				willSave.put("Base", willSave.get("Base")+1);
 	   		}
+
+	   		if (classes.get(clas) == 0 && classes.size() == 1) { // if this is the character's very first level
+	   			sppl = sppl * 4; // characters get quadruple hit points on their first ever level
+	   			hitPoints = hitPoints + clas.hitDie + abiMods[2]; // full hp rolls at level 1
+	   			getFeat();
+	   		}
+	   		else
+	   			hitPoints = hitPoints + r.nextInt(clas.hitDie) + abiMods[2] + 1;
+	   		System.out.println("hitPoints increasesd to " + hitPoints);
 
 	   		System.out.println("classSkills: " + classSkills);
 	   		System.out.println("Initializing cSkill...");
@@ -399,6 +415,15 @@ class DDCharacter { // D&D Character
 	   			}	
 	   		}
 
+	   		// her ei need to calculat ehte character's total number of class levels
+	   		int ecl = i+1;
+	   		for (CharacterClass c : classes.keySet()) {
+	   			ecl += classes.get(c);
+	   		}
+	   		System.out.println("Current total level: " + ecl);
+	   		if (ecl % 3 == 0) {
+	   			getFeat();
+	   		}
 	   		
 	   		System.out.println("*************************");
 
@@ -522,6 +547,42 @@ class DDCharacter { // D&D Character
    	willSave.put("Misc", (willSave.get("Misc")+race.saveAdjust[0]));
 
    	// and do languages
+   }
+
+
+  /* getFeat
+  		method looks at the character's priorityFeatChoices and if the characer qualifies for one, will choose that one
+  		otherwise there is the backup list of general feats	
+   */
+   private void getFeat() {
+   		// so what's this thing actually look like? it'll have to iterate through the priorityFeatChoices
+   		Iterator<Feat> priorityFeatIterator = priorityFeatChoices.iterator();
+   		boolean chosen = false;
+   		while(priorityFeatIterator.hasNext() && !chosen) {
+   			Feat newFeat = priorityFeatIterator.next();
+   			// i need to check each of the possible prerequisite options and also if the feat is also in the character's set of feats
+   			if (featList.contains(newFeat))
+   				continue;
+   			if (newFeat.minAbiScores != null) {
+   				for (int i=0; i < 6; i++) {
+   					if (abilityScores[i] < newFeat.minAbiScores[i])
+   						continue;
+   				}
+   			}
+   			if (newFeat.minBAB != 0) {
+   				if (baseAttackBonus < newFeat.minBAB)
+   					continue;
+   			}
+   			if (newFeat.featPrerequisites != null) {
+   				for (String fname : Arrays.asList(newFeat.featPrerequisites)) {
+   					if (!(featList.contains(new Feat(fname)))) // if the character doesn't have the required feats
+   						continue;
+   				}
+   			}
+   			System.out.println("Adding feat " + newFeat.featName + "...");
+   			featList.add(newFeat);
+   			chosen = true;
+   		}
    }
 
 
@@ -790,6 +851,17 @@ class DDCharacter { // D&D Character
 
 
 		System.out.println("Special: " + specialList);
+		System.out.println("Feats: " + featList);
+		System.out.print('[');
+		for (Feat f : featList) {
+			System.out.print(f.featName + ", ");
+		}
+		System.out.println(']');
+		// System.out.print("PriorityFeats: [");
+		// for (Feat f : priorityFeatChoices) {
+		// 	System.out.print(f.featName + ", ");
+		// }
+		//System.out.println(']');
 		System.out.println("Class Skills: " +classSkills);
 		System.out.println("Priority Skills: " + prioritySkills);
 		for (String item : prioritySkills) {
@@ -971,6 +1043,9 @@ class CharacterClass {
 	int skillPointsPerLevel; // the number of skill points a member of this class gains at each level, not counting their int bonus
 	int numOfLevels; //for now I'll keep this commented out and default to 20, but if prestige classes are going to be involved i'll have to deal with it
 	ArrayList<ArrayList<String>> special; // an array list of array lists to store the class's special features
+	String[] priorityFeatChoices;
+
+
 	Random rand = new Random();
 
 
@@ -1020,7 +1095,7 @@ class CharacterClass {
 		for(int i=0;i<numOfLevels;i++)
 			special.add(new ArrayList<String>());
 		// and now all the special lists for each level are empty
-		setSpecial(className);
+		//setSpecial(className);
 	}
 
 
@@ -1051,6 +1126,8 @@ class CharacterClass {
 			goodWill = false;
 			classSkills = new ArrayList<String>(Arrays.asList("CLIMB", "CRAFT", "HANDLE ANIMAL", "INTIMIDATE", "JUMP", "LISTEN", "RIDE", "SURVIVAL", "SWIM"));
 			skillPointsPerLevel = 4;
+			priorityFeatChoices = new String[] {"Power Attack", "Cleave", "Great Cleave", "Improved Bull Rush", "Improved Overrun", "Improved Sunder", "Blind-Fight", "Athletic", "Combat Reflexes", "Dodge", "Combat Expertise", "Diehard", "Improved Crtical", "Improved Initiative", "Toughness", "Improved Unarmed Strike", "Improved Grapple"};
+
 			special.get(0).add("Fast Movement");
 			special.get(0).add("Illiteracy");
 			special.get(0).add("Rage 1/day");
@@ -1143,7 +1220,7 @@ class CharacterClass {
 			bonusSpellsAbi = 4; // Wisdom
 
 			// the cleric's spells per day progression already includes the bonus domain spell of each level
-			spellsPerDayProgression = new int[][] {{3, 2}, {4, 3}, {4, 3, 2}, {5, 4, 3}, {5, 4, 3, 2}, {5, 4, 4, 3}, {6, 5, 4, 3, 2}, {6, 5, 4, 4, 3}, {6, 5, 5, 4, 3, 2}, {6, 5, 5, 4, 4, 3}, {6, 6, 5, 5, 4, 3, 2}, {6, 6, 5, 5, 4, 4, 3}, {6, 6, 6, 5, 5, 4, 3, 2}, {6, 6, 6, 5, 5, 4, 4, 3}, {6, 6, 6, 6, 5, 5, 4, 3, 2}, {6, 6, 6, 6, 5, 5, 4, 4, 3}, {6, 6, 6, } };
+			spellsPerDayProgression = new int[][] {{3, 1}, {4, 2}, {4, 2, 1}, {5, 3, 2}, {5, 3, 2, 1}, {5, 3, 3, 2}, {6, 4, 3, 2, 1}, {6, 4, 3, 3, 2}, {6, 4, 4, 3, 2, 1}, {6, 4, 4, 3, 3, 2}, {6, 5, 4, 4, 3, 2, 1}, {6, 5, 4, 4, 3, 3, 2}, {6, 5, 5, 4, 4, 3, 2, 1}, {6, 5, 5, 4, 4, 3, 3, 2}, {6, 5, 5, 5, 4, 4, 3, 2, 1}, {6, 5, 5, 5, 4, 4, 3, 3, 2}, {6, 5, 5, 5, 5, 4, 4, 3, 2, 1}, {6, 5, 5, 5, 5, 4, 4, 3, 3, 2}, {6, 5, 5, 5, 5, 5, 4, 4, 3, 3}, {6, 5, 5, 5, 5, 5, 4, 4, 4, 4}};
 
 		}
 		else if (clas.equals("DRUID")) {
@@ -1178,6 +1255,26 @@ class CharacterClass {
 			special.get(17).add("Wild Shape(Elemental 2/day");
 			special.get(19).add("Wild Shape(Elemental 3/day");
 			special.get(19).add("Wild Shape(Huge Elemental");
+
+			String[] spellsLv0 = new String[] {"Create Water", "Cure Minor Wounds", "Detect Magic", "Detect Poison", "Flare", "Guidance", "Know Direction", "Light", "Mending", "Purify Food and Drink", "Read Magic", "Resistance", "Virtue"};
+			String[] spellsLv1 = new String[] {"Calm Animals", "Charm Animal", "Cure Light Wounds", "Detect Animals and Plants", "Detect Snares and Pits", "Endure Elements", "Entangle", "Faerie Fire", "Goodberry", "Hide From Animals", "Jump", "Longstrider", "Magic Fang", "Magic Stone", "Obscuring Mist", "Pass without Trace", "Produce Flame", "Shillegah", "Speak with Animals", "Summon Nature's Ally I"};
+			String[] spellsLv2 = new String[] {"Animal Messenger", "Animal Trance", "Barkskin", "Bear's Endurance", "Bull's Strength", "Cat's Grace", "Chill Metal", "Delay Poison", "Fire Trap", "Flame Blade", "Flaming Sphere", "Fog Cloud", "Gust of Wind", "Heat Metal", "Hold Animal", "Owl's Wisdom", "Reduce Animal", "Resist Energy", "Lesser Restoration", "Soften Earth and Stone", "Spider Climb", "Summon Nature's Ally II", "Summon Swarm", "Tree Shape", "Warp Wood", "Wood Shape"};
+			String[] spellsLv3 = new String[] {"Call Lightning", "Contagion", "Cure Moderate Wounds", "Daylight", "Diminish Plants", "Dominate Animal", "Greater Magic Fang", "Meld into Stone", "Neutralize Poison", "Plant Growth", "Poison", "Protection from Energy", "Quench", "Remove Disease", "Sleet Storm", "Snare", "Speak with Plants", "Spike Growth", "Stone Shape", "Summon Nature's Ally III", "Water Breathing", "Wind Wall"};
+			String[] spellsLv4 = new String[] {"Air Walk", "Antiplant Shell", "Blight", "Command Plants", "Control Water", "Cure Serious Wounds", "Dispel Magic", "Flame Strike", "Freedom of Movement", "Giant Vermin", "Ice Storm", "Reincarnate", "Repel Vermin", "Rusting Grasp", "Scrying", "Spike Stones", "Summon Nature's Ally IV"};
+			String[] spellsLv5 = new String[] {"Animal Growth", "Atonement", "Awaken", "Baleful Polymorph", "Call Lightning Storm", "Commune with Nature", "Control Winds", "Cure Crtical Wounds", "Death Ward", "Hallow", "Insect Plague", "Stoneskin", "Summon Nature's Ally V", "Transmute Mud to Rock", "Transmute Rock to Mud", "Tree Stride", "Unhallow", "Wall of Fire", "Wall of Thorns"};
+			String[] spellsLv6 = new String[] {"Antilife Shell", "Mass Bear's Endurance", "Mass Bull's Strength", "Mass Cat's Grace", "Mass Cure Light Wounds", "Greater Dispel Magic", "Find the Path", "Fire Seeds", "Ironwood", "Liveoak", "Move Earth", "Mass Owl's Wisdom", "Repel Wood", "Spellstaff", "Stone Tell", "Summon Nature's Ally VI", "Transport via Plants", "Wall of Stone"};
+			String[] spellsLv7 = new String[] {"Animate Plants", "Changestaff", "Control Weather", "Creeping Doom", "Mass Cure Moderate Wounds", "Fire Storm", "Heal", "Greater Scrying", "Summon Nature's Ally VII", "Sunbeam", "Transmute Metal to Wood", "True Seeing", "Wind Walk"};
+			String[] spellsLv8 = new String[] {"Animal Shapes", "Control Plants", "Mass Cure Serious Wounds", "Earthquake", "Finger of Death", "Repel Metal or Stone", "Reverse Gravity", "Summon Nature's Ally VIII", "Sunburst", "Whirlwind", "Word of Recall"};
+			String[] spellsLv9 = new String[] {"Antipathy", "Mass Cure Critical Wounds", "Elemental Swarm", "Foresight", "Regenerate", "Shambler", "Shapechange", "Storm of Vengeance", "Summon Nature's Ally IX", "Sympathy"};
+
+			spellList = new String[][] {spellsLv0, spellsLv1, spellsLv2, spellsLv3, spellsLv4, spellsLv5, spellsLv6, spellsLv7, spellsLv8, spellsLv9};
+
+			bonusSpellsAbi = 4; // Wisdom
+
+			// the cleric's spells per day progression already includes the bonus domain spell of each level
+			spellsPerDayProgression = new int[][] {{3, 1}, {4, 2}, {4, 2, 1}, {5, 3, 2}, {5, 3, 2, 1}, {5, 3, 3, 2}, {6, 4, 3, 2, 1}, {6, 4, 3, 3, 2}, {6, 4, 4, 3, 2, 1}, {6, 4, 4, 3, 3, 2}, {6, 5, 4, 4, 3, 2, 1}, {6, 5, 4, 4, 3, 3, 2}, {6, 5, 5, 4, 4, 3, 2, 1}, {6, 5, 5, 4, 4, 3, 3, 2}, {6, 5, 5, 5, 4, 4, 3, 2, 1}, {6, 5, 5, 5, 4, 4, 3, 3, 2}, {6, 5, 5, 5, 5, 4, 4, 3, 2, 1}, {6, 5, 5, 5, 5, 4, 4, 3, 3, 2}, {6, 5, 5, 5, 5, 5, 4, 4, 3, 3}, {6, 5, 5, 5, 5, 5, 4, 4, 4, 4}};
+
+
 		}
 		else if (clas.equals("FIGHTER")) {
 			hitDie = 10;
@@ -1279,6 +1376,16 @@ class CharacterClass {
 			special.get(14).add("Smite Evil 4/day");
 			special.get(17).add("Remove Disease 5/week");
 			special.get(19).add("Smite Evil 5/day");
+
+			String[] spellsLv0 = new String[] {};
+			String[] spellsLv1 = new String[] {"Bless", "Bless Water", "Bless Weapon", "Create Water", "Cure Light Wounds", "Detect Poison", "Detect Undead", "Divine Favor", "Endure Elements", "Magic Weapon", "Protection from Chaos/Evil", "Read Magic", "Resistance", "Lesser Restoration", "Virtue"};
+			String[] spellsLv2 = new String[] {"Bull's Strength", "Delay Poison", "Eagle's Splendor", "Owl's Wisdom", "Remove Paralysis", "Resist Energy", "Shield Other", "Undetectable Alignment", "Zone of Truth"};
+			String[] spellsLv3 = new String[] {"Cure Moderate Wounds", "Daylight", "Discern Lies", "Dispel Magic", "Heal Mount", "Magic Circle Against Chaos", "Magic Circle Against Evil", "Greater Magic Weapon", "Prayer", "Remove Blindness/Deafness", "Remove Curse"};
+			String[] spellsLv4 = new String[] {"Break Enchantment", "Cure Serious Wounds", "Death Ward", "Dispel Chaos", "Dispel Evil", "Holy Sword", "Mark of Justice", "Neutralize Poison", "Restoration"};
+			spellList = new String[][] {spellsLv0, spellsLv1, spellsLv2, spellsLv3, spellsLv4};
+			bonusSpellsAbi = 4;
+			spellsPerDayProgression = new int[][] {{}, {}, {}, {}, {0}, {0}, {1}, {1}, {1, 0}, {1, 0}, {1, 1}, {1, 1, 0}, {1, 1, 1}, {1, 1, 1}, {2, 1, 1, 0}, {2, 1, 1, 1}, {2, 2, 1, 1}, {2, 2, 2, 1}, {3, 2, 2, 1}, {3, 3, 3, 2}, {3, 3, 3, 3}};
+
 		}
 		else if (clas.equals("PSION")) {
 			hitDie = 4;
@@ -1347,6 +1454,18 @@ class CharacterClass {
 			special.get(14).add("4th Favored Enemy");
 			special.get(16).add("HIDE in Plain Sight");
 			special.get(19).add("5th Favored Enemy");
+
+			String[] spellsLv0 = new String[] {};
+			String[] spellsLv1 = new String[] {"Alarm", "Animal Messenger", "Calm Animals", "Charm Animal", "Delay Poison", "Detct Animals or Plants", "Detect Poison", "Detect Snares and Pits", "Endure Elements", "Entangle", "Hide from Animals", "Jump", "Longstrider", "Magic Fang", "Pass without Trace", "Read Magic", "Resist Energy", "Speak with Animals", "Summon Nature's Ally I"};
+			String[] spellsLv2 = new String[] {"Barkskin", "Bear's Endurance", "Cat's Grace", "Cure Light Wounds", "Hold Animal", "Owl's Wisdom", "Protection from Energy", "Snare", "Speak with Plants", "Spike Growth", "Summon Nature's Ally II", "Wind Wall"};
+			String[] spellsLv3 = new String[] {"Command Plants", "Cure Moderate Wounds", "Darkvision", "Dimins Plants", "Greater Magic Fang", "Neutralize Poison", "Plant Growth", "Reduce Animal", "Remove Disease", "Repel Vermin", "Summon Nature's Ally III", "Tree Shape", "Water Walk"};
+			String[] spellsLv4 = new String[] {"Animal Growth", "Commune with Nature", "Cure Serious Wounds", "Freedom of Movement", "Nondetection", "Summon Nature's Ally IV", "Tree Stride"};
+
+			spellList = new String[][] {spellsLv0, spellsLv1, spellsLv2, spellsLv3, spellsLv4};
+			bonusSpellsAbi = 4;
+			spellsPerDayProgression = new int[][] {{}, {}, {}, {}, {0}, {0}, {1}, {1}, {1, 0}, {1, 0}, {1, 1}, {1, 1, 0}, {1, 1, 1}, {1, 1, 1}, {2, 1, 1, 0}, {2, 1, 1, 1}, {2, 2, 1, 1}, {2, 2, 2, 1}, {3, 2, 2, 1}, {3, 3, 3, 2}, {3, 3, 3, 3}};
+
+
 		}
 		else if (clas.equals("ROGUE")) {
 			hitDie = 6;
@@ -1397,14 +1516,14 @@ class CharacterClass {
 			special.get(0).add("Summon Familiar");
 
 			String[] spellsLv0 = new String[] {"Resistance", "Acid Splash", "Detect Poison", "Detect Magic", "Read Magic", "Daze", "Dancing Lights", "Flare", "Light", "Ray of Frost", "Ghost Sound", "Disrupt Undead", "Touch of Fatigue", "Mage Hand", "Mending", "Message", "Open/Close", "Arcane Mark", "Prestidigitation"};
-			String[] spellsLv1 = new String[] {"Alarm", "Endure Elements", "Hold Portal", "Protection from Chaos", "Protetion from Evil", "Protetion from Good", "Protetion from Law", "Shield", "Grease", "Mage Armor", "Mount", "Obscuring Mist", "Summong Monster I", "Unseen Servant", "Comprehend Languages", "Detect Secret Doors", "Detect Undead", "Identify", "True Strike", "Charm Person", "Hpnotism", "Sleep", "Burning Hands", "Floating Disk", "Magic Missile", "Shocking Grasp", "Color Spray", "Disguise Self", "Magic Aura", "Silent Image", "Ventriloquism", "Cause Fear", "Chill Touch", "Ray of Enfeeblement", "Animate Rope", "Enlarge Person", "Erase", "Expeditious Retreat", "Feather Fall", "Jump", "Magic Weapon", "Reduce Person"};
+			String[] spellsLv1 = new String[] {"Alarm", "Endure Elements", "Hold Portal", "Protection from Chaos", "Protection from Evil", "Protection from Good", "Protection from Law", "Shield", "Grease", "Mage Armor", "Mount", "Obscuring Mist", "Summong Monster I", "Unseen Servant", "Comprehend Languages", "Detect Secret Doors", "Detect Undead", "Identify", "True Strike", "Charm Person", "Hpnotism", "Sleep", "Burning Hands", "Floating Disk", "Magic Missile", "Shocking Grasp", "Color Spray", "Disguise Self", "Magic Aura", "Silent Image", "Ventriloquism", "Cause Fear", "Chill Touch", "Ray of Enfeeblement", "Animate Rope", "Enlarge Person", "Erase", "Expeditious Retreat", "Feather Fall", "Jump", "Magic Weapon", "Reduce Person"};
 			String[] spellsLv2 = new String[] {"Arcane Lock", "Obscure Object", "Protection from Arrows", "Resist Energy", "Acid Arrow", "Fog Cloud", "Glitterdust", "Summon Monster II", "Summon Swarm", "Web", "Detect Thoughts", "Locate Object", "See Invisibility", "Daze Monster", "Hideous Laughter", "Touch of Idiocy", "Continual Flame", "Darkness", "Flaming Sphere", "Gust of Wind", "Scorching Ray", "Shatter", "Blur", "Hypnotic Pattern", "Invisibility", "Magic Mouth", "Minor Image", "Mirror Image", "Midsirection", "Phantom Trap", "Blindness/Deafness", "Command Undead", "False Life", "Ghoul Touch", "Scare", "Spectral Hand", "Alter Self", "Bear's Endurance", "Bull's Strength", "Cat's Grace", "Darkvision", "Eagle's Splendor", "Fox's Cunning", "Knock", "Levitate", "Owl's Wisdom", "Pyrotechnics", "Rope Trick", "Spider Climb", "Whispering Wind"};
-			String[] spellsLv3 = new String[] {"Dispel Magic", "Explosive Runes", "Magic Circle Against Chaos", "Magic Circle Against Evil", "Magic Cirle Against Good", "Magic Circle Against Law", "Nondetection", "Protetion from Energy", "Phanton Steed", "Sepia Snake Sigil", "Sleet Storm", "Stinking Cloud", "Summon Monster III", "Arcane Sight", "Clairaudience/Clairvoyance", "Tongues", "Deep Slumber", "Heroism", "Hold Person", "Rage", "Suggestion", "Daylight", "Fireball", "Lightning Bolt", "Tiny Hut", "Wind Wall", "Displacement", "Illusory Script", "Invisibility Sphere", "Major Image", "Gentle Repose", "Halt Undead", "Ray of Exhaustion", "Vampiric Touch", "Blink", "Flame Arrow", "Fly", "Gaseous Form", "Haste", "Keen Edge", "Greater Magic Weapon", "Secret Page", "Shrink Item", "Slow", "Water Breathing"};
-			String[] spellsLv4 = new String[] {"Dimensional Anchor", "Fire Trap", "Lesser Globe of Invulnerability", "Remove Curse", "Stoneskin", "Black Tentacles", "Dimension Door", "Minor Creation", "Secure Shelter", "Solid Fog", "Summon Monster IV", "Arcane Eye", "Detect Scrying", "Locate Creature", "Scrying", "Charm Monster", "Confusion", "Crushing Despair", "Lesser Geas", "Fire Shield", "Ice Storm", "Resilient Sphere", "Shout", "Wall of Fire", "Wall of Ice", "Hallucinatory Terrain", "Illusory Wall", "Greater Invisibility", "Phantasmal Killer", "Rainbow Pattern", "Shadow Conjuration", "Animate Dead", "Bestow Curse", "Contagion", "Enervation", "Fear", "Mass Enlarge Person", "Polymorh", "Mass Reduce Person", "Stone Shape"};
-			String[] spellsLv5 = new String[] {"Break Enchantment", "Dismissal", "Mage's Private Sanctum", "Cloudkill", "Mage's Faithful Hound", "Major Creation", "Lesser Planar Binding", "Secret Chest", "Summon Monster V", "Teleport", "Wall of Stone", "Contact Other Plane", "Prying Eyes", "Telepathic Bond", "Dominate Person", "Feeblemind", "Hold Monster", "Mind Fog", "Symbol of Sleep", "Cone of Cold", "Interposing hand", "Sending", "Wall of Force", "Dream", "False Vision", "Mirage Arcana", "Nightmare", "Persistent Image", "Seeming", "Shadow Evocation", "Blight", "Magic Jar", "Symbol of Pain", "Waves of Fatigue", "Animal Growth", "Baleful Polymorh", "Fabricate", "Overland Flight", "Passwall", "Telekinesis", "Transmute Mud to Rock", "Transmute Rock to Mud", "Permanency"};
+			String[] spellsLv3 = new String[] {"Dispel Magic", "Explosive Runes", "Magic Circle Against Chaos", "Magic Circle Against Evil", "Magic Cirle Against Good", "Magic Circle Against Law", "Nondetection", "Protection from Energy", "Phanton Steed", "Sepia Snake Sigil", "Sleet Storm", "Stinking Cloud", "Summon Monster III", "Arcane Sight", "Clairaudience/Clairvoyance", "Tongues", "Deep Slumber", "Heroism", "Hold Person", "Rage", "Suggestion", "Daylight", "Fireball", "Lightning Bolt", "Tiny Hut", "Wind Wall", "Displacement", "Illusory Script", "Invisibility Sphere", "Major Image", "Gentle Repose", "Halt Undead", "Ray of Exhaustion", "Vampiric Touch", "Blink", "Flame Arrow", "Fly", "Gaseous Form", "Haste", "Keen Edge", "Greater Magic Weapon", "Secret Page", "Shrink Item", "Slow", "Water Breathing"};
+			String[] spellsLv4 = new String[] {"Dimensional Anchor", "Fire Trap", "Lesser Globe of Invulnerability", "Remove Curse", "Stoneskin", "Black Tentacles", "Dimension Door", "Minor Creation", "Secure Shelter", "Solid Fog", "Summon Monster IV", "Arcane Eye", "Detect Scrying", "Locate Creature", "Scrying", "Charm Monster", "Confusion", "Crushing Despair", "Lesser Geas", "Fire Shield", "Ice Storm", "Resilient Sphere", "Shout", "Wall of Fire", "Wall of Ice", "Hallucinatory Terrain", "Illusory Wall", "Greater Invisibility", "Phantasmal Killer", "Rainbow Pattern", "Shadow Conjuration", "Animate Dead", "Bestow Curse", "Contagion", "Enervation", "Fear", "Mass Enlarge Person", "Polymorph", "Mass Reduce Person", "Stone Shape"};
+			String[] spellsLv5 = new String[] {"Break Enchantment", "Dismissal", "Mage's Private Sanctum", "Cloudkill", "Mage's Faithful Hound", "Major Creation", "Lesser Planar Binding", "Secret Chest", "Summon Monster V", "Teleport", "Wall of Stone", "Contact Other Plane", "Prying Eyes", "Telepathic Bond", "Dominate Person", "Feeblemind", "Hold Monster", "Mind Fog", "Symbol of Sleep", "Cone of Cold", "Interposing hand", "Sending", "Wall of Force", "Dream", "False Vision", "Mirage Arcana", "Nightmare", "Persistent Image", "Seeming", "Shadow Evocation", "Blight", "Magic Jar", "Symbol of Pain", "Waves of Fatigue", "Animal Growth", "Baleful Polymorph", "Fabricate", "Overland Flight", "Passwall", "Telekinesis", "Transmute Mud to Rock", "Transmute Rock to Mud", "Permanency"};
 			String[] spellsLv6 = new String[] {"Antimagic Field", "Greater Dispel Magic", "Globe of Invulnerability", "Guards and Wards", "Repulsion", "Acid Fog", "Planar Binding", "Summon Monster VI", "Wall of Iron", "Analyze Dweomer", "Legend Lore", "True Seeing", "Geas/Quest", "Greater Heroism", "Mass Suggestion", "Symbol of Persuasion", "Chain Lightning", "Contigency", "Forceful Hand", "Freezing Sphere", "Mislead", "Permanent Image", "Programmed Image", "Shadow  Walk", "Veil", "Circle of Death", "Create Undead", "Eyebite", "Symbol of Fear", "Undeath to Death", "Mass Bear's Endurance", "Mass Bull's Strength", "Mass Cat's Grace", "Control Water", "Disintegrate", "Mass Eagle's Splendor", "Flesh to Stone", "Mass Fox's Cunning", "Move Earth", "Mass Owl's Wisdom", "Stone to Flesh", "Transformation"};
 			String[] spellsLv7 = new String[] {"Banishment", "Sequester", "Spell Turning", "Instant Summons", "Mage's Magnificent Mansion", "Phase Door", "Plane Shift", "Summon Monster VII", "Greater Teleport", "Teleport Object", "Greater Arcane Sight", "Greater Scrying", "Vision", "Mass Hold Person", "Insanity", "Power Word Blind", "Symbol of Stunning", "Delayed Blast Fireball", "Forcecage", "Grasping Hand", "Mage's Sword", "Prismatic Spray", "Mass Invisibility", "Project Image", "Greater Shadow Conjuration", "Simulacrum", "Control Undead", "Finger of Death", "Symbol of Weakness", "Waves of Exhaustion", "Control Weather", "Ethereal Jaunt", "Reverse Gravity", "Statue", "Limited Wish"};
-			String[] spellsLv8 = new String[] {"Dimensional Lock", "Mind Blank", "Prismatic Wall", "Protection from Spells", "Incendiary Cloud", "Maze", "Greater Planar Binding", "Summon Monster VIII", "Trap the Soul", "Discern Location", "Moment of Prescience", "Greater Prying Eyes", "Antipathy", "Binding", "Mass Charm Monster", "Demand", "Irresistable Dance", "Power Word Stun", "Symbol of Insanity", "Sympathy", "Clenched Fist", "Polar Ray", "Greater Shout", "Sunburst", "Telekinetic Sphere", "Scintillating Pattern", "Screen", "Greater Shadow Evocation", "Clone", "Create Greater Undead", "Horrid Wilting", "Symbol of Death", "Iron Body", "Polymorh Any Object", "Temporal Stasis"};
+			String[] spellsLv8 = new String[] {"Dimensional Lock", "Mind Blank", "Prismatic Wall", "Protection from Spells", "Incendiary Cloud", "Maze", "Greater Planar Binding", "Summon Monster VIII", "Trap the Soul", "Discern Location", "Moment of Prescience", "Greater Prying Eyes", "Antipathy", "Binding", "Mass Charm Monster", "Demand", "Irresistable Dance", "Power Word Stun", "Symbol of Insanity", "Sympathy", "Clenched Fist", "Polar Ray", "Greater Shout", "Sunburst", "Telekinetic Sphere", "Scintillating Pattern", "Screen", "Greater Shadow Evocation", "Clone", "Create Greater Undead", "Horrid Wilting", "Symbol of Death", "Iron Body", "Polymorph Any Object", "Temporal Stasis"};
 			String[] spellsLv9 = new String[] {"Freedom", "Imprisonment", "Mage's Disjunction", "Prismatic Sphere", "Gate", "Refuge", "Summon Monster IX", "Teleportation Circle", "Foresight", "Dominate Monster", "Mass Hold Monster", "Power Word Kill", "Crushing Hand", "Meteor Swarm", "Shades", "Weird", "Astral Projection", "Energy Drain", "Soul Bind", "Wail of the Banshee", "Etherealness", "Shapechange", "Time Stop", "Wish"};
 			spellList = new String[][] {spellsLv0, spellsLv1, spellsLv2, spellsLv3, spellsLv4, spellsLv5, spellsLv6, spellsLv7, spellsLv8, spellsLv9};
 			bonusSpellsAbi = 5; // Charisma
@@ -1482,6 +1601,22 @@ class CharacterClass {
 			special.get(9).add("Bonus Wizard Feat");
 			special.get(14).add("Bonus Wizard Feat");
 			special.get(19).add("Bonus Wizard Feat");
+
+			String[] spellsLv0 = new String[] {"Resistance", "Acid Splash", "Detect Poison", "Detect Magic", "Read Magic", "Daze", "Dancing Lights", "Flare", "Light", "Ray of Frost", "Ghost Sound", "Disrupt Undead", "Touch of Fatigue", "Mage Hand", "Mending", "Message", "Open/Close", "Arcane Mark", "Prestidigitation"};
+			String[] spellsLv1 = new String[] {"Alarm", "Endure Elements", "Hold Portal", "Protection from Chaos", "Protection from Evil", "Protection from Good", "Protection from Law", "Shield", "Grease", "Mage Armor", "Mount", "Obscuring Mist", "Summong Monster I", "Unseen Servant", "Comprehend Languages", "Detect Secret Doors", "Detect Undead", "Identify", "True Strike", "Charm Person", "Hpnotism", "Sleep", "Burning Hands", "Floating Disk", "Magic Missile", "Shocking Grasp", "Color Spray", "Disguise Self", "Magic Aura", "Silent Image", "Ventriloquism", "Cause Fear", "Chill Touch", "Ray of Enfeeblement", "Animate Rope", "Enlarge Person", "Erase", "Expeditious Retreat", "Feather Fall", "Jump", "Magic Weapon", "Reduce Person"};
+			String[] spellsLv2 = new String[] {"Arcane Lock", "Obscure Object", "Protection from Arrows", "Resist Energy", "Acid Arrow", "Fog Cloud", "Glitterdust", "Summon Monster II", "Summon Swarm", "Web", "Detect Thoughts", "Locate Object", "See Invisibility", "Daze Monster", "Hideous Laughter", "Touch of Idiocy", "Continual Flame", "Darkness", "Flaming Sphere", "Gust of Wind", "Scorching Ray", "Shatter", "Blur", "Hypnotic Pattern", "Invisibility", "Magic Mouth", "Minor Image", "Mirror Image", "Midsirection", "Phantom Trap", "Blindness/Deafness", "Command Undead", "False Life", "Ghoul Touch", "Scare", "Spectral Hand", "Alter Self", "Bear's Endurance", "Bull's Strength", "Cat's Grace", "Darkvision", "Eagle's Splendor", "Fox's Cunning", "Knock", "Levitate", "Owl's Wisdom", "Pyrotechnics", "Rope Trick", "Spider Climb", "Whispering Wind"};
+			String[] spellsLv3 = new String[] {"Dispel Magic", "Explosive Runes", "Magic Circle Against Chaos", "Magic Circle Against Evil", "Magic Cirle Against Good", "Magic Circle Against Law", "Nondetection", "Protection from Energy", "Phanton Steed", "Sepia Snake Sigil", "Sleet Storm", "Stinking Cloud", "Summon Monster III", "Arcane Sight", "Clairaudience/Clairvoyance", "Tongues", "Deep Slumber", "Heroism", "Hold Person", "Rage", "Suggestion", "Daylight", "Fireball", "Lightning Bolt", "Tiny Hut", "Wind Wall", "Displacement", "Illusory Script", "Invisibility Sphere", "Major Image", "Gentle Repose", "Halt Undead", "Ray of Exhaustion", "Vampiric Touch", "Blink", "Flame Arrow", "Fly", "Gaseous Form", "Haste", "Keen Edge", "Greater Magic Weapon", "Secret Page", "Shrink Item", "Slow", "Water Breathing"};
+			String[] spellsLv4 = new String[] {"Dimensional Anchor", "Fire Trap", "Lesser Globe of Invulnerability", "Remove Curse", "Stoneskin", "Black Tentacles", "Dimension Door", "Minor Creation", "Secure Shelter", "Solid Fog", "Summon Monster IV", "Arcane Eye", "Detect Scrying", "Locate Creature", "Scrying", "Charm Monster", "Confusion", "Crushing Despair", "Lesser Geas", "Fire Shield", "Ice Storm", "Resilient Sphere", "Shout", "Wall of Fire", "Wall of Ice", "Hallucinatory Terrain", "Illusory Wall", "Greater Invisibility", "Phantasmal Killer", "Rainbow Pattern", "Shadow Conjuration", "Animate Dead", "Bestow Curse", "Contagion", "Enervation", "Fear", "Mass Enlarge Person", "Polymorph", "Mass Reduce Person", "Stone Shape", "Mnemonic Enhancer"};
+			String[] spellsLv5 = new String[] {"Break Enchantment", "Dismissal", "Mage's Private Sanctum", "Cloudkill", "Mage's Faithful Hound", "Major Creation", "Lesser Planar Binding", "Secret Chest", "Summon Monster V", "Teleport", "Wall of Stone", "Contact Other Plane", "Prying Eyes", "Telepathic Bond", "Dominate Person", "Feeblemind", "Hold Monster", "Mind Fog", "Symbol of Sleep", "Cone of Cold", "Interposing hand", "Sending", "Wall of Force", "Dream", "False Vision", "Mirage Arcana", "Nightmare", "Persistent Image", "Seeming", "Shadow Evocation", "Blight", "Magic Jar", "Symbol of Pain", "Waves of Fatigue", "Animal Growth", "Baleful Polymorph", "Fabricate", "Overland Flight", "Passwall", "Telekinesis", "Transmute Mud to Rock", "Transmute Rock to Mud", "Permanency", "Mage's Lucubration"};
+			String[] spellsLv6 = new String[] {"Antimagic Field", "Greater Dispel Magic", "Globe of Invulnerability", "Guards and Wards", "Repulsion", "Acid Fog", "Planar Binding", "Summon Monster VI", "Wall of Iron", "Analyze Dweomer", "Legend Lore", "True Seeing", "Geas/Quest", "Greater Heroism", "Mass Suggestion", "Symbol of Persuasion", "Chain Lightning", "Contigency", "Forceful Hand", "Freezing Sphere", "Mislead", "Permanent Image", "Programmed Image", "Shadow  Walk", "Veil", "Circle of Death", "Create Undead", "Eyebite", "Symbol of Fear", "Undeath to Death", "Mass Bear's Endurance", "Mass Bull's Strength", "Mass Cat's Grace", "Control Water", "Disintegrate", "Mass Eagle's Splendor", "Flesh to Stone", "Mass Fox's Cunning", "Move Earth", "Mass Owl's Wisdom", "Stone to Flesh", "Transformation"};
+			String[] spellsLv7 = new String[] {"Banishment", "Sequester", "Spell Turning", "Instant Summons", "Mage's Magnificent Mansion", "Phase Door", "Plane Shift", "Summon Monster VII", "Greater Teleport", "Teleport Object", "Greater Arcane Sight", "Greater Scrying", "Vision", "Mass Hold Person", "Insanity", "Power Word Blind", "Symbol of Stunning", "Delayed Blast Fireball", "Forcecage", "Grasping Hand", "Mage's Sword", "Prismatic Spray", "Mass Invisibility", "Project Image", "Greater Shadow Conjuration", "Simulacrum", "Control Undead", "Finger of Death", "Symbol of Weakness", "Waves of Exhaustion", "Control Weather", "Ethereal Jaunt", "Reverse Gravity", "Statue", "Limited Wish"};
+			String[] spellsLv8 = new String[] {"Dimensional Lock", "Mind Blank", "Prismatic Wall", "Protection from Spells", "Incendiary Cloud", "Maze", "Greater Planar Binding", "Summon Monster VIII", "Trap the Soul", "Discern Location", "Moment of Prescience", "Greater Prying Eyes", "Antipathy", "Binding", "Mass Charm Monster", "Demand", "Irresistable Dance", "Power Word Stun", "Symbol of Insanity", "Sympathy", "Clenched Fist", "Polar Ray", "Greater Shout", "Sunburst", "Telekinetic Sphere", "Scintillating Pattern", "Screen", "Greater Shadow Evocation", "Clone", "Create Greater Undead", "Horrid Wilting", "Symbol of Death", "Iron Body", "Polymorph Any Object", "Temporal Stasis"};
+			String[] spellsLv9 = new String[] {"Freedom", "Imprisonment", "Mage's Disjunction", "Prismatic Sphere", "Gate", "Refuge", "Summon Monster IX", "Teleportation Circle", "Foresight", "Dominate Monster", "Mass Hold Monster", "Power Word Kill", "Crushing Hand", "Meteor Swarm", "Shades", "Weird", "Astral Projection", "Energy Drain", "Soul Bind", "Wail of the Banshee", "Etherealness", "Shapechange", "Time Stop", "Wish"};
+			spellList = new String[][] {spellsLv0, spellsLv1, spellsLv2, spellsLv3, spellsLv4, spellsLv5, spellsLv6, spellsLv7, spellsLv8, spellsLv9};
+			bonusSpellsAbi = 3; // Intelligence
+
+			spellsPerDayProgression = new int[][] {{5, 3}, {6, 4}, {6, 5}, {6, 6, 3}, {6, 6, 4}, {6, 6, 5, 3}, {6, 6, 6, 4}, {6, 6, 6, 5, 3}, {6, 6, 6, 6, 4}, {6, 6, 6, 6, 5, 3}, {6, 6, 6, 6, 6, 4}, {6, 6, 6, 6, 6, 5, 3}, {6, 6, 6, 6, 6, 6, 4}, {6, 6, 6, 6, 6, 6, 5, 3}, {6, 6, 6, 6, 6, 6, 6, 4}, {6, 6, 6, 6, 6, 6, 6, 5, 3}, {6, 6, 6, 6, 6, 6, 6, 6, 4}, {6, 6, 6, 6, 6, 6, 6, 6, 5, 3}, {6, 6, 6, 6, 6, 6, 6, 6, 6, 4}, {6, 6, 6, 6, 6, 6, 6, 6, 6, 6}};
+
 		}
 		else if (clas.equals("ADEPT")) {
 			hitDie = 6;
@@ -1492,6 +1627,18 @@ class CharacterClass {
 			classSkills = new ArrayList<String>(Arrays.asList("CONCENTRATION", "CRAFT", "HANDLE ANIMAL", "HEAL", "KNOWLEDGE(ARCANA)", "KNOWLEDGE(ARCHITECTURE & ENGINEERING)", "KNOWLEDGE(DUNGEONEERING)", "KNOWLEDGE(GEOGRAPHY)", "KNOWLEDGE(HISTORY)", "KNOWLEDGE(LOCAL)", "KNOWLEDGE(NATURE)", "KNOWLEDGE(NOBILITY & ROYALTY)", "KNOWLEDGE(RELIGION)", "KNOWLEDGE(THE PLANES)", "PROFESSION", "SPELLCRAFT", "SURVIVAL"));
 			skillPointsPerLevel = 2;
 			special.get(1).add("Summon Familiar");
+
+			String[] spellsLv0 = new String[] {"Create Water", "Cure Minor Wounds", "Detect Magic", "Ghost Sound", "Guidance", "Light", "Mending", "Purify Food and Drink", "Read Magic", "Touch of Fatigue"};
+			String[] spellsLv1 = new String[] {"Bless", "Burning Hands", "Cause Fear", "Command", "Comprehend Languages", "Cure Light Wounds", "Detect Chaos", "Detect Evil", "Detect Good", "Detect Law", "Endure Elements", "Obscuring Mist", "Protection from Chaos", "Protection from Evil", "Protection from Good", "Protection from Law", "Sleep"};
+			String[] spellsLv2 = new String[] {"Aid", "Animal Trance", "Bear's Endurance", "Bull's Strength", "Cat's Grace", "Cure Moderate Wounds", "Darkness", "Delay Poison", "Invisibility", "Mirror Image", "Resist Energy", "Scorching Ray", "See Invisibility", "Web"};
+			String[] spellsLv3 = new String[] {"Animate Dead", "Bestow Curse", "Contagion", "Continual Flame", "Cure Serious Wounds", "Daylight", "Deeper Darkness", "Lightning Bolt", "Neutralize Poison", "Remove Curse", "Remove Disease", "Tongues"};
+			String[] spellsLv4 = new String[] {"Cure Critical Wounds", "Minor Creation", "Polymorph", "Restoration", "Stoneskin", "Wall of Fire"};
+			String[] spellsLv5 = new String[] {"Baleful Polymorph", "Break Enchantment", "Commune", "Heal", "Major Creation", "Raise Dead", "True Seeing", "Wall of Stone"};
+			spellList = new String[][] {spellsLv0, spellsLv1, spellsLv2, spellsLv3, spellsLv4, spellsLv5};
+			bonusSpellsAbi = 4; // Wisdom
+			spellsPerDayProgression = new int[][] {{3, 1}, {3, 1}, {3, 2}, {3, 2, 0}, {3, 2, 1}, {3, 2, 1}, {3, 3, 2}, {3, 3, 2, 0}, {3, 3, 2, 1}, {3, 3, 2, 1}, {3, 3, 3, 2}, {3, 3, 3, 2, 0}, {3, 3, 3, 2, 1}, {3, 3, 3, 2, 1}, {3, 3, 3, 3, 2}, {3, 3, 3, 3, 2, 0}, {3, 3, 3, 3, 2, 1}, {3, 3, 3, 3, 2, 1}, {3, 3, 3, 3, 3, 2}, {3, 3, 3, 3, 3, 2}};
+
+
 		}
 		else if (clas.equals("ARISTOCRAT")) {
 			hitDie = 8;
@@ -1550,3 +1697,384 @@ class CharacterClass {
 	}
 }
 
+
+
+class Feat {
+	String featName;
+
+	// prerequisites for the feat
+	String[] featPrerequisites;
+	String[] specialPrequisites;
+	int[] minAbiScores;
+	int minBAB = 0;
+	int minCasterLevel;
+	HashMap<String, Integer> skillPrerequisites;
+
+	HashMap<String, Integer> skillAdjust; // bonuses to skills granted from the feat
+
+	boolean fighter; // whether or not the feat is an option as a bonus fighter feat
+	boolean psionic;
+	boolean metamagic;
+	boolean itemCreation;
+
+
+	Feat(String fName) {
+		featName = fName;
+		setSpecial(featName);
+	}
+
+	private void setSpecial(String fName) {
+		if (fName.equals("ACROBATIC")) {
+			skillAdjust = new HashMap<String, Integer>();
+			skillAdjust.put("JUMP", 2);
+			skillAdjust.put("TUMBLE", 2);
+		}
+		else if (fName.equals("AGILE")) {
+			skillAdjust = new HashMap<String, Integer>();
+			skillAdjust.put("BALANCE", 2);
+			skillAdjust.put("ESCAPE ARTIST", 2);
+		}
+		else if (fName.equals("ALERTNESS")) {
+			skillAdjust = new HashMap<String, Integer>();
+			skillAdjust.put("LISTEN", 2);
+			skillAdjust.put("SPOT", 2);
+		}
+		else if (fName.equals("ATHLETIC")) {
+			skillAdjust = new HashMap<String, Integer>();
+			skillAdjust.put("CLIMB", 2);
+			skillAdjust.put("SWIM", 2);
+		}
+		else if (fName.equals("AUGMENT SUMMONING")) {
+			featPrerequisites = new String[] {"SPELL FOCUS(CONJURATION)"};
+		}
+		else if (fName.equals("BLIND-FIGHT")) {
+			fighter = true;
+		}
+		else if (fName.equals("BREW POTION")) {
+			itemCreation = true;
+			minCasterLevel = 3;
+		}
+		else if (fName.equals("CLEAVE")) {
+			minAbiScores = new int[] {13, 0, 0, 0, 0, 0};
+			featPrerequisites = new String[] {"POWER ATTACK"};
+			fighter = true;
+		}
+		else if (fName.equals("COMBAT EXPERTISE")) {
+			minAbiScores = new int[] {0, 0, 0, 13, 0, 0};
+			fighter = true;
+		}
+		else if (fName.equals("COMBAT REFLEXES")) {
+			fighter = true;
+		}
+		else if (fName.equals("CRAFT MAGIC ARMS AND ARMOR")) {
+			itemCreation = true;
+			minCasterLevel = 5;
+		}
+		else if (fName.equals("CRAFT ROD")) {
+			itemCreation = true;
+			minCasterLevel = 9;
+		}
+		else if (fName.equals("CRAFT STAFF")) {
+			itemCreation = true;
+			minCasterLevel = 12;
+		}
+		else if (fName.equals("CRAFT WAND")) {
+			itemCreation = true;
+			minCasterLevel = 5;
+		}
+		else if (fName.equals("CRAFT WONDROUS ITEM")) {
+			itemCreation = true;
+			minCasterLevel = 3;
+		}
+		else if (fName.equals("DECEITFUL")) {
+			skillAdjust = new HashMap<String, Integer>();
+			skillAdjust.put("DISGUISE", 2);
+			skillAdjust.put("FORGERY", 2);
+		}
+		else if (fName.equals("DEFLECT ARROWS")) {
+			minAbiScores = new int[] {0, 13, 0, 0, 0, 0};
+			featPrerequisites = new String[] {"IMPROVED UNARMED STRIKE"};
+		}
+		else if (fName.equals("DEFT HANDS")) {
+			skillAdjust = new HashMap<String, Integer>();
+			skillAdjust.put("SLEIGHT OF HAND", 2);
+			skillAdjust.put("USE ROPE", 2);
+		}
+		else if (fName.equals("DIEHARD")) {
+			featPrerequisites = new String[] {"ENDURANCE"};
+		}
+		else if (fName.equals("DILIGENT")) {
+			skillAdjust = new HashMap<String, Integer>();
+			skillAdjust.put("APPRAISE", 2);
+			skillAdjust.put("DECIPHER SCRIPT", 2);
+		}
+		else if (fName.equals("EMPOWER SPELL")) {
+			metamagic = true;
+		}
+		else if (fName.equals("ENLARGE SPELL")) {
+			metamagic = true;
+		}
+		else if (fName.equals("EXTEND SPELL")) {
+			metamagic = true;
+		}
+		else if (fName.equals("EXTRA TURNING")) {
+			specialPrequisites = new String[] {"Turn Undead"};
+		}
+		else if (fName.equals("FAR SHOT")) {
+			featPrerequisites = new String[] {"POINT BLANK SHOT"};
+			fighter = true;
+		}
+		else if (fName.equals("FORGE RING")) {
+			itemCreation = true;
+			minCasterLevel = 12;
+		}
+		else if (fName.equals("GREAT CLEAVE")) {
+			fighter = true;
+			minAbiScores = new int[] {13, 0, 0, 0, 0, 0};
+			minBAB = 4;
+			featPrerequisites = new String[] {"POWER ATTACK, CLEAVE"};
+		}
+		else if (fName.equals("GREATER SPELL PENETRATION")) {
+			featPrerequisites = new String[] {"SPELL PENETRATION"};
+		}
+		else if (fName.equals("GREATER TWO-WEAPON FIGHTING")) {
+			fighter = true;
+			minAbiScores = new int[] {0, 19, 0, 0, 0, 0};
+			minBAB = 11;
+			featPrerequisites = new String[] {"IMPROVED TWO-WEAPON FIGHTING", "TWO-WEAPON FIGHTNG"};
+		}
+		else if (fName.equals("HEIGHTEN SPELL")) {
+			metamagic = true;
+		}
+		else if (fName.equals("IMPROVED BULL RUSH")) {
+			fighter = true;
+			minAbiScores = new int[] {13, 0, 0, 0, 0, 0};
+			featPrerequisites = new String[] {"POWER ATTACK"};
+		}
+		else if (fName.equals("IMPROVED CRITICAL")) {
+			fighter = true;
+			minBAB = 8;
+		}
+		else if (fName.equals("IMPROVED DISARM")) {
+			fighter = true;
+			minAbiScores = new int[] {0, 0, 0, 13, 0, 0};
+			featPrerequisites = new String [] {"COMBAT EXPERTISE"};
+		}
+		else if (fName.equals("IMPROVED FAMILIAR")) {
+			specialPrequisites = new String[] {"Acquire Familiar"};
+		}
+		else if (fName.equals("IMPROVED FEINT")) {
+			fighter = true;
+			minAbiScores = new int[] {0, 0, 0, 13, 0, 0};
+			featPrerequisites = new String[] {"COMBAT EXPERTISE"};
+		}
+		else if (fName.equals("IMPROVED GRAPPLE")) {
+			fighter = true;
+			minAbiScores = new int[] {0, 13, 0, 0, 0, 0};
+			featPrerequisites = new String[] {"IMPROVED UNARMED STRIKE"};
+		}
+		else if (fName.equals("IMPROVED INITIATIVE")) {
+			fighter = true;
+		}
+		else if (fName.equals("IMPROVED OVERRUN")) {
+			fighter = true;
+			minAbiScores = new int[] {13, 0, 0, 0, 0, 0};
+			featPrerequisites = new String[] {"POWER ATTACK"};
+		}
+		else if (fName.equals("IMPROVED PRECISE SHOT")) {
+			fighter = true;
+			minAbiScores = new int[] {0, 19, 0, 0, 0, 0};
+			minBAB = 11;
+			featPrerequisites = new String[] {"POINT BLANK SHOT", "PRECISE SHOT"};
+		}
+		else if (fName.equals("IMPROVED SHIELD BASH")) {
+			fighter = true;
+		}
+		else if (fName.equals("IMPROVED SUNDER")) {
+			fighter = true;
+			minAbiScores = new int[] {13, 0, 0, 0, 0, 0};
+			featPrerequisites = new String[] {"POWER ATTACK"};
+		}
+		else if (fName.equals("IMPROVED TRIP")) {
+			fighter = true;
+			minAbiScores = new int[] {0, 0, 0, 13, 0, 0};
+			featPrerequisites = new String[] {"COMBAT EXPERTISE"};
+		}
+		else if (fName.equals("IMPROVED TURNING")) {
+			specialPrequisites = new String[] {"Turn Undead"};
+		}
+		else if (fName.equals("IMPROVED TWO-WEAPON FIGHTING")) {
+			fighter = true;
+			minAbiScores = new int[] {0, 17, 0, 0, 0, 0};
+			minBAB = 6;
+			featPrerequisites = new String[] {"TWO-WEAPON FIGHTING"};
+		}
+		else if (fName.equals("IMPROVED UNARMED STRIKE")) {
+			fighter = true;
+		}
+		else if (fName.equals("INVESTIGATOR")) {
+			skillAdjust = new HashMap<String, Integer>();
+			skillAdjust.put("GATHER INFORMATION", 2);
+			skillAdjust.put("SEARCH", 2);
+		}
+		else if (fName.equals("MAGICAL APTITUDE")) {
+			skillAdjust = new HashMap<String, Integer>();
+			skillAdjust.put("SPELLCRAFT", 2);
+			skillAdjust.put("USE MAGIC DEVICE", 2);
+		}
+		else if (fName.equals("MANYSHOT")) {
+			fighter = true;
+			minAbiScores = new int[] {0, 17, 0, 0, 0, 0};
+			minBAB = 6;
+			featPrerequisites = new String[] {"POINT BLANK SHOT", "RAPID SHOT"};
+		}
+		else if (fName.equals("MAXIMIZE SPELLS")) {
+			metamagic = true;
+		}
+		else if (fName.equals("MOBILITY")) {
+			fighter = true;
+			minAbiScores = new int[] {0, 13, 0, 0, 0, 0};
+			featPrerequisites = new String[] {"DODGE"};
+		}
+		else if (fName.equals("MOUNTED ARCHERY")) {
+			fighter = true;
+			skillPrerequisites = new HashMap<String, Integer>();
+			skillPrerequisites.put("RIDE", 1);
+			featPrerequisites = new String[] {"MOUNTED COMBAT"};
+		}
+		else if (fName.equals("MOUNTED COMBAT")) {
+			fighter = true;
+			skillPrerequisites = new HashMap<String, Integer>();
+			skillPrerequisites.put("RIDE", 1);
+		}
+		else if (fName.equals("NATURAL SPELL")) {
+			minAbiScores = new int[] {0, 0, 0, 0, 13, 0};
+			specialPrequisites = new String[] {"Wild Shape"};
+		}
+		else if (fName.equals("NEGOTIATOR")) {
+			skillAdjust = new HashMap<String, Integer>();
+			skillAdjust.put("DIPLOMACY", 2);
+			skillAdjust.put("SENSE MOTIVE", 2);
+		}
+		else if (fName.equals("NIMBLE FINGERS")) {
+			skillAdjust = new HashMap<String, Integer>();
+			skillAdjust.put("DISABLE DEVICE", 2);
+			skillAdjust.put("OPEN LOCK", 2);
+		}
+		else if (fName.equals("PERSUASIVE")) {
+			skillAdjust = new HashMap<String, Integer>();
+			skillAdjust.put("BLUFF", 2);
+			skillAdjust.put("INTIMIDATE", 2);
+		}
+		else if (fName.equals("POINT BLANK SHOT")) {
+			fighter = true;
+		}
+		else if (fName.equals("POWER ATTACK")) {
+			minAbiScores = new int[] {13, 0, 0, 0, 0, 0};
+			fighter = true;
+		}
+		else if (fName.equals("PRECISE SHOT")) {
+			fighter = true;
+			featPrerequisites = new String[] {"POINT BLANK SHOT"};
+		}
+		else if (fName.equals("QUICK DRAW")) {
+			fighter = true;
+			minBAB = 1;
+		}
+		else if (fName.equals("QUICKEN SPELL")) {
+			metamagic = true;
+		}
+		else if (fName.equals("RAPID RELOAD")) {
+			fighter = true;
+		}
+		else if (fName.equals("RAPID SHOT")) {
+			fighter = true;
+			minAbiScores = new int[] {0, 13, 0, 0, 0, 0};
+			featPrerequisites = new String[] {"POINT BLANK SHOT"};
+		}
+		else if (fName.equals("RIDE-BY-ATTACK")) {
+			fighter = true;
+			skillPrerequisites = new HashMap<String, Integer>();
+			skillPrerequisites.put("RIDE", 1);
+			featPrerequisites = new String[] {"MOUNTED COMBAT"};
+		}
+		else if (fName.equals("SCRIBE SCROLL")) {
+			itemCreation = true;
+			minCasterLevel = 1;
+		}
+		else if (fName.equals("SELF-SUFFICIENT")) {
+			skillAdjust = new HashMap<String, Integer>();
+			skillAdjust.put("HEAL", 2);
+			skillAdjust.put("SURVIVAL", 2);
+		}
+		else if (fName.equals("SHOT ON THE RUN")) {
+			fighter = true;
+			minAbiScores = new int[] {0, 13, 0, 0, 0, 0};
+			minBAB = 4;
+			featPrerequisites = new String[] {"DODGE", "MOBILITY", "POINT BLANK SHOT"};
+		}
+		else if (fName.equals("SILENT SPELL")) {
+			metamagic = true;
+		}
+		else if (fName.equals("SNATCH ARROWS")) {
+			fighter = true;
+			minAbiScores = new int[] {0, 15, 0, 0, 0, 0};
+			featPrerequisites = new String[] {"DEFLECT ARROWS", "IMPROVED UNARMED STRIKE"};
+		}
+		else if (fName.equals("SPIRITED CHARGE")) {
+			fighter = true;
+			skillPrerequisites = new HashMap<String, Integer>();
+			skillPrerequisites.put("RIDE", 1);
+			featPrerequisites = new String[] {"MOUNTED COMBAT", "RIDE-BY-ATTACK"};
+		}
+		else if (fName.equals("SPRING ATTACK")) {
+			fighter = true;
+			minAbiScores = new int[] {0, 13, 0, 0, 0, 0};
+			featPrerequisites = new String[] {"DODGE", "MOBILITY"};
+			minBAB = 4;
+		}
+		else if (fName.equals("STEALTHY")) {
+			skillAdjust = new HashMap<String, Integer>();
+			skillAdjust.put("HIDE", 2);
+			skillAdjust.put("MOVE SILENTLY", 2);
+		}
+		else if (fName.equals("STILL SPELL")) {
+			metamagic = true;
+		}
+		else if (fName.equals("STUNNING FIST")) {
+			fighter = true;
+			minAbiScores = new int[] {0, 13, 0, 0, 13, 0};
+			minBAB = 8;
+			featPrerequisites = new String[] {"IMPROVED UNARMED STRIKE"};
+		}
+		else if (fName.equals("TRAMPLE")) {
+			fighter = true;
+			skillPrerequisites = new HashMap<String, Integer>();
+			skillPrerequisites.put("RIDE", 1);
+			featPrerequisites = new String[] {"MOUNTED COMBAT"};
+		}
+		else if (fName.equals("TWO-WEAPON DEFENSE")) {
+			fighter = true;
+			minAbiScores = new int[] {0, 15, 0, 0, 0, 0};
+			featPrerequisites = new String[] {"TWO-WEAPON FIGHTING"};
+		}
+		else if (fName.equals("TWO-WEAPON FIGHTING")) {
+			fighter = true;
+			minAbiScores = new int[] {0, 15, 0, 0, 0, 0};
+		}
+		else if (fName.equals("WEAPON FINESSE")) {
+			fighter = true;
+			minBAB = 1;
+		}
+		else if (fName.equals("WHIRLWIND ATTACK")) {
+			fighter = true;
+			minAbiScores = new int[] {0, 13, 0, 13, 0, 0};
+			minBAB = 4;
+			featPrerequisites = new String[] {"COMBAT EXPERTISE", "DODGE", "SPRING ATTACK"};
+		}
+		else if (fName.equals("WIDEN SPELL")) {
+			metamagic = true;
+		}
+	}
+
+}
