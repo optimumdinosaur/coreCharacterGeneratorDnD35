@@ -556,9 +556,9 @@ class DDCharacter { // D&D Character
    */
    private void getFeat() {
    		// so what's this thing actually look like? it'll have to iterate through the priorityFeatChoices
-   		Iterator<Feat> priorityFeatIterator = priorityFeatChoices.iterator();
    		boolean chosen = false;
    		while(!chosen) {
+   			Iterator<Feat> priorityFeatIterator = priorityFeatChoices.iterator();
    			int index = r.nextInt(priorityFeatChoices.size());
    			for(int i=0; i < index; i++)
    				priorityFeatIterator.next();
@@ -569,10 +569,16 @@ class DDCharacter { // D&D Character
    				continue;
    			if (newFeat.minAbiScores != null) {
    				System.out.println("Checking ability score prerequisites...");
+   				boolean gotTheStats = true;
    				for (int i=0; i < 6; i++) {
+   					System.out.println("Checking ability score #" + i);
+   					System.out.println("Character's Score: " + abilityScores[i]);
+   					System.out.println("Feat Prerequisite: " + newFeat.minAbiScores[i]);
    					if (abilityScores[i] < newFeat.minAbiScores[i])
-   						continue;
+   						gotTheStats = false;
    				}
+   				if (!gotTheStats)
+   					continue;
    			}
    			if (newFeat.minBAB != 0) {
    				if (baseAttackBonus < newFeat.minBAB)
@@ -1821,6 +1827,10 @@ class Feat {
 			skillAdjust.put("APPRAISE", 2);
 			skillAdjust.put("DECIPHER SCRIPT", 2);
 		}
+		else if (fName.equals("DODGE")) {
+			fighter = true;
+			minAbiScores = new int[] {0, 13, 0, 0, 0, 0};
+		}
 		else if (fName.equals("EMPOWER SPELL")) {
 			metamagic = true;
 		}
@@ -1845,7 +1855,7 @@ class Feat {
 			fighter = true;
 			minAbiScores = new int[] {13, 0, 0, 0, 0, 0};
 			minBAB = 4;
-			featPrerequisites = new String[] {"POWER ATTACK, CLEAVE"};
+			featPrerequisites = new String[] {"POWER ATTACK", "CLEAVE"};
 		}
 		else if (fName.equals("GREATER SPELL PENETRATION")) {
 			featPrerequisites = new String[] {"SPELL PENETRATION"};
