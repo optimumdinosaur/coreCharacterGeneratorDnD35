@@ -323,7 +323,7 @@ class DDCharacter { // D&D Character
 	   			if (clas.spellsPerDayProgression != null) {
 	   				System.out.println("FOUND FIRST LEVEL OF A SPELLCASTING CLASS");
 	   				System.out.println("Initializing clas.spellsPerDay...");
-	   				System.out.println("clas.spellsPerDayProgression[0][0] : " + clas.spellsPerDayProgression[0][0]);
+	   				//System.out.println("clas.spellsPerDayProgression[0][0] : " + clas.spellsPerDayProgression[0][0]);
 	   				clas.spellsPerDay = new ArrayList<Integer>();
 	   				for(int j=0; j < clas.spellsPerDayProgression[0].length; j++) {
 	   					System.out.println("About to set clas.spellPerDay equal to clas.spellsPerDayProgression[0]["+j+"]...");
@@ -1070,6 +1070,7 @@ class CharacterClass {
 	int skillPointsPerLevel; // the number of skill points a member of this class gains at each level, not counting their int bonus
 	int numOfLevels; //for now I'll keep this commented out and default to 20, but if prestige classes are going to be involved i'll have to deal with it
 	ArrayList<ArrayList<String>> special; // an array list of array lists to store the class's special features
+	String[][] bonusFeats; // contains bonus feats granted to the character, sorted by level
 	String[] priorityFeatChoices;
 
 
@@ -1153,8 +1154,7 @@ class CharacterClass {
 			goodWill = false;
 			classSkills = new ArrayList<String>(Arrays.asList("CLIMB", "CRAFT", "HANDLE ANIMAL", "INTIMIDATE", "JUMP", "LISTEN", "RIDE", "SURVIVAL", "SWIM"));
 			skillPointsPerLevel = 4;
-			priorityFeatChoices = new String[] {"POWER ATTACK", "CLEAVE", "GREAT CLEAVE", "IMPROVED BULL RUSH", "IMPROVED OVERRUN", "IMPROVED SUNDER"};
-			//priorityFeatChoices = new String[] {"POWER ATTACK", "CLEAVE", "GREAT CLEAVE", "IMPROVED BULL RUSH", "IMPROVED OVERRUN", "IMPROVED SUNDER", "BLIND-FIGHT", "ATHLETIC", "COMBAT REFLEXES", "DODGE", "COMBAT EXPERTISE", "DIEHARD", "IMPROVED CRITICAL", "IMPROVED INITIATIVE", "TOUGHNESS", "IMPROVED UNARMED STRIKE", "IMPROVED GRAPPLE"};
+			priorityFeatChoices = new String[] {"POWER ATTACK", "CLEAVE", "GREAT CLEAVE", "IMPROVED BULL RUSH", "IMPROVED OVERRUN", "IMPROVED SUNDER", "BLIND-FIGHT", "ATHLETIC", "COMBAT REFLEXES", "DODGE", "DIEHARD", "IMPROVED CRITICAL", "TOUGHNESS", "IMPROVED UNARMED STRIKE", "IMPROVED GRAPPLE"};
 			special.get(0).add("Fast Movement");
 			special.get(0).add("Illiteracy");
 			special.get(0).add("Rage 1/day");
@@ -1193,6 +1193,7 @@ class CharacterClass {
 			String priorityPerform = "PERFORM(" + performChoices[randomIndex]+")";
 			prioritySkills.add(priorityPerform);
 			skillPointsPerLevel = 6;
+			priorityFeatChoices = new String[] {"COMBAT CASTING", "COMBAT EXPERTISE", "IMPROVED DISARM", "IMPROVED FEINT", "IMPROVED TRIP", "COMBAT REFLEXES", "DODGE", "ESCHEW MATERIALS", "QUICK DRAW", "SPELL FOCUS(ILLUSION)", "SPELL FOCUS(ENCHANTMENT)", "WEAPON FINESSE", "SILENT SPELL", "STILL SPELL"};
 			special.get(0).add("Bardic Music");
 			special.get(0).add("Bardic Knowledge");
 			special.get(0).add("Countersong");
@@ -1231,7 +1232,8 @@ class CharacterClass {
 			classSkills = new ArrayList<String>(Arrays.asList("CONCENTRATION", "CRAFT", "DIPLOMACY", "HEAL", "KNOWLEDGE(ARCANA)", "KNOWLEDGE(HISTORY)", "KNOWLEDGE(RELIGION)", "KNOWLEDGE(THE PLANES)", "PROFESSION", "SPELLCRAFT"));
 			prioritySkills.add("KNOWLEDGE(RELIGION)");
 			skillPointsPerLevel = 2;
-			special.get(0).add("Turn or Rebuke Undead");
+			priorityFeatChoices = new String[] {"COMBAT CASTING", "EXTRA TURNING", "IMPROVED TURNING", "EXTEND SPELL", "HEIGHTEN SPELL", "QUICKEN SPELL", "WIDEN SPELL"};
+			special.get(0).add("Turn Undead");
 			String[] spellsLv0 = new String[] {"Create Water", "Cure Minor Wounds", "Detect Magic", "Detect Poison", "Guidance", "Inflict Minor Wounds", "Light", "Mending", "Purify Food and Drink", "Read Magic", "Resistance", "Virtue"};
 			String[] spellsLv1 = new String[] {"Bane", "Bless", "Bless Water", "Cause Fear", "Command", "Comprehend Languages", "Cure Light Wounds", "Curse Water", "Deathwatch", "Detect Chaos/Evil/Good/Law", "Detect Undead", "Divine Favor", "Doom", "Endure Elements", "Entropic Shield", "HIDE from Undead", "Inflict Light Wounds", "Magic Stone", "Magic Weapon", "Obscuring Mist", "Protection from Chaos/Evil/Good/Law", "Remove Fear", "Sanctuary", "Shield of Faith", "Summon Monster I"};
 			String[] spellsLv2 = new String[] {"Aid", "Align Weapon", "Augury", "Bear's Endurance", "Bull's Strength", "Calm Emotions", "Consecrate", "Cure Moderate Wounds", "Darkness", "Death Knell", "Delay Poison", "Desecrate", "Eagle's Splendor", "Enthrall", "Find Traps", "Gentle Repose", "Hold Person", "Inflict Moderate Wounds", "Make Whole", "Owl's Wisdom", "Remove Paralysis", "Resist Energy", "Lesser Restoration", "Shatter", "Shield Other", "Silence", "Sound Burst", "Spiritual Weapon", "Status", "Summon Monster II", "Undetectable Alignment", "Zone of Truth"};
@@ -1259,6 +1261,7 @@ class CharacterClass {
 			classSkills = new ArrayList<String>(Arrays.asList("CONCENTRATION", "CRAFT", "DIPLOMACY", "HANDLE ANIMAL", "HEAL", "KNOWLEDGE(NATURE)", "LISTEN", "PROFESSION", "RIDE", "SPELLCRAFT", "SPOT", "SURVIVAL", "SWIM"));
 			prioritySkills.add("KNOWLEDGE(NATURE)");
 			skillPointsPerLevel = 4;
+			priorityFeatChoices = new String[] {"COMBAT CASTING", "ESCHEW MATERIALS", "NATURAL SPELL", "SELF-SUFFICIENT", "BREW POTION", "EXTEND SPELL", "QUICKEN SPELL", "ENLARGE SPELL", "WIDEN SPELL"};
 			special.get(0).add("Animal Companion");
 			special.get(0).add("NATURE Sense");
 			special.get(0).add("Wild Empathy");
@@ -1311,6 +1314,7 @@ class CharacterClass {
 			goodWill = false;
 			classSkills = new ArrayList<String>(Arrays.asList("CLIMB", "CRAFT", "HANDLE ANIMAL", "INTIMIDATE", "JUMP", "RIDE", "SWIM"));
 			skillPointsPerLevel = 2;
+			priorityFeatChoices = new String[] {"COMBAT EXPERTISE", "IMPROVED DISARM", "IMPROVED FEINT", "IMPROVED TRIP", "COMBAT REFLEXES", "IMPROVED CRITICAL", "IMPROVED UNARMED STRIKE", "IMPROVED GRAPPLE", "MOUNTED COMBAT", "MOUNTED ARCHERY", "RIDE-BY-ATTACK", "SPRIITED CHARGE", "POINT BLANK SHOT", "FAR SHOT", "PRECISE SHOT", "IMPROVED PRECISE SHOT", "RAPID SHOT", "MANYSHOT", "POWER ATTACK", "CLEAVE", "GREAT CLEAVE", "IMPROVED BULL RUSH", "IMPROVED OVERRUN", "IMPROVED SUNDER", "IMPROVED SHIELD BASH", "TWO-WEAPON FIGHTING", "TWO-WEAPON DEFENSE", "IMPROVED TWO-WEAPON FIGHTING", "GREATER TWO-WEAPON FIGHTING"};
 			special.get(0).add("Bonus Fighter Feat");
 			special.get(1).add("Bonus Fighter Feat");
 			special.get(3).add("Bonus Fighter Feat");
@@ -1331,6 +1335,7 @@ class CharacterClass {
 			goodWill = true;
 			classSkills = new ArrayList<String>(Arrays.asList("BALANCE", "CLIMB", "CONCENTRATION", "CRAFT", "DIPLOMACY", "ESCAPE ARTIST", "HIDE", "JUMP", "KNOWLEDGE(ARCANA)", "KNOWLEDGE(RELIGION)", "LISTEN", "MOVE SILENTLY", "PERFORM", "PROFESSION", "SENSE MOTIVE", "SPOT", "SWIM", "TUMBLE"));
 			skillPointsPerLevel = 4;
+			priorityFeatChoices = new String[] {"BLIND-FIGHT", "COMBAT EXPERTISE", "DODGE", "MOBILITY", "IMPROVED CRITICAL", "IMPROVED INITIATIVE", "SNATCH ARROWS", "STUNNING FIST", "DEFLECT ARROWS", "POWER ATTACK", "WEAPON FINESSE"};
 			special.get(0).add("Monk AC Bonus");
 			special.get(0).add("Flurry of Blows");
 			special.get(0).add("Monk Unarmed Strike");
@@ -1385,6 +1390,7 @@ class CharacterClass {
 			goodWill = false;
 			classSkills = new ArrayList<String>(Arrays.asList("CONCENTRATION", "CRAFT", "DIPLOMACY", "HANDLE ANIMAL", "HEAL", "KNOWLEDGE(NOBILITY & ROYALTY)", "KNOWLEDGE(RELIGION)", "PROFESSION", "RIDE", "SENSE MOTIVE"));
 			skillPointsPerLevel = 2;
+			priorityFeatChoices = new String[] {"COMBAT EXPERTISE", "ENDURANCE", "DIEHARD", "EXTRA TURNING", "MOUNTED COMBAT", "RIDE-BY-ATTACK", "SPRIITED CHARGE", "POWER ATTACK", "SELF-SUFFICIENT", "IMPROVED SHIELD BASH", "TOUGHNESS"};
 			special.get(0).add("Aura of Good");
 			special.get(0).add("Detect Evil");
 			special.get(0).add("Smite Evil 1/day");
@@ -1411,7 +1417,7 @@ class CharacterClass {
 			String[] spellsLv4 = new String[] {"Break Enchantment", "Cure Serious Wounds", "Death Ward", "Dispel Chaos", "Dispel Evil", "Holy Sword", "Mark of Justice", "Neutralize Poison", "Restoration"};
 			spellList = new String[][] {spellsLv0, spellsLv1, spellsLv2, spellsLv3, spellsLv4};
 			bonusSpellsAbi = 4;
-			spellsPerDayProgression = new int[][] {{}, {}, {}, {}, {0}, {0}, {1}, {1}, {1, 0}, {1, 0}, {1, 1}, {1, 1, 0}, {1, 1, 1}, {1, 1, 1}, {2, 1, 1, 0}, {2, 1, 1, 1}, {2, 2, 1, 1}, {2, 2, 2, 1}, {3, 2, 2, 1}, {3, 3, 3, 2}, {3, 3, 3, 3}};
+			spellsPerDayProgression = new int[][] {{0}, {0}, {0}, {0, 0}, {0, 0}, {0, 1}, {0, 1}, {0, 1, 0}, {0, 1, 0}, {0, 1, 1}, {0, 1, 1, 0}, {0, 1, 1, 1}, {0, 1, 1, 1}, {0, 2, 1, 1, 0}, {0, 2, 1, 1, 1}, {0, 2, 2, 1, 1}, {0, 2, 2, 2, 1}, {0, 3, 2, 2, 1}, {0, 3, 3, 3, 2}, {0, 3, 3, 3, 3}};
 
 		}
 		else if (clas.equals("PSION")) {
@@ -1464,11 +1470,24 @@ class CharacterClass {
 			goodWill = false;
 			classSkills = new ArrayList<String>(Arrays.asList("CLIMB", "CONCENTRATION", "CRAFT", "HANDLE ANIMAL", "HEAL", "HIDE", "JUMP", "KNOWLEDGE(DUNGEONEERING)", "KNOWLEDGE(GEOGRAPHY)", "KNOWLEDGE(NATURE)", "LISTEN", "MOVE SILENTLY", "PROFESSION", "RIDE", "SEARCH", "SPOT", "SURVIVAL", "SWIM", "USE ROPE"));
 			skillPointsPerLevel = 6;
+			priorityFeatChoices = new String[] {"BLIND-FIGHT", "COMBAT REFLEXES", "IMPROVED INITIATIVE", "MOUNTED COMBAT", "MOUNTED ARCHERY", "RIDE-BY-ATTACK", "SPIRITED CHARGE", "FAR SHOT", "PRECISE SHOT", "TWO-WEAPON DEFENSE"};
 			special.get(0).add("1st Favored Enemy");
 			special.get(0).add("Track");
 			special.get(0).add("Wild Empathy");
-			special.get(1).add("Combat Style");
-			special.get(2).add("Endurance");
+			String combatStyle = getRandom(new String[] {"Archery", "Two-Weapon Combat"});
+			special.get(1).add("Combat Style: " + combatStyle);
+			bonusFeats = new String[20][];
+			if (combatStyle.equals("Archery")) {
+				bonusFeats[1] = new String[] {"RAPID SHOT"};
+				bonusFeats[5] = new String[] {"MANYSHOT"};
+				bonusFeats[12] = new String[] {"IMPROVED PRECISE SHOT"};
+			}
+			else if (combatStyle.equals("Two-Weapon Combat")) {
+				bonusFeats[1] = new String[] {"TWO-WEAPON FIGHTING"};
+				bonusFeats[5] = new String[] {"IMPROVED TWO-WEAPON FIGHTING"};
+				bonusFeats[12] = new String[] {"GREATER TWO-WEAPON FIGHTING"};
+			}
+			bonusFeats[2] = new String[] {"ENDURANCE"};
 			special.get(3).add("Animal Companion");
 			special.get(4).add("2nd Favored Enemy");
 			special.get(5).add("Improved Combat Style");
@@ -1479,7 +1498,7 @@ class CharacterClass {
 			special.get(10).add("Combat Style Mastery");
 			special.get(12).add("Camouflage");
 			special.get(14).add("4th Favored Enemy");
-			special.get(16).add("HIDE in Plain Sight");
+			special.get(16).add("Hide in Plain Sight");
 			special.get(19).add("5th Favored Enemy");
 
 			String[] spellsLv0 = new String[] {};
@@ -1489,8 +1508,8 @@ class CharacterClass {
 			String[] spellsLv4 = new String[] {"Animal Growth", "Commune with Nature", "Cure Serious Wounds", "Freedom of Movement", "Nondetection", "Summon Nature's Ally IV", "Tree Stride"};
 
 			spellList = new String[][] {spellsLv0, spellsLv1, spellsLv2, spellsLv3, spellsLv4};
-			bonusSpellsAbi = 4;
-			spellsPerDayProgression = new int[][] {{}, {}, {}, {}, {0}, {0}, {1}, {1}, {1, 0}, {1, 0}, {1, 1}, {1, 1, 0}, {1, 1, 1}, {1, 1, 1}, {2, 1, 1, 0}, {2, 1, 1, 1}, {2, 2, 1, 1}, {2, 2, 2, 1}, {3, 2, 2, 1}, {3, 3, 3, 2}, {3, 3, 3, 3}};
+			bonusSpellsAbi = 4; // Wisdom
+			spellsPerDayProgression = new int[][] {{0}, {0}, {0}, {0, 0}, {0, 0}, {0, 1}, {0, 1}, {0, 1, 0}, {0, 1, 0}, {0, 1, 1}, {0, 1, 1, 0}, {0, 1, 1, 1}, {0, 1, 1, 1}, {0, 2, 1, 1, 0}, {0, 2, 1, 1, 1}, {0, 2, 2, 1, 1}, {0, 2, 2, 2, 1}, {0, 3, 2, 2, 1}, {0, 3, 3, 3, 2}, {0, 3, 3, 3, 3}};
 
 
 		}
