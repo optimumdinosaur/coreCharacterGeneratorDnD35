@@ -1542,6 +1542,7 @@ class CharacterClass {
 			goodWill = false;
 			classSkills = new ArrayList<String>(Arrays.asList("APPRAISE", "BALANCE", "BLUFF", "CLIMB", "CRAFT", "DECIPHER SCRIPT", "DIPLOMACY", "DISABLE DEVICE", "DISGUISE", "ESCAPE ARTIST", "FORGERY", "GATHER INFORMATION", "HIDE", "INTIMIDATE", "JUMP", "KNOWLEDGE(LOCAL)", "LISTEN", "MOVE SILENTLY", "OPEN LOCK", "PERFORM", "PROFESSION", "SEARCH", "SENSE MOTIVE", "SLEIGHT OF HAND", "SPOT", "SWIM", "TUMBLE", "USE MAGIC DEVICE", "USE ROPE"));
 			skillPointsPerLevel = 8;
+			priorityFeatChoices = new String[] {"COMBAT EXPERTISE", "IMPROVED FEINT", "IMPROVED TRIP", "IMPROVED DISARM", "COMBAT REFLEXES", "DODGE", "IMPROVED INITIATIVE", "POINT BLANK SHOT", "RAPID SHOT", "MANY SHOT", "QUICK DRAW", "RAPID RELOAD", "STEALTHY", "TWO-WEAPON FIGHTING", "TWO-WEAPON DEFENSE", "IMPROVED TWO-WEAPON FIGHTING", "GREATER TWO-WEAPON FIGHTING", "WEAPON FINESSE"};
 			special.get(0).add("Sneak Attack +1d6");
 			special.get(0).add("Trapfinding");
 			special.get(1).add("Evasion");
@@ -1555,22 +1556,25 @@ class CharacterClass {
 			special.get(8).add("Sneak Attack +5d6");
 			special.get(8).add("Trap Sense +3");
 			ArrayList<String> specialAbilities = new ArrayList<String>(Arrays.asList("Crippling Strike", "Defensive Roll", "Improved Evasion", "Opportunist", "Skill Mastery", "Slippery Mind"));
-
-			//special.get(9).add(specialAbilities.get(rand.nextInt(specialAbilities.size())));
+			int saIndex = rand.nextInt(specialAbilities.size());
+			special.get(9).add(specialAbilities.get(saIndex));
+			specialAbilities.remove(saIndex);
 			special.get(10).add("Sneak Attack +6d6");
 			special.get(11).add("Trap Sense +4");
 			special.get(12).add("Sneak Attack +7d6");
-
-			//special.get(12).add(specialAbilities.get(rand.nextInt(specialAbilities.size())));
+			saIndex = rand.nextInt(specialAbilities.size());
+			special.get(12).add(specialAbilities.get(saIndex));
+			specialAbilities.remove(saIndex);
 			special.get(14).add("Sneak Attack +8d6");
 			special.get(14).add("Trap Sense +5");
-
-			//special.get(15).add(specialAbilities.get(rand.nextInt(specialAbilities.size())));
+			saIndex = rand.nextInt(specialAbilities.size());
+			special.get(15).add(specialAbilities.get(saIndex));
+			specialAbilities.remove(saIndex);
 			special.get(16).add("Sneak Attack +9d6");
 			special.get(17).add("Trap Sense +6");
 			special.get(18).add("Sneak Attack +10d6");
-			
-			//special.get(18).add(specialAbilities.get(rand.nextInt(specialAbilities.size())));
+			saIndex = rand.nextInt(specialAbilities.size());
+			special.get(18).add(specialAbilities.get(saIndex));
 		}
 		else if (clas.equals("SORCERER")) {
 			hitDie = 4;
@@ -1580,6 +1584,7 @@ class CharacterClass {
 			goodWill = true;
 			classSkills = new ArrayList<String>(Arrays.asList("BLUFF", "CONCENTRATION", "CRAFT", "KNOWLEDGE(ARCANA)", "PROFESSION", "SPELLCRAFT"));
 			skillPointsPerLevel = 2;
+			priorityFeatChoices = new String[] {"ESCHEW MATERIALS", "AUGMENT SUMMONING", "COMBAT CASTING", "IMPROVED COUNTERSPELL", "IMPROVED FAMILIAR", "MAGICAL APTITUDE", "POINT BLANK SHOT", "PRECISE SHOT", "SPELL PENETRATION", "EMPOWER SPELL", "ENLARGE SPELL", "EXTEND SPELL", "MAXIMIZE SPELL", "SILENT SPELL", "STILL SPELL", "WIDEN SPELL"};
 			special.get(0).add("Summon Familiar");
 
 			String[] spellsLv0 = new String[] {"Resistance", "Acid Splash", "Detect Poison", "Detect Magic", "Read Magic", "Daze", "Dancing Lights", "Flare", "Light", "Ray of Frost", "Ghost Sound", "Disrupt Undead", "Touch of Fatigue", "Mage Hand", "Mending", "Message", "Open/Close", "Arcane Mark", "Prestidigitation"};
@@ -1662,6 +1667,8 @@ class CharacterClass {
 			classSkills = new ArrayList<String>(Arrays.asList("CONCENTRATION", "CRAFT", "DECIPHER SCRIPT", "KNOWLEDGE(ARCANA)", "KNOWLEDGE(ARCHITECTURE & ENGINEERING)", "KNOWLEDGE(DUNGEONEERING)", "KNOWLEDGE(GEOGRAPHY)", "KNOWLEDGE(HISTORY)", "KNOWLEDGE(LOCAL)", "KNOWLEDGE(NATURE)", "KNOWLEDGE(NOBILITY & ROYALTY)", "KNOWLEDGE(RELIGION)", "KNOWLEDGE(THE PLANES)", "PROFESSION", "SPELLCRAFT"));
 			prioritySkills.add("KNOWLEDGE(ARCANA)");
 			skillPointsPerLevel = 2;
+			priorityFeatChoices = new String[] {"ESCHEW MATERIALS", "AUGMENT SUMMONING", "COMBAT CASTING", "IMPROVED COUNTERSPELL", "IMPROVED FAMILIAR", "MAGICAL APTITUDE", "POINT BLANK SHOT", "PRECISE SHOT", "SPELL PENETRATION", "EMPOWER SPELL", "ENLARGE SPELL", "EXTEND SPELL", "MAXIMIZE SPELL", "SILENT SPELL", "STILL SPELL", "WIDEN SPELL"};
+
 			bonusFeats = new String[20][];
 			special.get(0).add("Summon Familiar");
 			bonusFeats[0] = new String[] {"SCRIBE SCROLL"};
