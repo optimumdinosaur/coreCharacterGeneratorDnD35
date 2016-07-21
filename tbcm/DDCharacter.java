@@ -335,6 +335,9 @@ class DDCharacter { // D&D Character
 	   			if (newFeature.equals("Bonus Fighter Feat")) {
 	   				getFeat(1); // getFeat with mode=1, Fighter Bonus Feat mode
 	   			}
+	   			else if (newFeature.equals("Bonus Wizard Feat")) {
+	   				getFeat(2); // mode=2, Wizard Bonus Feat mode
+	   			}
 	   			else {
 	   				specialList.add(newFeature);
 	   			}
