@@ -636,6 +636,20 @@ class DDCharacter { // D&D Character
    				}
    			}
    		}
+   		if (newFeat.minSpellLevel > 0) {
+   			// look through each of the character's classes t o see if they have a spellsPerDay and to see if the size of that spellsPerDay is greater than or equal to not 4, but rather newFeat.minSpellLevel
+   			boolean gotTheSpellLevels = false;
+   			for (CharacterClass c : classes.keySet()) {
+   				if (c.spellsPerDay.size() >= newFeat.minSpellLevel) {
+   					gotTheSpellLevels = true;
+   					break;
+   				}
+   			}
+   			if (!gotTheSpellLevels) {
+   				System.out.println("Character does not have enough spell levels to use this feat effectively");
+   				return false;
+   			}
+   		}
 
    		return true;
    }
@@ -1826,14 +1840,15 @@ class Feat {
 	int[] minAbiScores;
 	int minBAB = 0;
 	int minCasterLevel;
+	int minSpellLevel; // used for metamagic feat; eg. Empower Spell uses a spell slot two levels higher than normal, so the caster must have at least 3rd level spells to use this feat
 	HashMap<String, Integer> skillPrerequisites;
-
-	HashMap<String, Integer> skillAdjust; // bonuses to skills granted from the feat
 
 	boolean fighter; // whether or not the feat is an option as a bonus fighter feat
 	boolean psionic;
 	boolean metamagic;
 	boolean itemCreation;
+
+	HashMap<String, Integer> skillAdjust; // bonuses to skills granted from the feat
 
 
 	Feat(String fName) {
@@ -1932,12 +1947,15 @@ class Feat {
 		}
 		else if (fName.equals("EMPOWER SPELL")) {
 			metamagic = true;
+			minSpellLevel = 3;
 		}
 		else if (fName.equals("ENLARGE SPELL")) {
 			metamagic = true;
+			minSpellLevel = 2;
 		}
 		else if (fName.equals("EXTEND SPELL")) {
 			metamagic = true;
+			minSpellLevel = 2;
 		}
 		else if (fName.equals("EXTRA TURNING")) {
 			specialPrequisites = new String[] {"Turn Undead"};
@@ -1967,6 +1985,7 @@ class Feat {
 		}
 		else if (fName.equals("HEIGHTEN SPELL")) {
 			metamagic = true;
+			minSpellLevel = 2;
 		}
 		else if (fName.equals("IMPROVED BULL RUSH")) {
 			fighter = true;
@@ -2052,6 +2071,7 @@ class Feat {
 		}
 		else if (fName.equals("MAXIMIZE SPELLS")) {
 			metamagic = true;
+			minSpellLevel = 4;
 		}
 		else if (fName.equals("MOBILITY")) {
 			fighter = true;
@@ -2105,6 +2125,7 @@ class Feat {
 		}
 		else if (fName.equals("QUICKEN SPELL")) {
 			metamagic = true;
+			minSpellLevel = 5;
 		}
 		else if (fName.equals("RAPID RELOAD")) {
 			fighter = true;
@@ -2137,6 +2158,7 @@ class Feat {
 		}
 		else if (fName.equals("SILENT SPELL")) {
 			metamagic = true;
+			minSpellLevel = 2;
 		}
 		else if (fName.equals("SNATCH ARROWS")) {
 			fighter = true;
@@ -2162,6 +2184,7 @@ class Feat {
 		}
 		else if (fName.equals("STILL SPELL")) {
 			metamagic = true;
+			minSpellLevel = 2;
 		}
 		else if (fName.equals("STUNNING FIST")) {
 			fighter = true;
@@ -2196,6 +2219,7 @@ class Feat {
 		}
 		else if (fName.equals("WIDEN SPELL")) {
 			metamagic = true;
+			minSpellLevel = 4;
 		}
 	}
 
