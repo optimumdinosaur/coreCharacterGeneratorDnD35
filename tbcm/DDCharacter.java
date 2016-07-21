@@ -275,41 +275,6 @@ class DDCharacter { // D&D Character
 	   	for(int i=0; i < levels; i++) {
 	   		int currentLevel = i + classes.get(clas);
 	   		System.out.format("**Going from level %1$d to %2$d...\n", currentLevel, currentLevel + 1);
-	   		ArrayList<String> newFeatures = clas.special.get(currentLevel);
-	   		System.out.println("newFeatures of Lv" + (currentLevel+1) + ": " + newFeatures);
-	   		for (int k=0; k < newFeatures.size(); k++) { // look at newFeatures for abilities that increase numerically and replace a lower level version (like Rage 2/day replacing Rage 1/day)
-	   			String newFeature = newFeatures.get(k);
-	   			// if(newFeature.matches(".*\\d+.*")) { // if newFeature contains a digit
-	   			// 	// here i need to remove the old version, so first i'll get the substring containing the name of hte ability
-	   			// 	int digIndex = 0;
-	   			// 	for (int j=0; j < newFeature.length(); j++) {
-	   			// 		if (Character.isDigit(newFeature.charAt(j))) {
-	   			// 			digIndex = j;
-	   			// 			}
-	   			// 	}
-	   			// 	String abiName = newFeature.substring(0, digIndex);
-	   			// 	for(String s : specialList) {
-	   			// 		if (s.startsWith(abiName)) {
-	   			// 			specialList.remove(s);
-	   			// 		}
-	   			// 	}
-	   			// }
-	   		}
-	   		specialList.addAll(newFeatures);
-
-	   		if (clas.bonusFeats != null) {
-	   			if (clas.bonusFeats[currentLevel] != null) {
-	   				for (String bonusFeatName : Arrays.asList(clas.bonusFeats[currentLevel])) {
-	   					featList.add(new Feat(bonusFeatName));
-	   				}
-	   			}
-	   		}
-
-	   		int sppl = clas.skillPointsPerLevel + abiMods[3]; // skill points per level
-	   		if (race.raceName.equals("HUMAN")) 
-	   			sppl++; // if human, get one more skill point per level
-	   		if (sppl < 1)
-	   			sppl = 1; // everybody gets at least one skill point per level
 	   		
 	   		if ((currentLevel) == 0) { // if this is the character's first level in this class
 	   			System.out.println("**1st level of a class.**");
@@ -361,6 +326,52 @@ class DDCharacter { // D&D Character
 	   			if (clas.goodWill)
 	   				willSave.put("plusTwo", 2);
 	   		}
+
+	   		ArrayList<String> newFeatures = clas.special.get(currentLevel);
+	   		System.out.println("newFeatures of Lv" + (currentLevel+1) + ": " + newFeatures);
+	   		for (int k=0; k < newFeatures.size(); k++) { // look at newFeatures for abilities that increase numerically and replace a lower level version (like Rage 2/day replacing Rage 1/day)
+	   			String newFeature = newFeatures.get(k);
+
+	   			if (newFeature.equals("Bonus Fighter Feat")) {
+	   				getFeat(1); // getFeat with mode=1, Fighter Bonus Feat mode
+	   			}
+	   			else {
+	   				specialList.add(newFeature);
+	   			}
+
+
+	   			// if(newFeature.matches(".*\\d+.*")) { // if newFeature contains a digit
+	   			// 	// here i need to remove the old version, so first i'll get the substring containing the name of hte ability
+	   			// 	int digIndex = 0;
+	   			// 	for (int j=0; j < newFeature.length(); j++) {
+	   			// 		if (Character.isDigit(newFeature.charAt(j))) {
+	   			// 			digIndex = j;
+	   			// 			}
+	   			// 	}
+	   			// 	String abiName = newFeature.substring(0, digIndex);
+	   			// 	for(String s : specialList) {
+	   			// 		if (s.startsWith(abiName)) {
+	   			// 			specialList.remove(s);
+	   			// 		}
+	   			// 	}
+	   			// }
+	   		}
+
+	   		if (clas.bonusFeats != null) {
+	   			if (clas.bonusFeats[currentLevel] != null) {
+	   				for (String bonusFeatName : Arrays.asList(clas.bonusFeats[currentLevel])) {
+	   					featList.add(new Feat(bonusFeatName));
+	   				}
+	   			}
+	   		}
+
+	   		int sppl = clas.skillPointsPerLevel + abiMods[3]; // skill points per level
+	   		if (race.raceName.equals("HUMAN")) 
+	   			sppl++; // if human, get one more skill point per level
+	   		if (sppl < 1)
+	   			sppl = 1; // everybody gets at least one skill point per level
+	   		
+	   		
 
 
 	   		if (((currentLevel+1) % 2) == 0) { // if the level is even, when a goodSave progression increments
@@ -424,8 +435,7 @@ class DDCharacter { // D&D Character
 	   			}	
 	   		}
 
-	   		// her ei need to calculat ehte character's total number of class levels
-	   		int ecl = i+1;
+	   		int ecl = i+1; // ecl = effective character level, here it's really the sum of all of the character's class levels
 	   		for (CharacterClass c : classes.keySet()) {
 	   			ecl += classes.get(c);
 	   		}
@@ -559,65 +569,97 @@ class DDCharacter { // D&D Character
    }
 
 
+   /* checkFeat(newFeat)
+   		method to check a Feat's prerequisites against the DDCharacter's attributes and abilities
+		returns false if the character already has the feat or does not meet any one of the feat's prerequisites
+		otherwise returns true
+		@param Feat newFeat : the feat to have its prerequisites checked
+		@param int mode : an int passed in by getFeat if called while in particular for a bonus Fighter, Wizard, or Psion feat
+   */
+   private boolean checkFeat(Feat newFeat, int mode) {
+   		System.out.println("Checking feat: " + newFeat.featName + "...");
+   		if (featList.contains(newFeat)) {
+   			System.out.println("Character already has " + newFeat.featName);
+   			return false;
+   		}
+   		if (mode == 1) {
+   			if (!newFeat.fighter) {
+   				System.out.println("Not a fighter feat");
+   				return false;
+   			}
+   		}
+   		if (mode == 2) {
+   			if (!newFeat.metamagic && !newFeat.itemCreation) {
+   				System.out.println("Not a metamagic or item creation feat");
+   				return false;
+   			}
+   		}
+   		// if (mode == 3) {
+   		// 	if (!newFeat.psionic && !newFeat.metapsionic && !newFeat.psionicItemCreation) {
+   		// 		System.out.println("Feat does not qualify as a Psion bonus feat");
+   		// 		return false;
+   		// 	}
+   		// }
+   		if (newFeat.minAbiScores != null) {
+   			System.out.println("Checking ability score prerequisites...");
+   			for (int i=0; i < 6; i++) {
+   				if (abilityScores[i] < newFeat.minAbiScores[i]) {
+   					System.out.println("Not enough of abiScore["+i+']');
+   					return false;
+   				}
+   			}
+   		}
+   		if (newFeat.minBAB != 0) {
+   			System.out.println("Checking base attack bonus prerequisite...");
+   			if (baseAttackBonus < newFeat.minBAB) {
+   				System.out.println("BAB not high enough");
+   				return false;
+   			}
+   		}
+   		if (newFeat.featPrerequisites != null) {
+   			System.out.println("Checking feat prerequisites...");
+   			for (int i=0; i < newFeat.featPrerequisites.length; i++) {
+   				System.out.println("Character must have " + newFeat.featPrerequisites[i]);
+   				boolean gotThisFeat = false;
+   				for (Feat f : featList) {
+   					if (f.featName.equals(newFeat.featPrerequisites[i])) {
+   						gotThisFeat = true;
+   						break;
+   					}
+   				}
+   				if (!gotThisFeat) {
+   					System.out.println("Character doesn't have " + newFeat.featPrerequisites[i]);
+   					return false;
+   				}
+   			}
+   		}
+
+   		return true;
+   }
+
+
   /* getFeat
   		method looks at the character's priorityFeatChoices and if the characer qualifies for one, will choose that one
   		otherwise there is the backup list of general feats	
+  		@param int mode : by default this value is 0, if looking for a bonus Fighter, Wizard, or Psion feat, this will be set to 1, 2, or 3 respectively
    */
    private void getFeat() {
-   		// so what's this thing actually look like? it'll have to iterate through the priorityFeatChoices
+   		this.getFeat(0);
+   }
+   private void getFeat(int mode) {
    		boolean chosen = false;
-   		while(!chosen) {
+   		while (!chosen) {
    			Iterator<Feat> priorityFeatIterator = priorityFeatChoices.iterator();
-   			int index = r.nextInt(priorityFeatChoices.size());
-   			for(int i=0; i < index; i++)
+   			int randomIndex = r.nextInt(priorityFeatChoices.size());
+   			for (int i=0; i < randomIndex; i++)
    				priorityFeatIterator.next();
    			Feat newFeat = priorityFeatIterator.next();
-   			System.out.println("Looking at feat: " + newFeat.featName + "...");
-   			// i need to check each of the possible prerequisite options and also if the feat is also in the character's set of feats
-   			if (featList.contains(newFeat))
-   				continue;
-   			if (newFeat.minAbiScores != null) {
-   				System.out.println("Checking ability score prerequisites...");
-   				boolean gotTheStats = true;
-   				for (int i=0; i < 6; i++) {
-   					System.out.println("Checking ability score #" + i);
-   					System.out.println("Character's Score: " + abilityScores[i]);
-   					System.out.println("Feat Prerequisite: " + newFeat.minAbiScores[i]);
-   					if (abilityScores[i] < newFeat.minAbiScores[i])
-   						gotTheStats = false;
-   				}
-   				if (!gotTheStats)
-   					continue;
+   			if (checkFeat(newFeat, mode)) {
+   				System.out.println("Adding feat " + newFeat.featName + "...");
+   				featList.add(newFeat);
+   				priorityFeatChoices.remove(newFeat);
+   				chosen = true;
    			}
-   			if (newFeat.minBAB != 0) {
-   				if (baseAttackBonus < newFeat.minBAB)
-   					continue;
-   			}
-   			if (newFeat.featPrerequisites != null) {
-   				System.out.println("Checking feat prerequisites...");
-   				boolean gotTheFeats = true;
-   				int prereqFeatIndex = 0;
-   				while(gotTheFeats && prereqFeatIndex < newFeat.featPrerequisites.length) {
-   					System.out.println("Character must have " + newFeat.featPrerequisites[prereqFeatIndex]);
-   					boolean gotThisFeat = false;
-   					for(Feat f : featList) {
-   						if (f.featName.equals(newFeat.featPrerequisites[prereqFeatIndex])) {
-   							gotThisFeat = true;
-   							break;
-   						}
-   					}
-   					gotTheFeats = gotThisFeat;
-   					prereqFeatIndex++;
-   				}
-   				if (!gotTheFeats) {
-   					System.out.println("Looks like the character doesn't have the prerequisite feats :(");
-   					continue;
-   				}
-   			}
-   			System.out.println("Adding feat " + newFeat.featName + "...");
-   			featList.add(newFeat);
-   			priorityFeatChoices.remove(newFeat);
-   			chosen = true;
    		}
    }
 
@@ -1312,8 +1354,6 @@ class CharacterClass {
 
 			// the cleric's spells per day progression already includes the bonus domain spell of each level
 			spellsPerDayProgression = new int[][] {{3, 1}, {4, 2}, {4, 2, 1}, {5, 3, 2}, {5, 3, 2, 1}, {5, 3, 3, 2}, {6, 4, 3, 2, 1}, {6, 4, 3, 3, 2}, {6, 4, 4, 3, 2, 1}, {6, 4, 4, 3, 3, 2}, {6, 5, 4, 4, 3, 2, 1}, {6, 5, 4, 4, 3, 3, 2}, {6, 5, 5, 4, 4, 3, 2, 1}, {6, 5, 5, 4, 4, 3, 3, 2}, {6, 5, 5, 5, 4, 4, 3, 2, 1}, {6, 5, 5, 5, 4, 4, 3, 3, 2}, {6, 5, 5, 5, 5, 4, 4, 3, 2, 1}, {6, 5, 5, 5, 5, 4, 4, 3, 3, 2}, {6, 5, 5, 5, 5, 5, 4, 4, 3, 3}, {6, 5, 5, 5, 5, 5, 4, 4, 4, 4}};
-
-
 		}
 		else if (clas.equals("FIGHTER")) {
 			hitDie = 10;
