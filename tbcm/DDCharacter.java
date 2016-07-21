@@ -296,13 +296,22 @@ class DDCharacter { // D&D Character
 	   			// }
 	   		}
 	   		specialList.addAll(newFeatures);
+
+	   		if (clas.bonusFeats != null) {
+	   			if (clas.bonusFeats[currentLevel] != null) {
+	   				for (String bonusFeatName : Arrays.asList(clas.bonusFeats[currentLevel])) {
+	   					featList.add(new Feat(bonusFeatName));
+	   				}
+	   			}
+	   		}
+
 	   		int sppl = clas.skillPointsPerLevel + abiMods[3]; // skill points per level
 	   		if (race.raceName.equals("HUMAN")) 
 	   			sppl++; // if human, get one more skill point per level
 	   		if (sppl < 1)
 	   			sppl = 1; // everybody gets at least one skill point per level
 	   		
-	   		if ((currentLevel+1) == 1) { // if this is the character's first level in this class
+	   		if ((currentLevel) == 0) { // if this is the character's first level in this class
 	   			System.out.println("**1st level of a class.**");
 	   			classSkills.addAll(clas.classSkills); 
 	   			prioritySkills.addAll(clas.prioritySkills);
@@ -1471,12 +1480,17 @@ class CharacterClass {
 			classSkills = new ArrayList<String>(Arrays.asList("CLIMB", "CONCENTRATION", "CRAFT", "HANDLE ANIMAL", "HEAL", "HIDE", "JUMP", "KNOWLEDGE(DUNGEONEERING)", "KNOWLEDGE(GEOGRAPHY)", "KNOWLEDGE(NATURE)", "LISTEN", "MOVE SILENTLY", "PROFESSION", "RIDE", "SEARCH", "SPOT", "SURVIVAL", "SWIM", "USE ROPE"));
 			skillPointsPerLevel = 6;
 			priorityFeatChoices = new String[] {"BLIND-FIGHT", "COMBAT REFLEXES", "IMPROVED INITIATIVE", "MOUNTED COMBAT", "MOUNTED ARCHERY", "RIDE-BY-ATTACK", "SPIRITED CHARGE", "FAR SHOT", "PRECISE SHOT", "TWO-WEAPON DEFENSE"};
-			special.get(0).add("1st Favored Enemy");
-			special.get(0).add("Track");
+			bonusFeats = new String[20][];
+			List<String> allFE = new ArrayList<String>();
+			allFE.addAll(Arrays.asList("Aberration", "Animal", "Construct", "Dragon", "Elemental", "Fey", "Giant", "Humanoid(Aquatic)", "Humanoid(Dwarf)", "Humanoid(Elf)", "Humanoid(Goblinoid)", "Humanoid(Gnoll)", "Humanoid(Gnome)", "Humanoid(Halfling)", "Humanoid(Human)", "Humanoid(Orc)", "Humanoid(Reptilian)", "Magical Beast", "Monstrous Humanoid", "Ooze", "Outsider(Air)", "Outsider(Chaotic)", "Outsider(Earth)", "Outsider(Evil)", "Outsider(Fire)", "Outsider(Good)", "Outsider(Lawful)", "Outsider(Native)", "Outsider(Water)", "Plant", "Undead", "Vermin"));
+
+			int feIndex = rand.nextInt(allFE.size());
+			special.get(0).add("Favored Enemy: " + allFE.get(feIndex) + " +2");
+			allFE.remove(feIndex); // this way we don't get it again
+			bonusFeats[0] = new String[] {"TRACK"};
 			special.get(0).add("Wild Empathy");
 			String combatStyle = getRandom(new String[] {"Archery", "Two-Weapon Combat"});
 			special.get(1).add("Combat Style: " + combatStyle);
-			bonusFeats = new String[20][];
 			if (combatStyle.equals("Archery")) {
 				bonusFeats[1] = new String[] {"RAPID SHOT"};
 				bonusFeats[5] = new String[] {"MANYSHOT"};
@@ -1489,17 +1503,24 @@ class CharacterClass {
 			}
 			bonusFeats[2] = new String[] {"ENDURANCE"};
 			special.get(3).add("Animal Companion");
-			special.get(4).add("2nd Favored Enemy");
+			feIndex = rand.nextInt(allFE.size());
+			special.get(4).add("Favored Enemy: " + allFE.get(feIndex) + " +4");
+			allFE.remove(feIndex);
 			special.get(5).add("Improved Combat Style");
 			special.get(6).add("Woodland Stride");
 			special.get(7).add("Swift Tracker");
 			special.get(8).add("Evasion");
-			special.get(9).add("3rd Favored Enemy");
+			feIndex = rand.nextInt(allFE.size());
+			special.get(9).add("Favored Enemy: " + allFE.get(feIndex) + " +4");
+			allFE.remove(feIndex);
 			special.get(10).add("Combat Style Mastery");
 			special.get(12).add("Camouflage");
-			special.get(14).add("4th Favored Enemy");
+			feIndex = rand.nextInt(allFE.size());
+			special.get(14).add("Favored Enemy: " + allFE.get(feIndex) + " +4");
+			allFE.remove(feIndex);
 			special.get(16).add("Hide in Plain Sight");
-			special.get(19).add("5th Favored Enemy");
+			feIndex = rand.nextInt(allFE.size());
+			special.get(19).add("Favored Enemy: " + allFE.get(feIndex) + " +4");
 
 			String[] spellsLv0 = new String[] {};
 			String[] spellsLv1 = new String[] {"Alarm", "Animal Messenger", "Calm Animals", "Charm Animal", "Delay Poison", "Detct Animals or Plants", "Detect Poison", "Detect Snares and Pits", "Endure Elements", "Entangle", "Hide from Animals", "Jump", "Longstrider", "Magic Fang", "Pass without Trace", "Read Magic", "Resist Energy", "Speak with Animals", "Summon Nature's Ally I"};
@@ -1641,8 +1662,9 @@ class CharacterClass {
 			classSkills = new ArrayList<String>(Arrays.asList("CONCENTRATION", "CRAFT", "DECIPHER SCRIPT", "KNOWLEDGE(ARCANA)", "KNOWLEDGE(ARCHITECTURE & ENGINEERING)", "KNOWLEDGE(DUNGEONEERING)", "KNOWLEDGE(GEOGRAPHY)", "KNOWLEDGE(HISTORY)", "KNOWLEDGE(LOCAL)", "KNOWLEDGE(NATURE)", "KNOWLEDGE(NOBILITY & ROYALTY)", "KNOWLEDGE(RELIGION)", "KNOWLEDGE(THE PLANES)", "PROFESSION", "SPELLCRAFT"));
 			prioritySkills.add("KNOWLEDGE(ARCANA)");
 			skillPointsPerLevel = 2;
+			bonusFeats = new String[20][];
 			special.get(0).add("Summon Familiar");
-			special.get(0).add("Scribe Scroll");
+			bonusFeats[0] = new String[] {"SCRIBE SCROLL"};
 			special.get(4).add("Bonus Wizard Feat");
 			special.get(9).add("Bonus Wizard Feat");
 			special.get(14).add("Bonus Wizard Feat");
